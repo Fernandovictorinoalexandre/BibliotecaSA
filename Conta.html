@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estação Literária</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="usuario.css">
+</head>
+<body class="page-internal">
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <div class="logo-area">
+    <img src="Biblioteca2.png" width="60">
+    <h1>BIBLIOTECA</h1>
+  </div>
+
+  <nav class="menu">
+    <a href="PainelUsuario.html">Início</a>
+    <a href="CatalogoLivros.html">Catálogo</a>
+    <a href="Suporte.html">Suporte</a>
+    <a href="Conta.html" class="active">Conta</a>
+  </nav>
+
+  <div class="right-area">
+    <input type="text" placeholder="Pesquisar..." class="search">
+    <div class="user-avatar">
+      <img src="https://static.wikia.nocookie.net/hoducks/images/5/56/Kevin_Kaslana.jpg/revision/latest/thumbnail/width/360/height/360?cb=20250121140658" alt="Usuário">
+    </div>
+  </div>
+</header>
+
+<!-- CONTEÚDO -->
+<main class="container-conta">
+
+  <!-- PERFIL -->
+  <section class="perfil">
+    <div class="card perfil-card">
+      <img class="avatar" src="https://static.wikia.nocookie.net/hoducks/images/5/56/Kevin_Kaslana.jpg/revision/latest/thumbnail/width/360/height/360?cb=20250121140658" alt="Avatar">
+      <h1>Kevin Kaslana</h1>
+      <p>kevin.kaslana@gmail.com</p>
+
+      <div class="stats">
+        <div>
+          <strong>12</strong>
+          <span>Leituras</span>
+        </div>
+        <div>
+          <strong>3</strong>
+          <span>Reservas</span>
+        </div>
+      </div>
+
+      <button class="btn btn-primary">Editar Perfil</button>
+    </div>
+
+    <div class="card">
+      <h3>Interesses</h3>
+      <div class="tags">
+        <span>Astronomia</span>
+        <span>Ficção Científica</span>
+        <span>Cyberpunk</span>
+        <span>Manhwa</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ATIVIDADES -->
+  <section class="atividades">
+    <div class="header">
+      <h2>Atividades Recentes</h2>
+      <span class="ver">Ver tudo →</span>
+    </div>
+
+    <div class="card tabela">
+      <table>
+        <thead>
+          <tr>
+            <th>Livro</th>
+            <th>Data</th>
+            <th>Devolução</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="livro">
+                <img src="https://m.media-amazon.com/images/I/91M9xPIf10L.jpg" alt="Capa">
+                <div>
+                  <strong>O Hobitte</strong>
+                  <small>J.R.R.Tokin</small>
+                </div>
+              </div>
+            </td>
+            <td>01/04/2026</td>
+            <td class="status-ok">10/05/2026</td>
+          </tr>
+
+          <tr>
+            <td>
+              <div class="livro">
+                <img src="HarryPotter.jpg" alt="Capa">
+                <div>
+                  <strong>Harry Potter</strong>
+                  <small>J.K.Rowling</small>
+                </div>
+              </div>
+            </td>
+            <td>05/04/2026</td>
+            <td class="status-late">15/04/2026</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div>Estação Literária</div>
+  <div>© 2023 Todos os direitos reservados</div>
+</footer>
+
+</body>
+</html>
