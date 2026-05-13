@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Estação Literária - Livros</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="funcionario.css">
+</head>
+<body class="page-func">
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <div class="logo-area">
+    <img src="Biblioteca2.png" width="60">
+    <h1>BIBLIOTECA</h1>
+  </div>
+  <nav class="menu">
+    <a href="PainelFuncionario.html">Painel Principal</a>
+  </nav>
+  <div class="right-area">
+    <input type="text" placeholder="Pesquisar..." class="search">
+    <div class="user-avatar">
+      <img src="https://static.wikia.nocookie.net/hoducks/images/5/56/Kevin_Kaslana.jpg/revision/latest/thumbnail/width/360/height/360?cb=20250121140658" alt="Usuário">
+    </div>
+  </div>
+</header>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <h1 class="logo">Estação Literária</h1>
+  <nav>
+    <a href="EmprestimoFuncionario.html" class="nav-item">
+      <span class="material-symbols-outlined">grid_view</span>
+      Empréstimos
+    </a>
+    <a href="Livros.html" class="nav-item active">
+      <span class="material-symbols-outlined">auto_stories</span>
+      Livros
+    </a>
+    <a href="Usuarios.html" class="nav-item">
+      <span class="material-symbols-outlined">swap_horiz</span>
+      Usuários
+    </a>
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <header class="header">
+    <h2>Acervo de Livros</h2>
+  </header>
+
+  <!-- STATS -->
+  <section class="grid">
+    <div class="card">
+      <p>Total de Livros</p>
+      <h3>2.530</h3>
+    </div>
+    <div class="card">
+      <p>Disponíveis</p>
+      <h3>1.764</h3>
+    </div>
+    <div class="card">
+      <p>Emprestados</p>
+      <h3>430</h3>
+    </div>
+    <div class="card">
+      <p>Categorias</p>
+      <h3>24</h3>
+    </div>
+  </section>
+
+  <!-- TABELA -->
+  <section class="table-section">
+
+    <div class="table-header">
+      <h3>Todos os Livros</h3>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <div class="view-toggle">
+          <button class="view-btn active" id="btn-list" title="Lista">☰</button>
+          <button class="view-btn" id="btn-grid" title="Grade">⊞</button>
+        </div>
+        <button class="btn btn-primary" onclick="window.location.href='CadastroLivro.html'">+ Cadastrar Livro</button>
+      </div>
+    </div>
+
+    <!-- FILTROS -->
+    <div class="filter-bar">
+      <button class="filter-btn active">Todos</button>
+      <button class="filter-btn">Disponíveis</button>
+      <button class="filter-btn">Emprestados</button>
+      <button class="filter-btn">Ficção Científica</button>
+      <button class="filter-btn">Romance</button>
+      <button class="filter-btn">Terror</button>
+      <input type="text" class="filter-search" placeholder="🔍  Buscar livro ou autor...">
+    </div>
+
+    <!-- TABELA LISTA -->
+    <div class="table-container" id="view-list">
+      <table>
+        <thead>
+          <tr>
+            <th>Livro</th>
+            <th>Autor</th>
+            <th>Categoria</th>
+            <th>Ano</th>
+            <th>Exemplares</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="book-cell">
+                <div class="book-cover">🤖</div>
+                <div>
+                  <div class="book-title">Neuromancer</div>
+                  <div class="book-isbn">ISBN: 978-85-325-1234-5</div>
+                </div>
+              </div>
+            </td>
+            <td>William Gibson</td>
+            <td><span class="cat-badge">Cyberpunk</span></td>
+            <td>1984</td>
+            <td>4</td>
+            <td><span class="status disponivel">Disponível</span></td>
+            <td>
+              <button class="action">✏️</button>
+              <button class="action">🗑️</button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="book-cell">
+                <div class="book-cover">🏜️</div>
+                <div>
+                  <div class="book-title">Duna</div>
+                  <div class="book-isbn">ISBN: 978-85-325-5678-9</div>
+                </div>
+              </div>
+            </td>
+            <td>Frank Herbert</td>
+            <td><span class="cat-badge">Ficção Científica</span></td>
+            <td>1965</td>
+            <td>6</td>
+            <td><span class="status emprestado">Emprestado</span></td>
+            <td>
+              <button class="action">✏️</button>
+              <button class="action">🗑️</button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="book-cell">
+                <div class="book-cover">🌌</div>
+                <div>
+                  <div class="book-title">Fundação</div>
+                  <div class="book-isbn">ISBN: 978-85-325-9012-3</div>
+                </div>
+              </div>
+            </td>
+            <td>Isaac Asimov</td>
+            <td><span class="cat-badge">Ficção Científica</span></td>
+            <td>1951</td>
+            <td>5</td>
+            <td><span class="status disponivel">Disponível</span></td>
+            <td>
+              <button class="action">✏️</button>
+              <button class="action">🗑️</button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="book-cell">
+                <div class="book-cover">🧙</div>
+                <div>
+                  <div class="book-title">O Senhor dos Anéis</div>
+                  <div class="book-isbn">ISBN: 978-85-325-3456-7</div>
+                </div>
+              </div>
+            </td>
+            <td>J.R.R. Tolkien</td>
+            <td><span class="cat-badge">Fantasia</span></td>
+            <td>1954</td>
+            <td>8</td>
+            <td><span class="status disponivel">Disponível</span></td>
+            <td>
+              <button class="action">✏️</button>
+              <button class="action">🗑️</button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="book-cell">
+                <div class="book-cover">🕵️</div>
+                <div>
+                  <div class="book-title">Sherlock Holmes</div>
+                  <div class="book-isbn">ISBN: 978-85-325-7890-1</div>
+                </div>
+              </div>
+            </td>
+            <td>Arthur Conan Doyle</td>
+            <td><span class="cat-badge">Mistério</span></td>
+            <td>1892</td>
+            <td>3</td>
+            <td><span class="status emprestado">Emprestado</span></td>
+            <td>
+              <button class="action">✏️</button>
+              <button class="action">🗑️</button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="book-cell">
+                <div class="book-cover">🐉</div>
+                <div>
+                  <div class="book-title">O Nome do Vento</div>
+                  <div class="book-isbn">ISBN: 978-85-325-2345-6</div>
+                </div>
+              </div>
+            </td>
+            <td>Patrick Rothfuss</td>
+            <td><span class="cat-badge">Fantasia</span></td>
+            <td>2007</td>
+            <td>2</td>
+            <td><span class="status indisponivel">Indisponível</span></td>
+            <td>
+              <button class="action">✏️</button>
+              <button class="action">🗑️</button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="book-cell">
+                <div class="book-cover">🧬</div>
+                <div>
+                  <div class="book-title">Admirável Mundo Novo</div>
+                  <div class="book-isbn">ISBN: 978-85-325-6789-0</div>
+                </div>
+              </div>
+            </td>
+            <td>Aldous Huxley</td>
+            <td><span class="cat-badge">Distopia</span></td>
+            <td>1932</td>
+            <td>7</td>
+            <td><span class="status disponivel">Disponível</span></td>
+            <td>
+              <button class="action">✏️</button>
+              <button class="action">🗑️</button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="book-cell">
+                <div class="book-cover">🌹</div>
+                <div>
+                  <div class="book-title">1984</div>
+                  <div class="book-isbn">ISBN: 978-85-325-4567-8</div>
+                </div>
+              </div>
+            </td>
+            <td>George Orwell</td>
+            <td><span class="cat-badge">Distopia</span></td>
+            <td>1949</td>
+            <td>9</td>
+            <td><span class="status disponivel">Disponível</span></td>
+            <td>
+              <button class="action">✏️</button>
+              <button class="action">🗑️</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- GRADE VIEW -->
+    <div class="books-grid" id="view-grid">
+      <div class="book-card">
+        <div class="book-cover-lg">🤖</div>
+        <h4>Neuromancer</h4>
+        <p class="author">William Gibson</p>
+        <div class="footer">
+          <span class="cat-badge">Cyberpunk</span>
+          <span class="status disponivel" style="font-size:11px;">Disponível</span>
+        </div>
+      </div>
+      <div class="book-card">
+        <div class="book-cover-lg">🏜️</div>
+        <h4>Duna</h4>
+        <p class="author">Frank Herbert</p>
+        <div class="footer">
+          <span class="cat-badge">Ficção Científica</span>
+          <span class="status emprestado" style="font-size:11px;">Emprestado</span>
+        </div>
+      </div>
+      <div class="book-card">
+        <div class="book-cover-lg">🌌</div>
+        <h4>Fundação</h4>
+        <p class="author">Isaac Asimov</p>
+        <div class="footer">
+          <span class="cat-badge">Ficção Científica</span>
+          <span class="status disponivel" style="font-size:11px;">Disponível</span>
+        </div>
+      </div>
+      <div class="book-card">
+        <div class="book-cover-lg">🧙</div>
+        <h4>O Senhor dos Anéis</h4>
+        <p class="author">J.R.R. Tolkien</p>
+        <div class="footer">
+          <span class="cat-badge">Fantasia</span>
+          <span class="status disponivel" style="font-size:11px;">Disponível</span>
+        </div>
+      </div>
+      <div class="book-card">
+        <div class="book-cover-lg">🕵️</div>
+        <h4>Sherlock Holmes</h4>
+        <p class="author">Arthur Conan Doyle</p>
+        <div class="footer">
+          <span class="cat-badge">Mistério</span>
+          <span class="status emprestado" style="font-size:11px;">Emprestado</span>
+        </div>
+      </div>
+      <div class="book-card">
+        <div class="book-cover-lg">🐉</div>
+        <h4>O Nome do Vento</h4>
+        <p class="author">Patrick Rothfuss</p>
+        <div class="footer">
+          <span class="cat-badge">Fantasia</span>
+          <span class="status indisponivel" style="font-size:11px;">Indisponível</span>
+        </div>
+      </div>
+      <div class="book-card">
+        <div class="book-cover-lg">🧬</div>
+        <h4>Admirável Mundo Novo</h4>
+        <p class="author">Aldous Huxley</p>
+        <div class="footer">
+          <span class="cat-badge">Distopia</span>
+          <span class="status disponivel" style="font-size:11px;">Disponível</span>
+        </div>
+      </div>
+      <div class="book-card">
+        <div class="book-cover-lg">🌹</div>
+        <h4>1984</h4>
+        <p class="author">George Orwell</p>
+        <div class="footer">
+          <span class="cat-badge">Distopia</span>
+          <span class="status disponivel" style="font-size:11px;">Disponível</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGINAÇÃO -->
+    <div class="pagination">
+      <button class="page-btn">‹</button>
+      <button class="page-btn active">1</button>
+      <button class="page-btn">2</button>
+      <button class="page-btn">3</button>
+      <button class="page-btn">…</button>
+      <button class="page-btn">12</button>
+      <button class="page-btn">›</button>
+    </div>
+
+  </section>
+
+</main>
+
+<script>
+  // Filtros
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // Paginação
+  document.querySelectorAll('.page-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.page-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // View toggle: lista vs grade
+  const btnList = document.getElementById('btn-list');
+  const btnGrid = document.getElementById('btn-grid');
+  const viewList = document.getElementById('view-list');
+  const viewGrid = document.getElementById('view-grid');
+
+  btnList.addEventListener('click', () => {
+    btnList.classList.add('active');
+    btnGrid.classList.remove('active');
+    viewList.classList.remove('hidden');
+    viewGrid.classList.remove('visible');
+  });
+
+  btnGrid.addEventListener('click', () => {
+    btnGrid.classList.add('active');
+    btnList.classList.remove('active');
+    viewList.classList.add('hidden');
+    viewGrid.classList.add('visible');
+  });
+</script>
+
+</body>
+</html>
