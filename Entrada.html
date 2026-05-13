@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <title>Estação Literária</title>
+
+    <!-- CSS -->
+
+    <!-- FONTES -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="auth.css">
+</head>
+
+<body class="page-auth">
+
+<!-- FUNDO -->
+  <div class="nebula-bg"></div>
+  <div class="overlay"></div>
+
+<main>
+  <div class="logo-circle"><img src="Biblioteca2.png" width="150px" height="100px"></div>
+
+  <h1 class="title-auth">Estação Literária</h1>
+  <p class="subtitle-auth">Terminal de Acesso ao Conhecimento</p>
+
+  <div class="card">
+    <h2>Bem-vindo à Estação Literária</h2>
+    <p>Selecione sua interface para acessar o sistema.</p>
+
+    <div class="buttons">
+      <button class="btn btn-secondary" onclick="window.location.href='LoginFuncionario.html'">
+        Sou Funcionário <br>
+      <small>Gerenciar acervo</small>
+      </button>
+
+      <button class="btn btn-secondary" onclick="window.location.href='Login.html'">
+        Sou Usuário <br>
+        <small>Explorar catálogo</small>
+      </button>
+    </div>
+  </div>
+</main>
+
+<div class="status">
+  <span class="status-dot"></span> ONLINE
+</div>
+
+</body>
+</html>
