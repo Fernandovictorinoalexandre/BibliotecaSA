@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Estação Literária</title>
+
+
+  <!-- Ícones -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+  <!-- Fonte -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="usuario.css">
+</head>
+
+<body class="page-internal">
+
+<!-- NAVBAR -->
+<header class="header">
+
+  <div class="logo">
+    <img src="Biblioteca2.png" width="50" alt="Logo">
+    <h1>Biblioteca</h1>
+  </div>
+
+  <nav class="nav-links">
+    <a href="PainelUsuario.html" class="active">Início</a>
+    <a href="CatalogoLivros.html">Catálogo</a>
+    <a href="Suporte.html">Suporte</a>
+    <a href="Conta.html">Conta</a>
+  </nav>
+
+  <div class="right-area">
+    <input class="search" type="text" placeholder="Pesquisar...">
+
+    <div class="avatar">
+      <img src="https://static.wikia.nocookie.net/hoducks/images/5/56/Kevin_Kaslana.jpg/revision/latest/thumbnail/width/360/height/360?cb=20250121140658" alt="Usuário">
+    </div>
+  </div>
+
+</header>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+
+  <h2 class="sidebar-title">Portal do Leitor</h2>
+  <p class="sidebar-subtitle">Estação Central</p>
+
+  <nav class="sidebar-links">
+
+    <a href="Emprestimo.html">
+      <span class="material-symbols-outlined">book</span>
+      <span>Empréstimo</span>
+    </a>
+
+    <a href="DevoluçãoMuta.html">
+      <span class="material-symbols-outlined">assignment_return</span>
+      <span>Devolução</span>
+    </a>
+
+  </nav>
+
+</aside>
+
+<!-- CONTEÚDO -->
+<main class="main">
+
+  <section class="hero">
+    <h2>Bem-vindo à Estação Literária</h2>
+    <p>Continue sua jornada entre livros e universos.</p>
+
+    <div class="actions">
+      <button class="btn btn-secondary">Últimas Notícias</button>
+      <button class="btn btn-primary">Mais Emprestados</button>
+    </div>
+  </section>
+
+  <section class="book-grid">
+
+    <div class="book-card">
+      <img src="Hobbit.webp" class="book-img" alt="O Hobbit">
+      <div class="book-body">
+        <h3>O Hobbit</h3>
+        <p>J.R.R. Tolkien</p>
+      </div>
+    </div>
+
+    <div class="book-card">
+      <img src="HarryPotter.jpg" class="book-img" alt="Harry Potter">
+      <div class="book-body">
+        <h3>Harry Potter</h3>
+        <p>J.K. Rowling</p>
+      </div>
+    </div>
+
+    <div class="book-card">
+      <img src="AssassinCreed.jpg" class="book-img" alt="Assassin's Creed">
+      <div class="book-body">
+        <h3>Assassin's Creed</h3>
+        <p>Anton Gill</p>
+      </div>
+    </div>
+
+    <div class="book-card">
+      <img src="https://livrariascuritiba.vteximg.com.br/arquivos/ids/2184938-1000-1000/LV520518.jpg?v=638822975842800000" class="book-img" alt="O Hobbit">
+      <div class="book-body">
+        <h3>Tower of God</h3>
+        <p>SIU</p>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+</body>
+</html>
