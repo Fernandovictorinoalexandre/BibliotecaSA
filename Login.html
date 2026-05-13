@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+<title>Estação Literária</title>
+
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="auth.css">
+</head>
+
+<body class="page-auth">
+
+<div class="nebula-bg"></div>
+<div class="overlay"></div>
+
+<main>
+
+  <!-- TOPO -->
+  <div class="logo-circle">
+    <img src="Biblioteca2.png" width="150px" height="100px">
+  </div>
+
+  <h1 class="title-auth">Estação Literária</h1>
+  <p class="subtitle-auth">Portal do Explorador</p>
+
+  <!-- CARD LOGIN -->
+  <div class="card-login">
+
+    <h2>Bem-vindo de volta</h2>
+    <p>Acesse sua biblioteca</p>
+
+    <form onsubmit="fazerLogin(event)">
+
+      <div class="input-group">
+        <input type="email" id="email" placeholder="E-mail" required>
+      </div>
+
+      <div class="input-group">
+        <input type="password" id="senha" placeholder="Senha" required>
+      </div>
+
+      <p id="mensagem-erro" style="color: red; display: none;">Preencha o e-mail e a senha.</p>
+
+      <button class="btn btn-primary" type="submit">Entrar</button>
+
+    </form>
+
+    <div>
+      <span>Novo por aqui?</span>
+      <a href="CadastroUsuario.html">Criar Conta</a>
+    </div>
+    <div>
+      <span>Ajuda?</span>
+      <a href="RecuperarSenha.html">Esqueci a Senha?</a>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+  function fazerLogin(event) {
+    event.preventDefault();
+
+    const email = document.getElementById('email').value.trim();
+    const senha = document.getElementById('senha').value.trim();
+    const erro = document.getElementById('mensagem-erro');
+
+    if (email !== '' && senha !== '') {
+      window.location.href = 'PainelUsuario.html';
+    } else {
+      erro.style.display = 'block';
+    }
+  }
+</script>
+
+</body>
+</html>
