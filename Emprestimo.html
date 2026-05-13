@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estação Literária</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="leitor.css">
+</head>
+<body class="page-flex">
+
+<header class="header">
+  <div class="logo">
+    <img src="Biblioteca2.png" alt="Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+    <div class="logo-icon-fallback">
+      <span class="material-symbols-outlined">auto_stories</span>
+    </div>
+    <h1>Biblioteca</h1>
+  </div>
+  <nav class="nav-links">
+    <a href="PainelUsuario.html">Início</a>
+    <a href="CatalogoLivros.html">Catálogo</a>
+    <a href="Suporte.html">Suporte</a>
+    <a href="Conta.html">Conta</a>
+  </nav>
+  <div class="right-area">
+    <input class="search" type="text" placeholder="Pesquisar...">
+    <div class="avatar">
+      <img src="https://static.wikia.nocookie.net/hoducks/images/5/56/Kevin_Kaslana.jpg/revision/latest/thumbnail/width/360/height/360?cb=20250121140658" alt="Usuário"
+           onerror="this.parentElement.style.background='linear-gradient(135deg,#192447,#1e2a50)'; this.style.display='none'; this.parentElement.textContent='U';">
+    </div>
+  </div>
+</header>
+
+<div class="page-body">
+
+  <aside class="sidebar">
+    <h2 class="sidebar-title">Portal do Leitor</h2>
+    <p class="sidebar-subtitle">Estação Central</p>
+    <nav class="sidebar-links">
+      <a href="Emprestimo.html" class="active">
+        <span class="material-symbols-outlined">book</span>
+        <span>Empréstimo</span>
+      </a>
+      <a href="DevoluçãoMuta.html">
+        <span class="material-symbols-outlined">assignment_return</span>
+        <span>Devolução</span>
+      </a>
+    </nav>
+  </aside>
+
+  <main class="main">
+
+    <section class="hero">
+      <h2>Bem-vindo à Estação Literária</h2>
+      <p>Continue sua jornada entre livros. Gerencie seus empréstimos.</p>
+      <div class="actions">
+        <button class="btn btn-primary">
+          <span class="material-symbols-outlined sm">trending_up</span>
+          Ultimos Emprestados
+        </button>
+      </div>
+    </section>
+
+    <div class="section-header">
+      <span class="section-title">Meus Empréstimos</span>
+      <div class="limit-bar-wrap">
+        <span class="limit-label">
+          <strong id="loan-count">0</strong><strong>/5</strong> livros
+        </span>
+        <div class="limit-track">
+          <div class="limit-fill" id="limit-fill" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="loans-card" id="loans-card"></div>
+
+    <div>
+      <span class="section-title">Historico</span>
+    </div>
+
+    <section class="book-grid" id="book-list">
+
+      <div class="book-card" data-id="1" data-title="O Hobbit" data-author="J.R.R. Tolkien">
+        <div class="book-img-wrap">
+          <img src="Hobbit.webp" class="book-img" alt="O Hobbit"
+               onerror="this.parentElement.innerHTML='<div class=\'book-img-ph\'><span class=\'material-symbols-outlined\'>menu_book</span></div>'">
+        </div>
+        <div class="book-body">
+          <h3>O Hobbit</h3>
+          <p>J.R.R. Tolkien</p>
+          <div class="book-footer">
+            <button class="btn-borrow" onclick="borrowBook(this, 1, 'O Hobbit', 'J.R.R. Tolkien')">
+              <span class="material-symbols-outlined sm">add</span> Emprestar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="book-card" data-id="2" data-title="Harry Potter" data-author="J.K. Rowling">
+        <div class="book-img-wrap">
+          <img src="HarryPotter.jpg" class="book-img" alt="Harry Potter"
+               onerror="this.parentElement.innerHTML='<div class=\'book-img-ph\'><span class=\'material-symbols-outlined\'>menu_book</span></div>'">
+        </div>
+        <div class="book-body">
+          <h3>Harry Potter</h3>
+          <p>J.K. Rowling</p>
+          <div class="book-footer">
+            <button class="btn-borrow" onclick="borrowBook(this, 2, 'Harry Potter', 'J.K. Rowling')">
+              <span class="material-symbols-outlined sm">add</span> Emprestar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="book-card" data-id="3" data-title="Assassin's Creed" data-author="Anton Gill">
+        <div class="book-img-wrap">
+          <img src="AssassinCreed.jpg" class="book-img" alt="Assassin's Creed"
+               onerror="this.parentElement.innerHTML='<div class=\'book-img-ph\'><span class=\'material-symbols-outlined\'>menu_book</span></div>'">
+        </div>
+        <div class="book-body">
+          <h3>Assassin's Creed</h3>
+          <p>Anton Gill</p>
+          <div class="book-footer">
+            <button class="btn-borrow" onclick="borrowBook(this, 3, 'Assassin\'s Creed', 'Anton Gill')">
+              <span class="material-symbols-outlined sm">add</span> Emprestar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="book-card" data-id="4" data-title="Tower of God" data-author="SIU">
+        <div class="book-img-ph">
+          <img src="https://livrariascuritiba.vteximg.com.br/arquivos/ids/2184938-1000-1000/LV520518.jpg?v=638822975842800000" class="book-img" alt="Tower of God">
+        </div>
+        <div class="book-body">
+          <h3>Tower of God</h3>
+          <p>SIU</p>
+          <div class="book-footer">
+            <button class="btn-borrow" onclick="borrowBook(this, 4, 'Tower of God', 'SIU')">
+              <span class="material-symbols-outlined sm">add</span> Emprestar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="book-card" data-id="5" data-title="Pai Rico Pai Pobre" data-author="Robert Kiyosaki">
+        <div class="book-img-ph">
+          <img src="https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTSlXVHkVYztlc7pjEh_CrUZU-KymzNepFVMY73srE0b93p1H97AKPC89IBK2cv4l35hsaow6KtMHoJBnLNwpM3ru_pPFYO_jX6MsnUjb8&usqp=CAc" class="book-img" alt="Pai Rico Pai Pobre">
+        </div>
+        <div class="book-body">
+          <h3>Pai Rico Pai Pobre</h3>
+          <p>Robert Kiyosaki</p>
+          <div class="book-footer">
+            <button class="btn-borrow" onclick="borrowBook(this, 5, 'Pai Rico Pai Pobre', 'Robert Kiyosaki')">
+              <span class="material-symbols-outlined sm">add</span> Emprestar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="book-card" data-id="6" data-title="Dom Quixote" data-author="Miguel de Cervantes">
+        <div class="book-img-ph">
+          <img src="https://www.lpm.com.br/livros/imagens/dom_quixote_hq_9788525425669_hd.jpg" class="book-img" alt="Dom Quixote">
+        </div>
+        <div class="book-body">
+          <h3>Dom Quixote</h3>
+          <p>Miguel de Cervantes</p>
+          <div class="book-footer">
+            <button class="btn-borrow" onclick="borrowBook(this, 6, 'Dom Quixote', 'Miguel de Cervantes')">
+              <span class="material-symbols-outlined sm">add</span> Emprestar
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+  /* ════════════════════════════════════
+     CONSTANTES
+  ════════════════════════════════════ */
+  const MAX_LOANS    = 5;
+  const MAX_RENEWALS = 2;
+  const STORAGE_KEY  = 'biblioteca_loans'; // chave compartilhada com Devolução
+
+  /* ════════════════════════════════════
+     PERSISTÊNCIA — localStorage
+  ════════════════════════════════════ */
+  function loadLoans() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  }
+
+  function saveLoans() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(loans));
+  }
+
+  /* Estado inicial — usa localStorage se já existir, senão usa os valores padrão */
+  let loans = loadLoans() ?? [
+    {
+      id: 1,
+      title: 'O Hobbit',
+      author: 'J.R.R. Tolkien',
+      borrowedAt: '2026-04-01',
+      dueDate: '2026-05-10',
+      renewals: 0,
+      late: false
+    },
+    {
+      id: 2,
+      title: 'Harry Potter',
+      author: 'J.K. Rowling',
+      borrowedAt: '2026-04-05',
+      dueDate: '2026-04-15',
+      renewals: 1,
+      late: true
+    }
+  ];
+
+  /* Recalcula o campo `late` com base na data atual */
+  (function recalcLate() {
+    const today = new Date(); today.setHours(0,0,0,0);
+    loans.forEach(l => {
+      const due = new Date(l.dueDate); due.setHours(0,0,0,0);
+      l.late = due < today;
+    });
+    saveLoans();
+  })();
+
+  /* ════════════════════════════════════
+     RENDER
+  ════════════════════════════════════ */
+  function renderLoans() {
+    const card    = document.getElementById('loans-card');
+    const countEl = document.getElementById('loan-count');
+    const fill    = document.getElementById('limit-fill');
+
+    const n = loans.length;
+    countEl.textContent = n;
+    countEl.className   = n >= MAX_LOANS ? 'at-limit' : '';
+
+    const pct = (n / MAX_LOANS) * 100;
+    fill.style.width = pct + '%';
+    fill.className   = 'limit-fill' + (n >= MAX_LOANS ? ' full' : n >= 4 ? ' warn' : '');
+
+    /* Atualiza botões do catálogo */
+    const borrowedIds = loans.map(l => l.id);
+    document.querySelectorAll('.btn-borrow').forEach(btn => {
+      const bookCard       = btn.closest('.book-card');
+      const bookId         = bookCard ? parseInt(bookCard.dataset.id) : null;
+      const alreadyBorrowed = borrowedIds.includes(bookId);
+      btn.disabled = n >= MAX_LOANS || alreadyBorrowed;
+      btn.innerHTML = alreadyBorrowed
+        ? '<span class="material-symbols-outlined sm">check</span> Emprestado'
+        : '<span class="material-symbols-outlined sm">add</span> Emprestar';
+    });
+
+    if (loans.length === 0) {
+      card.innerHTML = `
+        <div class="loans-empty">
+          <span class="material-symbols-outlined">auto_stories</span>
+          Nenhum livro emprestado no momento.<br>Escolha um título no catálogo abaixo!
+        </div>`;
+      return;
+    }
+
+    card.innerHTML = loans.map(loan => {
+      const late     = loan.late;
+      const canRenew = loan.renewals < MAX_RENEWALS && !late;
+
+      return `
+      <div class="loan-row" id="loan-${loan.id}">
+        <div class="loan-cover-ph">
+          <span class="material-symbols-outlined">menu_book</span>
+        </div>
+        <div class="loan-info">
+          <div class="loan-title">${loan.title}</div>
+          <div class="loan-author">${loan.author}</div>
+          <div class="loan-dates">
+            <span>
+              <span class="material-symbols-outlined">calendar_today</span>
+              Retirada: ${formatDate(loan.borrowedAt)}
+            </span>
+            <span>
+              <span class="material-symbols-outlined">${late ? 'warning' : 'event'}</span>
+              Devolução: ${formatDate(loan.dueDate)}
+            </span>
+          </div>
+        </div>
+        <div class="loan-right">
+          <span class="status ${late ? 'status-late' : 'status-ok'}">
+            ${late ? 'Atrasado' : 'Em dia'}
+          </span>
+          <div class="loan-actions">
+            <button
+              class="btn-renew"
+              onclick="renewLoan(${loan.id})"
+              ${canRenew ? '' : 'disabled'}
+              title="${loan.renewals >= MAX_RENEWALS ? 'Limite de renovações atingido' : late ? 'Não é possível renovar livro em atraso' : 'Renovar por mais 14 dias'}"
+            >
+              <span class="material-symbols-outlined sm">autorenew</span>
+              Renovar${loan.renewals > 0 ? ` (${loan.renewals}/${MAX_RENEWALS})` : ''}
+            </button>
+            <button class="btn-return" onclick="returnLoan(${loan.id})">
+              <span class="material-symbols-outlined sm">assignment_return</span>
+              Devolver
+            </button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  /* ════════════════════════════════════
+     AÇÕES
+  ════════════════════════════════════ */
+  function borrowBook(btn, id, title, author) {
+    if (loans.length >= MAX_LOANS) {
+      showToast('⚠ Limite de 5 livros atingido.', 'warn'); return;
+    }
+    if (loans.find(l => l.id === id)) {
+      showToast('Este livro já está na sua lista.', 'warn'); return;
+    }
+
+    const today = new Date();
+    const due   = new Date(today);
+    due.setDate(due.getDate() + 14);
+
+    loans.push({
+      id,
+      title,
+      author,
+      borrowedAt: toISO(today),
+      dueDate:    toISO(due),
+      renewals:   0,
+      late:       false
+    });
+
+    saveLoans(); // ← sincroniza com Devolução
+    renderLoans();
+    showToast(`"${title}" emprestado com sucesso!`, 'ok');
+  }
+
+  function renewLoan(id) {
+    const loan = loans.find(l => l.id === id);
+    if (!loan) return;
+
+    if (loan.renewals >= MAX_RENEWALS) {
+      showToast('Limite de renovações atingido.', 'error'); return;
+    }
+    if (loan.late) {
+      showToast('Não é possível renovar um livro em atraso.', 'error'); return;
+    }
+
+    const due = new Date(loan.dueDate);
+    due.setDate(due.getDate() + 14);
+    loan.dueDate = toISO(due);
+    loan.renewals++;
+
+    saveLoans(); // ← sincroniza com Devolução
+    renderLoans();
+    showToast(`"${loan.title}" renovado! Nova devolução: ${formatDate(loan.dueDate)}`, 'ok');
+  }
+
+  function returnLoan(id) {
+    const loan = loans.find(l => l.id === id);
+    if (!loan) return;
+    loans = loans.filter(l => l.id !== id);
+    saveLoans(); // ← sincroniza com Devolução
+    renderLoans();
+    showToast(`"${loan.title}" devolvido. Obrigado!`, 'ok');
+  }
+
+  /* ════════════════════════════════════
+     TOAST / UTILITÁRIOS
+  ════════════════════════════════════ */
+  function showToast(msg, type = 'ok') {
+    const wrap = document.getElementById('toast-wrap');
+    const t    = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.textContent = msg;
+    wrap.appendChild(t);
+    setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 350); }, 3200);
+  }
+
+  function toISO(date)    { return date.toISOString().split('T')[0]; }
+  function formatDate(iso) {
+    if (!iso) return '—';
+    const [y, m, d] = iso.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  /* Nav ativa */
+  const currentPage = location.pathname.split('/').pop();
+  document.querySelectorAll('.nav-links a').forEach(a => {
+    if (a.getAttribute('href') === currentPage) a.classList.add('active');
+  });
+
+  renderLoans();
+</script>
+</body>
+</html>
