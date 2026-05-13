@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estação Literária - Cadastro</title>
+
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="auth.css">
+</head>
+<body class="page-auth">
+
+  <div class="nebula-bg"></div>
+  <div class="overlay"></div>
+
+
+
+<main>
+  <div>
+    <div class="logo-circle"><img src="Biblioteca2.png" width="150px" height="100px"></div>
+
+    <div class="card">
+      <h1 class="title-auth">Estação Literária</h1>
+      <h2 >Criar Conta</h2>
+
+      <form>
+
+        <div class="input-group">
+            <label>Nome completo
+                <input type="text" name="name">
+            </label>
+        </div>
+        <div class="input-group">
+          <label>Data de Nacimento
+            <input name="date" type="date">
+          </label>  
+        </div>
+
+        <div class="input-group">
+          <label>E-Mail
+            <input name="email" type="email" required>
+          </label>
+        </div>
+
+        <div class="input-group">
+          <label>Senha
+            <input name="Senha" type="password" maxlength="8" required>
+          </label>
+        </div>
+
+        <div class="input-group">
+          <label>Confirmar Senha
+            <input name="Senha" type="password" maxlength="8" required>
+          </label>
+        </div>
+
+        <button class="btn-primary">Cadastrar</button>
+
+      </form>
+
+      <div class="footer">
+        <span>Já tem uma conta?</span>
+        <a href="Login.html">Entrar</a>
+      </div>
+
+    </div>
+
+  </div>
+</main>
+</body>
+</html>
