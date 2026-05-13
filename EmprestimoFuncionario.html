@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Empréstimos - Estação Literária</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="funcionario.css">
+</head>
+<body class="page-func">
+
+<!-- NAVBAR -->
+<nav class="navbar">
+
+  <!-- Logo: brasão + BIBLIOTECA -->
+  <div class="logo-area">
+    <img src="Biblioteca2.png" width="60">
+    <span class="logo-wordmark">Biblioteca</span>
+  </div>
+
+  <!-- Menu central -->
+  <div class="menu">
+    <a href="PainelFuncionario.html">Painel Principal</a>
+  </div>
+
+  <!-- Direita: busca + avatar -->
+  <div class="right-area">
+    <div class="search-wrap">
+      <input class="search" type="text" placeholder="Pesquisar..."/>
+    </div>
+    <div class="user-avatar" title="Usuário">
+        <img src="https://static.wikia.nocookie.net/hoducks/images/5/56/Kevin_Kaslana.jpg/revision/latest/thumbnail/width/360/height/360?cb=20250121140658" alt="Usuário">
+    </div>
+  </div>
+
+</nav>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h1 class="logo">Estação Literária</h1>
+  
+    <nav>
+      <a href="EmprestimoFuncionario.html" class="nav-item">
+        <span class="material-symbols-outlined">grid_view</span>
+        Emprestimos
+      </a>
+      <a href="FuncionarioLivro.html" class="nav-item">
+        <span class="material-symbols-outlined">auto_stories</span>
+        Livros
+      </a>
+      <a href="FuncionarioUsuario.html" class="nav-item">
+        <span class="material-symbols-outlined">swap_horiz</span>
+        Usuários
+      </a>
+    </nav>
+  
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="page-header">
+      <div>
+        <h1>Relatório de Empréstimos</h1>
+        <p>Monitore retiradas ativas, itens em atraso e notificações de usuários.</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-outline">
+          <span class="material-symbols-outlined" style="font-size:16px">filter_list</span>
+          Filtrar
+        </button>
+        <button class="btn-outline">
+          <span class="material-symbols-outlined" style="font-size:16px">download</span>
+          Exportar
+        </button>
+      </div>
+    </div>
+
+    <div class="table-section">
+      <div class="table-container">
+        <div class="table-header">
+          <h3>Empréstimos Ativos</h3>
+          <span>4 registros encontrados</span>
+        </div>
+
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Livro</th>
+                <th>Autor</th>
+                <th>Usuário</th>
+                <th>Data de Empréstimo</th>
+                <th>Data de Devolução</th>
+                <th>Status</th>
+                <th class="th-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Row 1 -->
+              <tr>
+                <td class="td-title">Neuromancer</td>
+                <td class="td-muted">William Gibson</td>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-initials">JS</div>
+                    <span>João Silva</span>
+                  </div>
+                </td>
+                <td class="td-muted">15/10/2023</td>
+                <td class="td-muted">29/10/2023</td>
+                <td>
+                  <span class="status disponivel">
+                    <span class="status-dot"></span>
+                    Emprestado
+                  </span>
+                </td>
+                <td class="td-right">
+                  <div class="action-cell">
+                    <button class="action edit" title="Notificar">
+                      <span class="material-symbols-outlined">mail</span>
+                    </button>
+                    <button class="action edit" title="Registrar devolução">
+                      <span class="material-symbols-outlined">assignment_return</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <!-- Row 2 -->
+              <tr>
+                <td class="td-title">Snow Crash</td>
+                <td class="td-muted">Neal Stephenson</td>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-initials">MO</div>
+                    <span>Maria Oliveira</span>
+                  </div>
+                </td>
+                <td class="td-muted">20/09/2023</td>
+                <td class="td-error">04/10/2023</td>
+                <td>
+                  <span class="status atrasado">
+                    <span class="status-dot"></span>
+                    Atrasado
+                  </span>
+                </td>
+                <td class="td-right">
+                  <div class="action-cell">
+                    <button class="action warn" title="Notificar urgente">
+                      <span class="material-symbols-outlined">notification_important</span>
+                    </button>
+                    <button class="action edit" title="Registrar devolução">
+                      <span class="material-symbols-outlined">assignment_return</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <!-- Row 3 -->
+              <tr>
+                <td class="td-title">Dune</td>
+                <td class="td-muted">Frank Herbert</td>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-initials">PS</div>
+                    <span>Pedro Santos</span>
+                  </div>
+                </td>
+                <td class="td-muted">18/10/2023</td>
+                <td class="td-muted">01/11/2023</td>
+                <td>
+                  <span class="status disponivel">
+                    <span class="status-dot"></span>
+                    Emprestado
+                  </span>
+                </td>
+                <td class="td-right">
+                  <div class="action-cell">
+                    <button class="action edit" title="Notificar">
+                      <span class="material-symbols-outlined">mail</span>
+                    </button>
+                    <button class="action edit" title="Registrar devolução">
+                      <span class="material-symbols-outlined">assignment_return</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <!-- Row 4 -->
+              <tr>
+                <td class="td-title">Foundation</td>
+                <td class="td-muted">Isaac Asimov</td>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-initials">AC</div>
+                    <span>Ana Costa</span>
+                  </div>
+                </td>
+                <td class="td-muted">10/08/2023</td>
+                <td class="td-error">24/08/2023</td>
+                <td>
+                  <span class="status atrasado">
+                    <span class="status-dot"></span>
+                    Atrasado
+                  </span>
+                </td>
+                <td class="td-right">
+                  <div class="action-cell">
+                    <button class="action warn" title="Notificar urgente">
+                      <span class="material-symbols-outlined">notification_important</span>
+                    </button>
+                    <button class="action edit" title="Registrar devolução">
+                      <span class="material-symbols-outlined">assignment_return</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="pagination">
+        <span>Exibindo 1 a 4 de 4 registros</span>
+        <div class="page-controls">
+          <button class="page-btn" disabled>
+            <span class="material-symbols-outlined" style="font-size:18px">chevron_left</span>
+          </button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn" disabled>
+            <span class="material-symbols-outlined" style="font-size:18px">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+</body>
+</html>
