@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estação Literária — Devolução</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="leitor.css">
+</head>
+<body class="page-flex">
+
+<header class="header">
+  <div class="logo">
+    <img src="Biblioteca2.png" alt="Logo"
+         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+    <div class="logo-icon-fallback">
+      <span class="material-symbols-outlined">auto_stories</span>
+    </div>
+    <h1>Biblioteca</h1>
+  </div>
+  <nav class="nav-links">
+    <a href="PainelUsuario.html">Início</a>
+    <a href="CatalogoLivros.html">Catálogo</a>
+    <a href="Suporte.html">Suporte</a>
+    <a href="Conta.html">Conta</a>
+  </nav>
+  <div class="right-area">
+    <input class="search" type="text" placeholder="Pesquisar...">
+    <div class="avatar">
+      <img src="https://static.wikia.nocookie.net/hoducks/images/5/56/Kevin_Kaslana.jpg/revision/latest/thumbnail/width/360/height/360?cb=20250121140658" alt="Usuário"
+           onerror="this.parentElement.style.background='linear-gradient(135deg,#192447,#1e2a50)'; this.style.display='none'; this.parentElement.textContent='U';">
+    </div>
+  </div>
+</header>
+
+<div class="page-body">
+
+  <aside class="sidebar">
+    <h2 class="sidebar-title">Portal do Leitor</h2>
+    <p class="sidebar-subtitle">Estação Central</p>
+    <nav class="sidebar-links">
+      <a href="Emprestimo.html">
+        <span class="material-symbols-outlined">book</span>
+        <span>Empréstimo</span>
+      </a>
+      <a href="#" class="active">
+        <span class="material-symbols-outlined">assignment_return</span>
+        <span>Devolução</span>
+      </a>
+    </nav>
+  </aside>
+
+  <main class="main">
+
+    <section class="hero">
+      <div class="hero-top">
+        <div class="hero-icon">
+          <span class="material-symbols-outlined">assignment_return</span>
+        </div>
+        <div>
+          <h2>Central de Devoluções</h2>
+          <p>Devolva seus livros, acompanhe multas por atraso e regularize sua situação na biblioteca.</p>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <span class="hero-stat-value teal" id="stat-loans">0</span>
+          <span class="hero-stat-label">Livros em mãos</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-value red" id="stat-late">0</span>
+          <span class="hero-stat-label">Em atraso</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-value yellow" id="stat-fine">R$ 0,00</span>
+          <span class="hero-stat-label">Multa total</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-value teal" id="stat-today">0</span>
+          <span class="hero-stat-label">Vence hoje</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="total-panel" id="total-panel">
+      <div class="total-left">
+        <div class="total-label">Total de multas pendentes</div>
+        <div class="total-value" id="total-value">R$ 0,00</div>
+        <div class="total-sub" id="total-sub">Nenhuma multa pendente</div>
+      </div>
+      <button class="btn-pay" id="btn-pay-all" onclick="payAllFines()" disabled>
+        <span class="material-symbols-outlined sm">payments</span>
+        Pagar todas as multas
+      </button>
+    </div>
+
+    <div class="section-header">
+      <span class="section-title">Livros para Devolver</span>
+      <span class="section-tag" id="loan-count-label">—</span>
+    </div>
+
+    <div class="returns-grid" id="returns-grid"></div>
+
+    <div class="section-header" style="margin-top: 1rem;">
+      <span class="section-title">Histórico de Devoluções</span>
+    </div>
+
+    <div class="history-card" id="history-card">
+      <div class="history-header">
+        <span style="font-size:0.8125rem; color:var(--on-surface-variant);">Devoluções recentes desta sessão</span>
+      </div>
+      <div id="history-list">
+        <div class="empty-state">
+          <span class="material-symbols-outlined">history</span>
+          <h3>Nenhuma devolução ainda</h3>
+          <p>As devoluções feitas nesta sessão aparecerão aqui.</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+    <div class="modal-icon">
+      <span class="material-symbols-outlined">assignment_return</span>
+    </div>
+    <h3 id="modal-title">Confirmar devolução</h3>
+    <p id="modal-desc">Você está devolvendo este livro.</p>
+    <div class="modal-fine-box">
+      <div class="modal-fine-label">
+        <div style="font-weight:700; color:var(--on-background); font-size:0.9375rem;" id="modal-book">—</div>
+        <div style="margin-top:4px;" id="modal-days-info">—</div>
+      </div>
+      <div class="modal-fine-value" id="modal-fine-value">R$ 0,00</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-confirm" id="modal-confirm-btn">
+        <span class="material-symbols-outlined sm">check</span>
+        Confirmar devolução
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+  /* ════════════════════════════════════
+     CONFIGURAÇÕES
+  ════════════════════════════════════ */
+  const FINE_PER_DAY = 0.50;
+  const STORAGE_KEY  = 'biblioteca_loans'; // mesma chave do Emprestimo.html
+  const TODAY = new Date();
+  TODAY.setHours(0,0,0,0);
+
+  /* ════════════════════════════════════
+     PERSISTÊNCIA — localStorage
+  ════════════════════════════════════ */
+  function loadLoans() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  }
+
+  function saveLoans() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(loans));
+  }
+
+  /* Dados carregados do localStorage (compartilhado com Emprestimo.html) */
+  let loans = loadLoans() ?? [
+    {
+      id: 1,
+      title: 'O Hobbit',
+      author: 'J.R.R. Tolkien',
+      borrowedAt: '2026-04-01',
+      dueDate:    '2026-05-10',
+    },
+    {
+      id: 2,
+      title: 'Harry Potter e a Câmara Secreta',
+      author: 'J.K. Rowling',
+      borrowedAt: '2026-04-05',
+      dueDate:    '2026-04-15',
+    }
+  ];
+
+  let history       = [];
+  let pendingReturnId = null;
+
+  /* ════════════════════════════════════
+     UTILITÁRIOS
+  ════════════════════════════════════ */
+  function parseDate(iso) {
+    const [y, m, d] = iso.split('-').map(Number);
+    const dt = new Date(y, m - 1, d);
+    dt.setHours(0,0,0,0);
+    return dt;
+  }
+
+  function fmt(iso) {
+    const [y, m, d] = iso.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  function daysLate(dueISO) {
+    const due  = parseDate(dueISO);
+    return Math.floor((TODAY - due) / 86400000);
+  }
+
+  function calcFine(dueISO) {
+    const late = daysLate(dueISO);
+    return late > 0 ? late * FINE_PER_DAY : 0;
+  }
+
+  function fmtMoney(val) {
+    return 'R$ ' + val.toFixed(2).replace('.', ',');
+  }
+
+  function deadlinePct(borrowedISO, dueISO) {
+    const start   = parseDate(borrowedISO).getTime();
+    const end     = parseDate(dueISO).getTime();
+    const now     = TODAY.getTime();
+    const total   = end - start;
+    const elapsed = now - start;
+    if (total <= 0) return 100;
+    return Math.min(100, Math.max(0, (elapsed / total) * 100));
+  }
+
+  function today_iso() {
+    return TODAY.toISOString().split('T')[0];
+  }
+
+  /* ════════════════════════════════════
+     RENDER
+  ════════════════════════════════════ */
+  function render() {
+    renderStats();
+    renderTotal();
+    renderGrid();
+  }
+
+  function renderStats() {
+    const totalFine  = loans.reduce((s, l) => s + calcFine(l.dueDate), 0);
+    const lateCount  = loans.filter(l => daysLate(l.dueDate) > 0).length;
+    const todayCount = loans.filter(l => daysLate(l.dueDate) === 0).length;
+
+    document.getElementById('stat-loans').textContent = loans.length;
+    document.getElementById('stat-late').textContent  = lateCount;
+    document.getElementById('stat-fine').textContent  = fmtMoney(totalFine);
+    document.getElementById('stat-today').textContent = todayCount;
+
+    const countLabel = document.getElementById('loan-count-label');
+    countLabel.textContent = loans.length === 0
+      ? 'Nenhum livro pendente'
+      : `${loans.length} livro${loans.length > 1 ? 's' : ''}`;
+  }
+
+  function renderTotal() {
+    const total     = loans.reduce((s, l) => s + calcFine(l.dueDate), 0);
+    const lateCount = loans.filter(l => daysLate(l.dueDate) > 0).length;
+    const el  = document.getElementById('total-value');
+    const sub = document.getElementById('total-sub');
+    const btn = document.getElementById('btn-pay-all');
+
+    el.textContent = fmtMoney(total);
+    el.className   = 'total-value' + (total === 0 ? ' zero' : '');
+
+    if (total === 0) {
+      sub.textContent = 'Nenhuma multa pendente 🎉';
+      btn.disabled = true;
+    } else {
+      sub.textContent = `${lateCount} livro${lateCount > 1 ? 's' : ''} em atraso • ${FINE_PER_DAY.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})} por dia`;
+      btn.disabled = false;
+    }
+  }
+
+  function renderGrid() {
+    const grid = document.getElementById('returns-grid');
+
+    if (loans.length === 0) {
+      grid.innerHTML = `
+        <div class="empty-state" style="background:var(--surface-container);border:1px solid var(--border);border-radius:1rem;">
+          <span class="material-symbols-outlined">check_circle</span>
+          <h3>Tudo em ordem!</h3>
+          <p>Você não tem livros pendentes de devolução.</p>
+        </div>`;
+      return;
+    }
+
+    const sorted = [...loans].sort((a, b) => daysLate(b.dueDate) - daysLate(a.dueDate));
+
+    grid.innerHTML = sorted.map(loan => {
+      const late    = daysLate(loan.dueDate);
+      const fine    = calcFine(loan.dueDate);
+      const pct     = deadlinePct(loan.borrowedAt, loan.dueDate);
+      const isLate  = late > 0;
+      const isToday = late === 0;
+
+      let statusClass, statusText;
+      if (isLate)       { statusClass = 'status-late';  statusText = 'Atrasado'; }
+      else if (isToday) { statusClass = 'status-today'; statusText = 'Vence hoje'; }
+      else              {
+        const dias = Math.abs(late);
+        statusClass = 'status-ok';
+        statusText  = `${dias} dia${dias !== 1 ? 's' : ''} restante${dias !== 1 ? 's' : ''}`;
+      }
+
+      let fillClass = isLate ? 'over' : pct > 75 ? 'warn' : 'ok';
+
+      const deadlineText = isLate
+        ? `${late} dia${late > 1 ? 's' : ''} em atraso`
+        : isToday
+          ? 'Devolução hoje!'
+          : `Vence em ${fmt(loan.dueDate)}`;
+
+      return `
+      <div class="return-card ${isLate ? 'is-late' : ''}" id="rc-${loan.id}">
+        <div class="return-card-body">
+          <div class="rc-cover ${isLate ? 'late-cover' : 'ok-cover'}">
+            <span class="material-symbols-outlined" style="font-size:1.5rem;">menu_book</span>
+          </div>
+          <div class="rc-info">
+            <div class="rc-title">${loan.title}</div>
+            <div class="rc-author">${loan.author}</div>
+            <div class="rc-dates">
+              <div class="rc-date-item">
+                <div class="rc-date-label">Retirada</div>
+                <div class="rc-date-value">${fmt(loan.borrowedAt)}</div>
+              </div>
+              <div class="rc-date-item">
+                <div class="rc-date-label">Devolução prevista</div>
+                <div class="rc-date-value ${isLate ? 'late-date' : ''}">${fmt(loan.dueDate)}</div>
+              </div>
+              ${isLate ? `
+              <div class="rc-date-item">
+                <div class="rc-date-label">Dias em atraso</div>
+                <div class="rc-date-value late-date">${late} dia${late > 1 ? 's' : ''}</div>
+              </div>` : ''}
+            </div>
+          </div>
+          <div class="rc-right">
+            <span class="status ${statusClass}">${statusText}</span>
+            <div class="fine-block">
+              <div class="fine-label">Multa</div>
+              <div class="fine-amount ${fine === 0 ? 'zero' : ''}">${fmtMoney(fine)}</div>
+              ${isLate ? `<div class="fine-days">${FINE_PER_DAY.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}/dia</div>` : ''}
+            </div>
+            <button class="btn-return-main" onclick="openModal(${loan.id})">
+              <span class="material-symbols-outlined sm">assignment_return</span>
+              Devolver
+            </button>
+          </div>
+        </div>
+        <div class="rc-footer">
+          <div class="deadline-track">
+            <div class="deadline-fill ${fillClass}" style="width:${Math.min(pct, 100)}%"></div>
+          </div>
+          <span class="deadline-text ${isLate ? 'late-text' : ''}">${deadlineText}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderHistory() {
+    const list = document.getElementById('history-list');
+    if (history.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <span class="material-symbols-outlined">history</span>
+          <h3>Nenhuma devolução ainda</h3>
+          <p>As devoluções feitas nesta sessão aparecerão aqui.</p>
+        </div>`;
+      return;
+    }
+    list.innerHTML = history.map(h => `
+      <div class="history-row">
+        <div class="history-icon ${h.fine > 0 ? 'fine' : 'ok'}">
+          <span class="material-symbols-outlined sm">${h.fine > 0 ? 'warning' : 'check_circle'}</span>
+        </div>
+        <div class="history-info">
+          <div class="history-title">${h.title}</div>
+          <div class="history-meta">${h.author} • Devolvido ${fmt(h.returnedAt)}</div>
+        </div>
+        <div class="history-fine ${h.fine > 0 ? 'paid' : 'zero'}" style="${h.fine > 0 ? 'color:var(--error)' : ''}">
+          ${h.fine > 0 ? fmtMoney(h.fine) + ' multa' : 'Sem multa'}
+        </div>
+      </div>`).join('');
+  }
+
+  /* ════════════════════════════════════
+     MODAL
+  ════════════════════════════════════ */
+  function openModal(id) {
+    const loan = loans.find(l => l.id === id);
+    if (!loan) return;
+
+    pendingReturnId = id;
+    const late   = daysLate(loan.dueDate);
+    const fine   = calcFine(loan.dueDate);
+    const isLate = late > 0;
+
+    document.getElementById('modal-title').textContent = isLate ? 'Devolução com multa' : 'Confirmar devolução';
+    document.getElementById('modal-desc').textContent  = isLate
+      ? `O livro está ${late} dia${late > 1 ? 's' : ''} atrasado. A multa será cobrada na devolução.`
+      : 'O livro está dentro do prazo. Nenhuma multa será cobrada.';
+
+    document.getElementById('modal-book').textContent = loan.title;
+    document.getElementById('modal-days-info').textContent = isLate
+      ? `${late} dia${late > 1 ? 's' : ''} em atraso • ${FINE_PER_DAY.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})} por dia`
+      : `Prazo: ${fmt(loan.dueDate)}`;
+
+    const fineEl = document.getElementById('modal-fine-value');
+    fineEl.textContent = fmtMoney(fine);
+    fineEl.className   = 'modal-fine-value' + (fine === 0 ? ' zero' : '');
+
+    document.getElementById('modal-confirm-btn').onclick = () => confirmReturn(id);
+    document.getElementById('modal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+    pendingReturnId = null;
+  }
+
+  document.getElementById('modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('modal')) closeModal();
+  });
+
+  /* ════════════════════════════════════
+     DEVOLVER — salva no localStorage
+  ════════════════════════════════════ */
+  function confirmReturn(id) {
+    const loan   = loans.find(l => l.id === id);
+    if (!loan) return;
+
+    const fine   = calcFine(loan.dueDate);
+    const isLate = daysLate(loan.dueDate) > 0;
+
+    history.unshift({
+      title:      loan.title,
+      author:     loan.author,
+      dueDate:    loan.dueDate,
+      returnedAt: today_iso(),
+      fine,
+    });
+
+    loans = loans.filter(l => l.id !== id);
+    saveLoans(); // ← remove do localStorage → Emprestimo.html vai ver a mudança
+
+    closeModal();
+    render();
+    renderHistory();
+
+    if (isLate) {
+      showToast(`"${loan.title}" devolvido. Multa de ${fmtMoney(fine)} registrada.`, 'error');
+    } else {
+      showToast(`"${loan.title}" devolvido com sucesso! Obrigado.`, 'ok');
+    }
+  }
+
+  /* ════════════════════════════════════
+     PAGAR TODAS
+  ════════════════════════════════════ */
+  function payAllFines() {
+    const total = loans.reduce((s, l) => s + calcFine(l.dueDate), 0);
+    if (total === 0) return;
+    showToast(`Multa total de ${fmtMoney(total)} registrada para pagamento.`, 'warn');
+  }
+
+  /* ════════════════════════════════════
+     TOAST
+  ════════════════════════════════════ */
+  function showToast(msg, type = 'ok') {
+    const wrap = document.getElementById('toast-wrap');
+    const t    = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.textContent = msg;
+    wrap.appendChild(t);
+    setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 350); }, 3500);
+  }
+
+  /* Sidebar ativa */
+  document.querySelectorAll('.sidebar-links a').forEach(a =>
+    a.addEventListener('click', e => {
+      if (a.getAttribute('href') === '#') e.preventDefault();
+      document.querySelectorAll('.sidebar-links a').forEach(x => x.classList.remove('active'));
+      a.classList.add('active');
+    })
+  );
+
+  /* INIT */
+  render();
+  renderHistory();
+</script>
+</body>
+</html>
