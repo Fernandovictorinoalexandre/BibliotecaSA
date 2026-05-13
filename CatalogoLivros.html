@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Catálogo — Estação Literária</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="leitor.css">
+</head>
+<body class="page-catalogo">
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <div class="logo-area">
+    <img src="Biblioteca2.png" width="60" alt="Logo">
+    <h1>BIBLIOTECA</h1>
+  </div>
+
+  <nav class="menu">
+    <a href="PainelUsuario.html">Início</a>
+    <a href="CatalogoLivros.html" class="active">Catálogo</a>
+    <a href="Suporte.html">Suporte</a>
+    <a href="Conta.html">Conta</a>
+  </nav>
+
+  <div class="right-area">
+    <input type="text" placeholder="Pesquisar..." class="search">
+    <div class="user-avatar">
+      <img src="https://static.wikia.nocookie.net/hoducks/images/5/56/Kevin_Kaslana.jpg/revision/latest/thumbnail/width/360/height/360?cb=20250121140658" alt="Usuário">
+    </div>
+  </div>
+</header>
+
+<!-- SIDE NAV -->
+<aside class="side-nav">
+  <div class="side-nav-header">
+    <h3 class="side-nav-title">Portal do Leitor</h3>
+    <p class="side-nav-subtitle">Estação Central</p>
+  </div>
+
+  <p class="side-nav-section-label">Categorias</p>
+  <div class="side-nav-section">
+    <a class="side-nav-link" href="#">
+      <span class="material-symbols-outlined">favorite</span>
+      <span class="link-label">Romance</span>
+    </a>
+    <a class="side-nav-link active" href="#">
+      <span class="material-symbols-outlined">auto_awesome</span>
+      <span class="link-label">Fantasia</span>
+    </a>
+    <a class="side-nav-link" href="#">
+      <span class="material-symbols-outlined">skull</span>
+      <span class="link-label">Terror</span>
+    </a>
+    <a class="side-nav-link" href="#">
+      <span class="material-symbols-outlined">explore</span>
+      <span class="link-label">Aventura</span>
+    </a>
+    <a class="side-nav-link" href="#">
+      <span class="material-symbols-outlined">auto_stories</span>
+      <span class="link-label">Manhwa</span>
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main>
+
+  <header class="page-header">
+    <div class="page-title-row">
+      <h1 class="page-title">Explorar Catálogo</h1>
+      <span class="page-subtitle">/ Fantasia</span>
+    </div>
+    <p class="page-desc">Navegue pelos registros ancestrais e novos portais literários da nossa estação digital.</p>
+  </header>
+
+  <section class="book-grid">
+
+    <!-- Card 1 — Harry Potter -->
+    <div class="book-card" data-id="harry-potter">
+      <div class="book-cover-wrap">
+        <img src="HarryPotter.jpg" alt="Harry Potter"/>
+        <div class="cover-gradient"></div>
+      </div>
+      <div class="book-body">
+        <div class="book-title-row">
+          <h3 class="book-title">Harry Potter</h3>
+          <span class="badge">Novo</span>
+        </div>
+        <p class="book-desc">Harry Potter é uma série de sete romances de fantasia escrita pela autora britânica J. K. Rowling.</p>
+        <div class="book-actions">
+          <button class="btn btn-secondary" onclick="verDetalhes('harry-potter')">Ver Detalhes</button>
+          <button class="btn btn-primary" onclick="emprestarLivro('harry-potter')">Emprestar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2 — O Hobbit -->
+    <div class="book-card" data-id="hobbit">
+      <div class="book-cover-wrap">
+        <img src="https://m.media-amazon.com/images/I/91M9xPIf10L.jpg" alt="O Hobbit"/>
+        <div class="cover-gradient"></div>
+      </div>
+      <div class="book-body">
+        <div class="book-title-row">
+          <h3 class="book-title">O Hobbit</h3>
+        </div>
+        <p class="book-desc">Um livro infantojuvenil de alta fantasia.</p>
+        <div class="book-actions">
+          <button class="btn btn-secondary" onclick="verDetalhes('hobbit')">Ver Detalhes</button>
+          <button class="btn btn-primary" onclick="emprestarLivro('hobbit')">Emprestar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3 — A Maldição do Mar -->
+    <div class="book-card" data-id="maldicao-mar">
+      <div class="book-cover-wrap">
+        <img src="https://m.media-amazon.com/images/I/81kQ2kkTI8L.jpg" alt="A maldição do mar"/>
+        <div class="cover-gradient"></div>
+      </div>
+      <div class="book-body">
+        <div class="book-title-row">
+          <h3 class="book-title">A maldição do mar</h3>
+        </div>
+        <p class="book-desc">Quando corpos de garotos começam a aparecer no litoral da cidade de Sparrow, alguns moradores se perguntam se a antiga lenda sobre as bruxas vingativas seria verdade.</p>
+        <div class="book-actions">
+          <button class="btn btn-secondary" onclick="verDetalhes('maldicao-mar')">Ver Detalhes</button>
+          <button class="btn btn-primary" onclick="emprestarLivro('maldicao-mar')">Emprestar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4 — Assassin's Creed -->
+    <div class="book-card" data-id="assassins-creed">
+      <div class="book-cover-wrap">
+        <img src="AssassinCreed.jpg" alt="Assassin's Creed"/>
+        <div class="cover-gradient"></div>
+      </div>
+      <div class="book-body">
+        <div class="book-title-row">
+          <h3 class="book-title">Assassin's Creed</h3>
+        </div>
+        <p class="book-desc">Uma coleção de romances ambientados no universo dos videogames Assassin's Creed.</p>
+        <div class="book-actions">
+          <button class="btn btn-secondary" onclick="verDetalhes('assassins-creed')">Ver Detalhes</button>
+          <button class="btn btn-primary" onclick="emprestarLivro('assassins-creed')">Emprestar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 5 — Coroa de Sombras -->
+    <div class="book-card" data-id="coroa-sombras">
+      <div class="book-cover-wrap">
+        <img src="https://m.media-amazon.com/images/I/911+kloXIRL.jpg" alt="Coroa de Sombras"/>
+        <div class="cover-gradient"></div>
+      </div>
+      <div class="book-body">
+        <div class="book-title-row">
+          <h3 class="book-title">Coroa de Sombras</h3>
+        </div>
+        <p class="book-desc">Se prepare para mergulhar nas intrigas da corte (e do coração).</p>
+        <div class="book-actions">
+          <button class="btn btn-secondary" onclick="verDetalhes('coroa-sombras')">Ver Detalhes</button>
+          <button class="btn btn-primary" onclick="emprestarLivro('coroa-sombras')">Emprestar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 6 — O Nome do Vento -->
+    <div class="book-card" data-id="nome-vento">
+      <div class="book-cover-wrap">
+        <img src="https://m.media-amazon.com/images/I/81CGmkRG9GL._AC_UF1000,1000_QL80_.jpg" alt="O Nome do Vento"/>
+        <div class="cover-gradient"></div>
+      </div>
+      <div class="book-body">
+        <div class="book-title-row">
+          <h3 class="book-title">O Nome do Vento</h3>
+        </div>
+        <p class="book-desc">O Nome do Vento é um livro de fantasia escrito pelo norte-americano Patrick Rothfuss.</p>
+        <div class="book-actions">
+          <button class="btn btn-secondary" onclick="verDetalhes('nome-vento')">Ver Detalhes</button>
+          <button class="btn btn-primary" onclick="emprestarLivro('nome-vento')">Emprestar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 7 — Um Mar Sem Estrelas -->
+    <div class="book-card" data-id="mar-sem-estrelas">
+      <div class="book-cover-wrap">
+        <img src="https://m.media-amazon.com/images/I/81ORe57k3vS.jpg" alt="Um Mar Sem Estrelas"/>
+        <div class="cover-gradient"></div>
+      </div>
+      <div class="book-body">
+        <div class="book-title-row">
+          <h3 class="book-title">Um Mar Sem Estrelas</h3>
+        </div>
+        <p class="book-desc">Acompanha Zachary Ezra Rawlins, um estudante que encontra um livro misterioso contendo uma história de sua própria infância.</p>
+        <div class="book-actions">
+          <button class="btn btn-secondary" onclick="verDetalhes('mar-sem-estrelas')">Ver Detalhes</button>
+          <button class="btn btn-primary" onclick="emprestarLivro('mar-sem-estrelas')">Emprestar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 8 — O Feiticeiro de Terramar -->
+    <div class="book-card" data-id="feiticeiro-terramar">
+      <div class="book-cover-wrap">
+        <img src="https://m.media-amazon.com/images/I/61Nvp78uhGL._AC_UF1000,1000_QL80_.jpg" alt="O Feiticeiro de Terramar"/>
+        <div class="cover-gradient"></div>
+      </div>
+      <div class="book-body">
+        <div class="book-title-row">
+          <h3 class="book-title">O Feiticeiro de Terramar</h3>
+        </div>
+        <p class="book-desc">A Wizard of Earthsea é um romance de fantasia escrito por Ursula K. Le Guin.</p>
+        <div class="book-actions">
+          <button class="btn btn-secondary" onclick="verDetalhes('feiticeiro-terramar')">Ver Detalhes</button>
+          <button class="btn btn-primary" onclick="emprestarLivro('feiticeiro-terramar')">Emprestar</button>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <footer class="footer">
+    <p>© 2024 Estação Literária. Navegando pelo conhecimento infinito.</p>
+    <div class="footer-links">
+      <a href="#">Privacidade</a>
+      <a href="#">Termos de Serviço</a>
+      <a href="#">Acessibilidade</a>
+    </div>
+  </footer>
+
+</main>
+
+<!-- ══════════════════════════════════════
+     MODAL — TICKET DE EMPRÉSTIMO
+══════════════════════════════════════ -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="ticket-wrap">
+    <div class="ticket">
+
+      <div class="ticket-header">
+        <div class="ticket-logo">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">auto_stories</span>
+        </div>
+        <h2>Ticket de Empréstimo</h2>
+        <p>ESTAÇÃO LITERÁRIA — BIBLIOTECA</p>
+        <p>Comprovante de retirada do livro</p>
+      </div>
+
+      <div class="perforation">
+        <div class="perf-line"></div>
+      </div>
+
+      <div class="ticket-body">
+        <div class="status-badge">
+          <div class="pulse"></div>
+          Empréstimo Ativo
+        </div>
+
+        <div class="field-group">
+          <div class="field-row">
+            <span class="field-label">Usuário</span>
+            <div class="field-dots"></div>
+            <span class="field-value" id="tk-user"></span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">ID do Usuário</span>
+            <div class="field-dots"></div>
+            <span class="field-value mono" id="tk-userid"></span>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="field-group">
+          <div class="field-row">
+            <span class="field-label">Livro</span>
+            <div class="field-dots"></div>
+            <span class="field-value" id="tk-title"></span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Autor</span>
+            <div class="field-dots"></div>
+            <span class="field-value" id="tk-author"></span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Código do Livro</span>
+            <div class="field-dots"></div>
+            <span class="field-value mono" id="tk-isbn"></span>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="dates-grid">
+          <div class="date-box">
+            <div class="date-box-label">📅 Empréstimo</div>
+            <div class="date-box-value" id="tk-borrowed"></div>
+          </div>
+          <div class="date-box">
+            <div class="date-box-label">📅 Devolução</div>
+            <div class="date-box-value" id="tk-due"></div>
+          </div>
+        </div>
+
+        <div class="instr-block">
+          <div class="instr-title">
+            <span class="material-symbols-outlined">warning</span>
+            Instruções
+          </div>
+          <ul>
+            <li>Imprima este ticket ou salve o número</li>
+            <li>Apresente na retirada do livro no balcão</li>
+            <li>O funcionário confirmará no sistema</li>
+          </ul>
+        </div>
+
+        <div class="qr-section">
+          <div class="qr-box">
+            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">qr_code</span>
+          </div>
+          <div class="qr-info">
+            <span>Data da Solicitação</span>
+            <strong id="tk-reqdate"></strong>
+            <span style="margin-top:0.3rem">Número do Ticket</span>
+            <strong id="tk-ticketnum"></strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="ticket-footer">
+        <button class="btn-print" onclick="window.print()">
+          <span class="material-symbols-outlined">print</span>
+          Imprimir Ticket
+        </button>
+        <button class="btn-back" onclick="event.stopPropagation(); closeTicket()">
+          <span class="material-symbols-outlined">arrow_back</span>
+          Voltar
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // ══════════════════════════════════════
+  // BANCO DE DADOS DOS LIVROS
+  // ══════════════════════════════════════
+  const livros = {
+    'harry-potter': {
+      id: 'harry-potter',
+      titulo: 'Harry Potter',
+      autor: 'J. K. Rowling',
+      isbn: '978-8532530783',
+      capa: 'HarryPotter.jpg',
+      desc: 'Harry Potter descobre, aos 11 anos, que é um bruxo e vai estudar na Escola de Magia e Bruxaria de Hogwarts. Lá, faz amigos, aprende magia e enfrenta mistérios envolvendo a Pedra Filosofal — um objeto poderoso cobiçado por forças sombrias ligadas ao passado de seus pais.'
+    },
+    'hobbit': {
+      id: 'hobbit',
+      titulo: 'O Hobbit',
+      autor: 'J.R.R. Tolkien',
+      isbn: '978-8595084742',
+      capa: 'https://m.media-amazon.com/images/I/91M9xPIf10L.jpg',
+      desc: 'Bilbo Bolseiro, um hobbit tranquilo, é levado a uma aventura inesperada com um grupo de anões e o mago Gandalf. A missão é recuperar um tesouro guardado pelo dragão Smaug, mas Bilbo acaba descobrindo coragem e inteligência que nem sabia possuir..'
+    },
+    'maldicao-mar': {
+      id: 'maldicao-mar',
+      titulo: 'A Maldição do Mar',
+      autor: 'Shea Ernshaw',
+      isbn: '978-8551004296',
+      capa: 'https://m.media-amazon.com/images/I/81kQ2kkTI8L.jpg',
+      desc: 'Na cidade de Sparrow, três irmãs acusadas de bruxaria foram afogadas séculos atrás. Todo verão, seus espíritos retornam possuindo garotas locais para atrair jovens ao mar e matá-los. Penny vive ali e tenta sobreviver à maldição — até que um forasteiro chega e tudo começa a mudar.'
+    },
+    'assassins-creed': {
+      id: 'assassins-creed',
+      titulo: "Assassin's Creed",
+      autor: 'Oliver Bowden',
+      isbn: '978-8501092929',
+      capa: 'AssassinCreed.jpg',
+      desc: "A história acompanha Ezio Auditore, um jovem italiano que busca vingança após sua família ser traída e assassinada. Ao longo do caminho, ele se torna um assassino habilidoso, mergulhando em uma conspiração envolvendo poder, política e segredos antigos."
+    },
+    'coroa-sombras': {
+      id: 'coroa-sombras',
+      titulo: 'Coroa de Sombras',
+      autor: 'Sarah J. Maas',
+      isbn: '978-8501401370',
+      capa: 'https://m.media-amazon.com/images/I/911+kloXIRL.jpg',
+      desc: ', acompanha Alessandra Stathos, uma jovem ambiciosa que planeja seduzir o misterioso Rei das Sombras, casar-se com ele e matá-lo para assumir o reino. O romance enemies to lovers foca na corte e poderes do rei, mostrando a anti-heroína superando desafios para se tornar rainha.'
+    },
+    'nome-vento': {
+      id: 'nome-vento',
+      titulo: 'O Nome do Vento',
+      autor: 'Patrick Rothfuss',
+      isbn: '978-8598078359',
+      capa: 'https://m.media-amazon.com/images/I/81CGmkRG9GL._AC_UF1000,1000_QL80_.jpg',
+      desc: 'Kvothe, uma figura lendária, conta sua própria história: de um garoto órfão que vive nas ruas até se tornar um dos maiores magos de sua época. A narrativa mistura magia, música e tragédia, revelando como nasce uma lenda.'
+    },
+    'mar-sem-estrelas': {
+      id: 'mar-sem-estrelas',
+      titulo: 'Um Mar Sem Estrelas',
+      autor: 'Erin Morgenstern',
+      isbn: '978-8551005743',
+      capa: 'https://m.media-amazon.com/images/I/81ORe57k3vS.jpg',
+      desc: 'Zachary descobre um livro misterioso que conta uma história sobre ele mesmo. Isso o leva a um mundo oculto de bibliotecas secretas, portas mágicas e sociedades enigmáticas, onde realidade e fantasia se misturam.'
+    },
+    'feiticeiro-terramar': {
+      id: 'feiticeiro-terramar',
+      titulo: 'O Feiticeiro de Terramar',
+      autor: 'Ursula K. Le Guin',
+      isbn: '978-8578270698',
+      capa: 'https://m.media-amazon.com/images/I/61Nvp78uhGL._AC_UF1000,1000_QL80_.jpg',
+      desc: 'Ged, um jovem com grande talento mágico, entra para uma escola de magia, mas sua arrogância o leva a libertar uma força sombria. A partir daí, ele precisa enfrentar seus próprios erros em uma jornada de autoconhecimento e equilíbrio.'
+    }
+  };
+
+  // Dados do usuário logado
+  const usuarioLogado = {
+    nome: 'Kevin Kaslana',
+    id: '2451'
+  };
+
+  // ══════════════════════════════════════
+  // VER DETALHES — salva no localStorage e redireciona
+  // ══════════════════════════════════════
+  function verDetalhes(id) {
+    const livro = livros[id];
+    if (!livro) return;
+    localStorage.setItem('livro', JSON.stringify(livro));
+    window.location.href = `LivroDetalhe.html?livro=${id}`;
+  }
+
+  // ══════════════════════════════════════
+  // EMPRESTAR — abre o modal do ticket
+  // ══════════════════════════════════════
+  function emprestarLivro(id) {
+    const livro = livros[id];
+    if (!livro) return;
+    openTicket(livro);
+  }
+
+  // ══════════════════════════════════════
+  // MODAL DO TICKET
+  // ══════════════════════════════════════
+  function formatDate(date) {
+    return date.toLocaleDateString('pt-BR');
+  }
+
+  function genTicketNum() {
+    return 'EMP-' + String(Math.floor(Math.random() * 99999) + 1).padStart(6, '0');
+  }
+
+  function openTicket(livro) {
+    const today = new Date();
+    const due = new Date(today);
+    due.setDate(due.getDate() + 14);
+
+    document.getElementById('tk-user').textContent    = usuarioLogado.nome;
+    document.getElementById('tk-userid').textContent  = '#' + usuarioLogado.id;
+    document.getElementById('tk-title').textContent   = livro.titulo;
+    document.getElementById('tk-author').textContent  = livro.autor;
+    document.getElementById('tk-isbn').textContent    = livro.isbn;
+    document.getElementById('tk-borrowed').textContent = formatDate(today);
+    document.getElementById('tk-due').textContent     = formatDate(due);
+    document.getElementById('tk-reqdate').textContent = formatDate(today);
+    document.getElementById('tk-ticketnum').textContent = genTicketNum();
+
+    document.getElementById('modalOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeTicket() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('modalOverlay')) {
+      closeTicket();
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeTicket();
+  });
+
+  // ══════════════════════════════════════
+  // BUSCA
+  // ══════════════════════════════════════
+  document.querySelector('.search').addEventListener('input', function () {
+    const valor = this.value.toLowerCase();
+    document.querySelectorAll('.book-card').forEach(card => {
+      const titulo = card.querySelector('.book-title').innerText.toLowerCase();
+      card.style.display = titulo.includes(valor) ? 'block' : 'none';
+    });
+  });
+</script>
+
+</body>
+</html>
