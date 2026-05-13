@@ -26,38 +26,57 @@
 </header>
 
 <main>
-  <section class="hero">
-    <h1 class="hero-title">Central de Ajuda Galáctica</h1>
-    <div class="search-wrap">
-      <input class="search" placeholder="Pesquisar soluções ou manuais..." type="text"/>
-      <span class="material-symbols-outlined search-icon">search</span>
+  <!-- CHAT IA PRINCIPAL -->
+  <section class="chat-page">
+
+    <!-- Cabeçalho do chat -->
+    <div class="chat-page-header">
+      <div class="chat-page-avatar">
+        <span class="material-symbols-outlined">support_agent</span>
+      </div>
+      <div>
+        <h1 class="chat-page-title">Arquivista IA</h1>
+        <span class="chat-page-status">
+          <span class="chat-online-dot"></span>
+          Online · Estação Literária
+        </span>
+      </div>
+      <button class="chat-page-clear" onclick="limparChat()" title="Limpar conversa">
+        <span class="material-symbols-outlined">delete_sweep</span>
+      </button>
     </div>
+
+    <!-- Mensagens -->
+    <div class="chat-page-msgs" id="chat-msgs"></div>
+
+    <!-- Chips de sugestão -->
+    <div class="chat-page-chips" id="sugestoes">
+      <button class="chip" onclick="enviarChip(this)">📖 Emprestar livro</button>
+      <button class="chip" onclick="enviarChip(this)">🔄 Renovar prazo</button>
+      <button class="chip" onclick="enviarChip(this)">💳 Pagar multa</button>
+      <button class="chip" onclick="enviarChip(this)">🔑 Recuperar senha</button>
+      <button class="chip" onclick="enviarChip(this)">📋 Fazer reserva</button>
+      <button class="chip" onclick="enviarChip(this)">🕐 Horário de funcionamento</button>
+    </div>
+
+    <!-- Input -->
+    <form class="chat-page-form" id="chat-form" onsubmit="enviarMensagem(event)">
+      <textarea
+        id="chat-input"
+        class="chat-page-input"
+        placeholder="Digite sua dúvida sobre a biblioteca..."
+        rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarMensagem(event)}"
+        oninput="autoResize(this)"
+      ></textarea>
+      <button type="submit" id="btn-enviar" class="chat-page-send">
+        <span class="material-symbols-outlined">send</span>
+      </button>
+    </form>
+
   </section>
-  <section class="category-grid">
-    <div class="glass-card category-card">
-      <div class="card-icon-wrap"><span class="material-symbols-outlined card-icon">book_online</span></div>
-      <h3 class="card-title">Guia de Empréstimos</h3>
-      <p class="card-desc">Instruções precisas sobre o manifesto de cargas literárias, limites temporais e reservas interestelares.</p>
-    </div>
-    <div class="glass-card category-card">
-      <div class="card-icon-wrap"><span class="material-symbols-outlined card-icon">vpn_key</span></div>
-      <h3 class="card-title">Acesso e Segurança</h3>
-      <p class="card-desc">Protocolos de recuperação de chaves criptográficas e solução para terminais de acesso bloqueados.</p>
-    </div>
-    <div class="glass-card category-card">
-      <div class="card-icon-wrap"><span class="material-symbols-outlined card-icon">payments</span></div>
-      <h3 class="card-title">Multas e Pagamentos</h3>
-      <p class="card-desc">Conciliação de créditos galácticos e quitação de débitos por atrasos em rotas de devolução.</p>
-    </div>
-  </section>
-  <section class="faq-section">
-    <h2 class="faq-title">PERGUNTAS FREQUENTES</h2>
-    <div class="faq-list">
-      <div class="faq-item" onclick="perguntarFAQ(this)"><span class="faq-question">Como renovar um livro?</span><span class="material-symbols-outlined faq-icon">add</span></div>
-      <div class="faq-item" onclick="perguntarFAQ(this)"><span class="faq-question">Perdi minha chave de segurança, o que fazer?</span><span class="material-symbols-outlined faq-icon">add</span></div>
-      <div class="faq-item" onclick="perguntarFAQ(this)"><span class="faq-question">A biblioteca funciona em modo offline?</span><span class="material-symbols-outlined faq-icon">add</span></div>
-    </div>
-  </section>
+  <br>
+
   <section class="glass-card support-section">
     <span class="material-symbols-outlined support-bg-icon">support_agent</span>
     <h2 class="support-title">Ainda precisa de auxílio?</h2>
@@ -80,11 +99,11 @@
 
 
 <!-- CHAT FLUTUANTE -->
-<button id="chat-fab" onclick="toggleChat()" title="Falar com o Arquivista">
+<button id="chat-fab" onclick="" title="Chat" style="display:none">
   <span id="chat-badge"></span>
   <span class="fab-icon material-symbols-outlined">support_agent</span>
 </button>
-<div id="chat-window">
+<div id="chat-window" style="display:none!important">
   <div id="chat-header">
     <div class="chat-avatar">📚</div>
     <div class="chat-header-info">
@@ -177,7 +196,7 @@ const PADRAO = [
   'Não encontrei uma resposta precisa para isso. 🛸\n\nTente perguntar sobre: **empréstimos, renovações, devoluções, multas, senha ou reservas**.\n\nOu clique em "Abrir Ticket" para falar com nosso time!'
 ];
 
-let padraoCiclo = 0, digitando = false, chatAberto = false;
+let padraoCiclo = 0, digitando = false;
 
 function normalizar(t) {
   return t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
@@ -197,19 +216,11 @@ function buscar(texto) {
   return PADRAO[padraoCiclo++ % PADRAO.length];
 }
 
-function toggleChat() {
-  chatAberto = !chatAberto;
-  document.getElementById('chat-window').classList.toggle('aberto', chatAberto);
-  document.getElementById('chat-fab').classList.toggle('aberto', chatAberto);
-  if (chatAberto) {
-    document.getElementById('chat-badge').style.display = 'none';
-    document.getElementById('chat-input').focus();
-    scrollMsgs();
-  }
+function perguntarFAQ(el) { enviarTexto(el.querySelector('.faq-question').textContent); }
+function enviarChip(btn) {
+  enviarTexto(btn.textContent.trim());
+  document.getElementById('sugestoes').style.display='none';
 }
-function abrirChat() { if (!chatAberto) toggleChat(); }
-function perguntarFAQ(el) { abrirChat(); setTimeout(() => enviarTexto(el.querySelector('.faq-question').textContent), 300); }
-function enviarChip(btn) { enviarTexto(btn.textContent.trim()); document.getElementById('sugestoes').style.display='none'; }
 
 function enviarMensagem(e) {
   e.preventDefault();
@@ -234,7 +245,7 @@ function enviarTexto(texto) {
     digitando = false;
     document.getElementById('btn-enviar').disabled = false;
     document.getElementById('chat-input').focus();
-    if (!chatAberto) document.getElementById('chat-badge').style.display = 'block';
+
   }, 650 + Math.random() * 550);
 }
 
@@ -272,7 +283,7 @@ function limparChat() {
 function autoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,80)+'px'; }
 
 function boasVindas() {
-  setTimeout(() => renderMsg('Saudações, viajante literário! 🌌 Sou o **Arquivista**, assistente da Estação.\n\nComo posso iluminar sua jornada hoje? Use os botões abaixo ou digite sua dúvida!', 'ia'), 400);
+  setTimeout(() => renderMsg('Saudações, viajante literário! 🌌 Sou o **Arquivista**, assistente da Estação Literária.\n\nPosso ajudar com **empréstimos, devoluções, multas, reservas, senha** e muito mais.\n\nUse os atalhos abaixo ou digite sua dúvida!', 'ia'), 300);
 }
 
 window.addEventListener('DOMContentLoaded', boasVindas);
