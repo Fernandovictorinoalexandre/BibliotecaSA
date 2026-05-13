@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Estação Literária - Usuários</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="funcionario.css">
+</head>
+<body class="page-func">
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <div class="logo-area">
+    <img src="Biblioteca2.png" width="60">
+    <h1>BIBLIOTECA</h1>
+  </div>
+  <nav class="menu">
+    <a href="PainelFuncionario.html">Painel Principal</a>
+  </nav>
+  <div class="right-area">
+    <input type="text" placeholder="Pesquisar..." class="search">
+    <div class="user-avatar">
+      <img src="https://static.wikia.nocookie.net/hoducks/images/5/56/Kevin_Kaslana.jpg/revision/latest/thumbnail/width/360/height/360?cb=20250121140658" alt="Usuário">
+    </div>
+  </div>
+</header>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <h1 class="logo">Estação Literária</h1>
+  <nav>
+    <a href="EmprestimoFuncionario.html" class="nav-item">
+      <span class="material-symbols-outlined">grid_view</span>
+      Empréstimos
+    </a>
+    <a href="Livros.html" class="nav-item">
+      <span class="material-symbols-outlined">auto_stories</span>
+      Livros
+    </a>
+    <a href="Usuarios.html" class="nav-item active">
+      <span class="material-symbols-outlined">swap_horiz</span>
+      Usuários
+    </a>
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <header class="header">
+    <h2>Gerenciamento de Usuários</h2>
+  </header>
+
+  <!-- CARDS STATS -->
+  <section class="grid">
+    <div class="card">
+      <p>Total de Usuários</p>
+      <h3>782</h3>
+    </div>
+    <div class="card">
+      <p>Ativos</p>
+      <h3>654</h3>
+    </div>
+    <div class="card">
+      <p>Com Empréstimo</p>
+      <h3>211</h3>
+    </div>
+    <div class="card">
+      <p>Suspensos</p>
+      <h3>28</h3>
+    </div>
+  </section>
+
+  <!-- TABELA -->
+  <section class="table-section">
+
+    <div class="table-header">
+      <h3>Todos os Usuários</h3>
+      <button class="btn btn-primary">+ Cadastrar Usuário</button>
+    </div>
+
+    <!-- FILTROS -->
+    <div class="filter-bar">
+      <button class="filter-btn active">Todos</button>
+      <button class="filter-btn">Ativos</button>
+      <button class="filter-btn">Suspensos</button>
+      <button class="filter-btn">Com Empréstimos</button>
+      <input type="text" class="filter-search" placeholder="🔍  Buscar usuário...">
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Usuário</th>
+            <th>CPF</th>
+            <th>Tipo</th>
+            <th>Empréstimos</th>
+            <th>Membro desde</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="avatar-placeholder">AO</div>
+                <div>
+                  <div class="user-name">Ana Oliveira</div>
+                  <div class="user-email">ana.oliveira@email.com</div>
+                </div>
+              </div>
+            </td>
+            <td>123.456.789-00</td>
+            <td>Estudante</td>
+            <td><span class="badge">3 livros</span></td>
+            <td>Jan 2023</td>
+            <td><span class="status status-ok">Ativo</span></td>
+            <td>
+              <button class="action">✏️</button>
+              <button class="action">🗑️</button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="avatar-placeholder">CS</div>
+                <div>
+                  <div class="user-name">Carlos Silva</div>
+                  <div class="user-email">carlos.s@email.com</div>
+                </div>
+              </div>
+            </td>
+            <td>987.654.321-00</td>
+            <td>Professor</td>
+            <td><span class="badge">1 livro</span></td>
+            <td>Mar 2022</td>
+            <td><span class="status status-ok">Ativo</span></td>
+            <td>
+              <button class="action">✏️</button>
+              <button class="action">🗑️</button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="avatar-placeholder">BF</div>
+                <div>
+                  <div class="user-name">Beatriz Ferreira</div>
+                  <div class="user-email">bea.ferreira@email.com</div>
+                </div>
+              </div>
+            </td>
+            <td>456.123.789-00</td>
+            <td>Estudante</td>
+            <td><span class="badge">0 livros</span></td>
+            <td>Jun 2024</td>
+            <td><span class="status status-late">Suspenso</span></td>
+            <td>
+              <button class="action">✏️</button>
+              <button class="action">🗑️</button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="avatar-placeholder">RM</div>
+                <div>
+                  <div class="user-name">Rafael Mendes</div>
+                  <div class="user-email">r.mendes@email.com</div>
+                </div>
+              </div>
+            </td>
+            <td>321.654.987-00</td>
+            <td>Funcionário</td>
+            <td><span class="badge">2 livros</span></td>
+            <td>Out 2021</td>
+            <td><span class="status status-ok">Ativo</span></td>
+            <td>
+              <button class="action">✏️</button>
+              <button class="action">🗑️</button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="avatar-placeholder">LC</div>
+                <div>
+                  <div class="user-name">Larissa Costa</div>
+                  <div class="user-email">larissa.c@email.com</div>
+                </div>
+              </div>
+            </td>
+            <td>654.321.123-00</td>
+            <td>Estudante</td>
+            <td><span class="badge">0 livros</span></td>
+            <td>Fev 2025</td>
+            <td><span class="status status-pending">Inativo</span></td>
+            <td>
+              <button class="action">✏️</button>
+              <button class="action">🗑️</button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="avatar-placeholder">GP</div>
+                <div>
+                  <div class="user-name">Gabriel Pinto</div>
+                  <div class="user-email">gabriel.p@email.com</div>
+                </div>
+              </div>
+            </td>
+            <td>789.012.345-00</td>
+            <td>Professor</td>
+            <td><span class="badge">5 livros</span></td>
+            <td>Ago 2020</td>
+            <td><span class="status status-ok">Ativo</span></td>
+            <td>
+              <button class="action">✏️</button>
+              <button class="action">🗑️</button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="avatar-placeholder">JR</div>
+                <div>
+                  <div class="user-name">Julia Rocha</div>
+                  <div class="user-email">julia.rocha@email.com</div>
+                </div>
+              </div>
+            </td>
+            <td>012.345.678-00</td>
+            <td>Estudante</td>
+            <td><span class="badge">1 livro</span></td>
+            <td>Abr 2023</td>
+            <td><span class="status status-ok">Ativo</span></td>
+            <td>
+              <button class="action">✏️</button>
+              <button class="action">🗑️</button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="avatar-placeholder">MN</div>
+                <div>
+                  <div class="user-name">Marcos Nunes</div>
+                  <div class="user-email">marcos.n@email.com</div>
+                </div>
+              </div>
+            </td>
+            <td>345.678.901-00</td>
+            <td>Funcionário</td>
+            <td><span class="badge">0 livros</span></td>
+            <td>Nov 2022</td>
+            <td><span class="status status-late">Suspenso</span></td>
+            <td>
+              <button class="action">✏️</button>
+              <button class="action">🗑️</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINAÇÃO -->
+    <div class="pagination">
+      <button class="page-btn">‹</button>
+      <button class="page-btn active">1</button>
+      <button class="page-btn">2</button>
+      <button class="page-btn">3</button>
+      <button class="page-btn">›</button>
+    </div>
+
+  </section>
+
+</main>
+
+<script>
+  // Filtros
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // Paginação
+  document.querySelectorAll('.page-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.page-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>
