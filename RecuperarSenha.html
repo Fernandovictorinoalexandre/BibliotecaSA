@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar Senha</title>
+
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="auth.css">
+</head>
+<body class="page-auth">
+
+    <div class="nebula-bg"></div>
+<div class="overlay"></div>
+
+<main>
+
+  <!-- TOPO -->
+  <div class="logo-circle">
+    <img src="Biblioteca2.png" width="150px" height="100px">
+  </div>
+
+  <h1 class="title-auth">Estação Literária</h1>
+  <p class="subtitle-auth">Portal do Explorador</p>
+
+  <!-- CARD LOGIN -->
+  <div class="card-login">
+
+    <h2>Trocar Senha</h2>
+
+    <form onsubmit="event.preventDefault(); confirmarSenha()">
+      <div class="input-group">
+          <input type="email" id="email" placeholder="E-mail" required>
+      </div>
+      
+      <div class="input-group">
+          <input type="password" placeholder="Nova Senha" required>
+      </div>
+  
+      <div class="input-group">
+          <input type="password" placeholder="Repita a Senha" required>
+      </div>
+      
+      <button class="btn btn-primary">Confirmar</button>
+  </form>
+  
+  <script>
+  function confirmarSenha() {
+      var inputs = document.querySelectorAll('input[type="password"]');
+      var novaSenha = inputs[0].value;
+      var repitaSenha = inputs[1].value;
+      
+      if (novaSenha === repitaSenha && novaSenha !== "") {
+          window.location.href = "entrada.html";
+      } else {
+          alert("As senhas não coincidem!");
+      }
+  }
+  </script>
+    
+</body>
+</html>
