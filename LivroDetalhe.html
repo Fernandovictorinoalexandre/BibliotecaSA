@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Detalhe do Livro - Estação Literária</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="leitor.css">
+</head>
+
+<body class="page-detalhe">
+
+  <!-- Decorative Atmosphere -->
+  <div class="atmosphere">
+    <div class="atm-blob-1"></div>
+    <div class="atm-blob-2"></div>
+    <div class="atm-blob-3"></div>
+  </div>
+
+  <!-- Top Nav -->
+  <header class="top-nav">
+    <a class="back-link" href="CatalogoLivros.html">
+      <span class="material-symbols-outlined">arrow_back</span>
+      <span class="back-label">Voltar</span>
+    </a>
+    <div class="nav-brand">Estação Literária</div>
+    <div class="nav-spacer"></div>
+  </header>
+
+  <!-- Main -->
+  <main>
+
+    <!-- Left Column: Cover -->
+    <section class="col-cover">
+      <div class="cover-wrap">
+        <div class="cover-glass">
+          <img id="book-cover" src="" alt="Cover Art" />
+        </div>
+        <div class="cover-glow"></div>
+        <div class="cover-label" id="cover-label">Arquivo Códice // ----</div>
+      </div>
+
+      <!-- Mobile CTA -->
+      <div class="mobile-cta">
+        <button class="btn-loan" onclick="openTicket()">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">qr_code_scanner</span>
+          SOLICITAR EMPRÉSTIMO
+        </button>
+      </div>
+    </section>
+
+    <!-- Right Column: Info -->
+    <section class="col-info">
+
+      <!-- Header Block -->
+      <div class="book-header">
+        <div class="header-tags">
+          <div class="badge-available">
+            <span class="pulse-dot"></span>
+            Disponível
+          </div>
+          <span class="shelf-label" id="shelf-label">Setor A // Prateleira 4</span>
+        </div>
+        <div>
+          <h1 class="book-title" id="book-title">Carregando...</h1>
+          <h2 class="book-author">
+            <span class="author-line"></span>
+            <span id="book-author">—</span>
+          </h2>
+        </div>
+      </div>
+
+      <!-- Meta Grid -->
+      <div class="meta-grid">
+        <div class="meta-card">
+          <span class="meta-label">Gênero</span>
+          <span class="meta-value" id="book-genre">—</span>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">Páginas</span>
+          <span class="meta-value" id="book-pages">—</span>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">Idioma</span>
+          <span class="meta-value" id="book-lang">PT-BR</span>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">ISBN</span>
+          <span class="meta-value" id="book-isbn">—</span>
+        </div>
+      </div>
+
+      <!-- Synopsis -->
+      <div class="synopsis-block">
+        <div class="synopsis-line"></div>
+        <h3 class="synopsis-title">
+          <span class="material-symbols-outlined">subject</span>
+          SINOPSE DO ARQUIVO
+        </h3>
+        <div class="synopsis-text">
+          <p id="book-desc">—</p>
+        </div>
+      </div>
+
+      <!-- Desktop CTA -->
+      <button class="btn-loan" onclick="openTicket()">
+        <div class="btn-shine"></div>
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">qr_code_scanner</span>
+        <span>SOLICITAR EMPRÉSTIMO</span>
+      </button>
+
+    </section>
+
+  </main>
+
+  <!-- MODAL — TICKET DE EMPRÉSTIMO -->
+  <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+    <div class="ticket-wrap">
+      <div class="ticket">
+
+        <div class="ticket-header">
+          <div class="ticket-logo">
+            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">auto_stories</span>
+          </div>
+          <h2>Ticket de Empréstimo</h2>
+          <p>ESTAÇÃO LITERÁRIA — BIBLIOTECA</p>
+          <p>Comprovante de retirada do livro</p>
+        </div>
+
+        <div class="perforation">
+          <div class="perf-line"></div>
+        </div>
+
+        <div class="ticket-body">
+          <div class="status-badge">
+            <div class="pulse"></div>
+            Empréstimo Ativo
+          </div>
+
+          <div class="field-group">
+            <div class="field-row">
+              <span class="field-label">Usuário</span>
+              <div class="field-dots"></div>
+              <span class="field-value" id="tk-user"></span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">ID do Usuário</span>
+              <div class="field-dots"></div>
+              <span class="field-value mono" id="tk-userid"></span>
+            </div>
+          </div>
+
+          <hr class="divider">
+
+          <div class="field-group">
+            <div class="field-row">
+              <span class="field-label">Livro</span>
+              <div class="field-dots"></div>
+              <span class="field-value" id="tk-title"></span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Autor</span>
+              <div class="field-dots"></div>
+              <span class="field-value" id="tk-author"></span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Código do Livro</span>
+              <div class="field-dots"></div>
+              <span class="field-value mono" id="tk-isbn"></span>
+            </div>
+          </div>
+
+          <hr class="divider">
+
+          <div class="dates-grid">
+            <div class="date-box">
+              <div class="date-box-label">📅 Empréstimo</div>
+              <div class="date-box-value" id="tk-borrowed"></div>
+            </div>
+            <div class="date-box">
+              <div class="date-box-label">📅 Devolução</div>
+              <div class="date-box-value" id="tk-due"></div>
+            </div>
+          </div>
+
+          <div class="instr-block">
+            <div class="instr-title">
+              <span class="material-symbols-outlined">warning</span>
+              Instruções
+            </div>
+            <ul>
+              <li>Imprima este ticket ou salve o número</li>
+              <li>Apresente na retirada do livro no balcão</li>
+              <li>O funcionário confirmará no sistema</li>
+            </ul>
+          </div>
+
+          <div class="qr-section">
+            <div class="qr-box">
+              <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">qr_code</span>
+            </div>
+            <div class="qr-info">
+              <span>Data da Solicitação</span>
+              <strong id="tk-reqdate"></strong>
+              <span style="margin-top:0.3rem">Número do Ticket</span>
+              <strong id="tk-ticketnum"></strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="ticket-footer">
+          <button class="btn-print" onclick="window.print()">
+            <span class="material-symbols-outlined">print</span>
+            Imprimir Ticket
+          </button>
+          <button class="btn-back" onclick="event.stopPropagation(); closeTicket()">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Voltar
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ══════════════════════════════════════
+    // METADADOS EXTRAS POR LIVRO
+    // (dados que não estão no localStorage, mas são fixos por livro)
+    // ══════════════════════════════════════
+    const metadados = {
+      'harry-potter':      { genero: 'Fantasia',        paginas: '309',  prateleira: 'Setor B // Prateleira 2', codigo: '0001' },
+      'hobbit':            { genero: 'Alta Fantasia',   paginas: '310',  prateleira: 'Setor A // Prateleira 4', codigo: '0042' },
+      'maldicao-mar':      { genero: 'Fantasia/Terror', paginas: '342',  prateleira: 'Setor C // Prateleira 1', codigo: '0087' },
+      'assassins-creed':   { genero: 'Romance/Fantasia',  paginas: '400',  prateleira: 'Setor D // Prateleira 3', codigo: '0115' },
+      'coroa-sombras':     { genero: 'Fantasia/Romance',paginas: '418',  prateleira: 'Setor B // Prateleira 5', codigo: '0063' },
+      'nome-vento':        { genero: 'Fantasia Épica',  paginas: '662',  prateleira: 'Setor A // Prateleira 2', codigo: '0029' },
+      'mar-sem-estrelas':  { genero: 'Fantasia/Mistério',paginas:'389',  prateleira: 'Setor C // Prateleira 4', codigo: '0074' },
+      'feiticeiro-terramar':{ genero: 'Fantasia',       paginas: '183',  prateleira: 'Setor A // Prateleira 6', codigo: '0011' },
+    };
+
+    // ══════════════════════════════════════
+    // DADOS DO USUÁRIO LOGADO
+    // ══════════════════════════════════════
+    const usuarioLogado = {
+      nome: 'Kevin Kaslana',
+      id: '2451'
+    };
+
+    // ══════════════════════════════════════
+    // CARREGAR LIVRO DO localStorage
+    // ══════════════════════════════════════
+    const livro = JSON.parse(localStorage.getItem('livro'));
+
+    if (livro) {
+      // Preenche título da aba
+      document.title = `${livro.titulo} - Estação Literária`;
+
+      // Capa
+      document.getElementById('book-cover').src = livro.capa;
+      document.getElementById('book-cover').alt = livro.titulo;
+
+      // Título e autor
+      document.getElementById('book-title').textContent  = livro.titulo;
+      document.getElementById('book-author').textContent = livro.autor;
+
+      // ISBN
+      document.getElementById('book-isbn').textContent = livro.isbn;
+
+      // Descrição
+      document.getElementById('book-desc').textContent = livro.desc;
+
+      // Metadados extras (gênero, páginas, prateleira, código)
+      const meta = metadados[livro.id];
+      if (meta) {
+        document.getElementById('book-genre').textContent  = meta.genero;
+        document.getElementById('book-pages').textContent  = meta.paginas;
+        document.getElementById('shelf-label').textContent = meta.prateleira;
+        document.getElementById('cover-label').textContent = `Arquivo Códice // ${meta.codigo}`;
+      }
+    } else {
+      // Se não há livro no localStorage, volta para o catálogo
+      window.location.href = 'CatalogoLivros.html';
+    }
+
+    // ══════════════════════════════════════
+    // MODAL DO TICKET
+    // ══════════════════════════════════════
+    function formatDate(date) {
+      return date.toLocaleDateString('pt-BR');
+    }
+
+    function genTicketNum() {
+      return 'EMP-' + String(Math.floor(Math.random() * 99999) + 1).padStart(6, '0');
+    }
+
+    function openTicket() {
+      const today = new Date();
+      const due   = new Date(today);
+      due.setDate(due.getDate() + 14);
+
+      document.getElementById('tk-user').textContent     = usuarioLogado.nome;
+      document.getElementById('tk-userid').textContent   = '#' + usuarioLogado.id;
+      document.getElementById('tk-title').textContent    = livro ? livro.titulo : '—';
+      document.getElementById('tk-author').textContent   = livro ? livro.autor  : '—';
+      document.getElementById('tk-isbn').textContent     = livro ? livro.isbn   : '—';
+      document.getElementById('tk-borrowed').textContent = formatDate(today);
+      document.getElementById('tk-due').textContent      = formatDate(due);
+      document.getElementById('tk-reqdate').textContent  = formatDate(today);
+      document.getElementById('tk-ticketnum').textContent = genTicketNum();
+
+      document.getElementById('modalOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeTicket() {
+      document.getElementById('modalOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function handleOverlayClick(e) {
+      if (e.target === document.getElementById('modalOverlay')) {
+        closeTicket();
+      }
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeTicket();
+    });
+  </script>
+
+</body>
+</html>
