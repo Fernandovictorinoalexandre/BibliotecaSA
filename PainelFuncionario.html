@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Estação Literária</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+  <!-- FONTES -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="funcionario.css">
+</head>
+<body class="page-func">
+
+
+<header class="navbar">
+
+  <div class="logo-area">
+    <img src="Biblioteca2.png" width="60">
+    <h1>BIBLIOTECA</h1>
+  </div>
+
+  <nav class="menu">
+    <a href="#" class="active">Dashboard Principal</a>
+  </nav>
+
+  <div class="right-area">
+    <input type="text" placeholder="Pesquisar..." class="search">
+
+    <div class="user-avatar">
+      <img src="https://static.wikia.nocookie.net/hoducks/images/5/56/Kevin_Kaslana.jpg/revision/latest/thumbnail/width/360/height/360?cb=20250121140658" alt="Usuário">
+    </div>
+  </div>
+
+</header>
+
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <h1 class="logo">Estação Literária</h1>
+
+  <nav>
+    <a href="EmprestimoFuncionario.html" class="nav-item">
+      <span class="material-symbols-outlined">grid_view</span>
+      Emprestimos
+    </a>
+    <a href="FuncionarioLivro.html" class="nav-item">
+      <span class="material-symbols-outlined">auto_stories</span>
+      Livros
+    </a>
+    <a href="FuncionarioUsuario.html" class="nav-item">
+      <span class="material-symbols-outlined">swap_horiz</span>
+      Usuários
+    </a>
+  </nav>
+
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <header class="header">
+    <h2>Dashboard de Gestão</h2>
+  </header>
+
+  <!-- CARDS -->
+  <section class="grid">
+    <div class="card">
+      <p>Total de Livros</p>
+      <h3>2.530</h3>
+    </div>
+
+    <div class="card">
+      <p>Disponíveis</p>
+      <h3>1.764</h3>
+    </div>
+
+    <div class="card">
+      <p>Emprestados</p>
+      <h3>430</h3>
+    </div>
+
+    <div class="card">
+      <p>Usuários</p>
+      <h3>782</h3>
+    </div>
+  </section>
+
+  <section class="table-section fade-up">
+
+  <div class="h2">
+    <h2>Funcionarios</h2>
+  </div>
+
+
+  <div class="table-container">
+    <table>
+        <tr>
+          <th>Nome</th>
+          <th>Setor</th>
+          <th>Matricula</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr>
+          <td>Ana Paula</td>
+          <td>Recepcionista</td>
+          <td>REC2026001</td>
+          <td><span class="status disponivel">Trabalhando</span></td>
+        </tr>
+
+        <tr>
+          <td>William Santos</td>
+          <td>Auxiliar de Biblioteca</td>
+          <td>AUX2026002</td>
+          <td><span class="status emprestado">Folga</span></td>
+        </tr>
+
+        <tr>
+          <td>Otavio Henrique</td>
+          <td>Bibliotecário</td>
+          <td>BIB2026003</td>
+          <td><span class="status disponivel">Trabalhando</span></td>
+        </tr>
+
+        <tr>
+          <td>Emanuelle Albarnaes</td>
+          <td>Diretor de Biblioteca</td>
+          <td>DIR2026004</td>
+          <td><span class="status disponivel">Trabalhando</span></td>
+        </tr>
+
+        <tr>
+          <td>Luan Henrique</td>
+          <td>Assistente Administrativo</td>
+          <td>ADM2026005</td>
+          <td><span class="status disponivel" > Tabalhando</span></td>
+        </tr>
+
+        <tr>
+          <td>Fernando Alexandre</td>
+          <td>Analista de Sistema</td>
+          <td>TI2026006</td>
+          <td><span class="status emprestado" > Folga </span></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+</section>
+
+</main>
+
+</body>
+</html>
