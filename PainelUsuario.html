@@ -74,12 +74,63 @@
     <p>Continue sua jornada entre livros e universos.</p>
 
     <div class="actions">
-      <button class="btn btn-secondary">Últimas Notícias</button>
-      <button class="btn btn-primary">Mais Emprestados</button>
+      <button class="btn btn-secondary" id="btnNoticias" onclick="mostrar('noticias')">
+        <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;margin-right:4px;">newspaper</span>
+        Últimas Notícias
+      </button>
+      <button class="btn btn-primary" id="btnEmprestados" onclick="mostrar('livros')">Mais Emprestados</button>
     </div>
   </section>
 
-  <section class="book-grid">
+  <!-- PAINEL DE NOTÍCIAS -->
+  <div class="news-panel" id="newsPanel">
+    <div class="news-panel-inner">
+      <div class="news-panel-header">
+        <span class="news-panel-title">
+          <span class="material-symbols-outlined">newspaper</span>
+          Últimas Notícias
+        </span>
+        <button class="news-panel-close" onclick="mostrar('livros')" title="Fechar">✕</button>
+      </div>
+      <div class="news-grid">
+        <div class="news-card">
+          <span class="news-tag tag-novidade">✦ Novidade</span>
+          <div class="news-card-body">
+            <div class="news-card-title">Novos títulos de ficção científica chegaram ao acervo!</div>
+            <div class="news-card-desc">A biblioteca recebeu 40 novos exemplares de autores nacionais e internacionais. Confira o catálogo e reserve o seu.</div>
+            <div class="news-card-date">15 de maio de 2026</div>
+          </div>
+        </div>
+        <div class="news-card">
+          <span class="news-tag tag-evento">★ Evento</span>
+          <div class="news-card-body">
+            <div class="news-card-title">Clube do Livro — encontro mensal dia 24</div>
+            <div class="news-card-desc">O tema deste mês é "Mundos distópicos". Traga sua análise e participe da discussão. Vagas limitadas, inscreva-se na recepção.</div>
+            <div class="news-card-date">10 de maio de 2026</div>
+          </div>
+        </div>
+        <div class="news-card">
+          <span class="news-tag tag-aviso">⚠ Aviso</span>
+          <div class="news-card-body">
+            <div class="news-card-title">Sistema de renovação online agora disponível</div>
+            <div class="news-card-desc">Você já pode renovar seus empréstimos diretamente pela plataforma, sem precisar comparecer à biblioteca. Válido para até 2 renovações.</div>
+            <div class="news-card-date">5 de maio de 2026</div>
+          </div>
+        </div>
+        <div class="news-card">
+          <span class="news-tag tag-dica">💡 Dica</span>
+          <div class="news-card-body">
+            <div class="news-card-title">Horário especial no feriado de junho</div>
+            <div class="news-card-desc">A biblioteca funcionará em horário reduzido nos dias 19 e 20 de junho — das 9h às 14h. Planeje suas devoluções com antecedência.</div>
+            <div class="news-card-date">2 de maio de 2026</div>
+          </div>
+        </div>
+      </div>
+      <hr class="news-divider">
+    </div>
+  </div>
+
+  <section class="book-grid" id="secLivros">
 
     <div class="book-card">
       <img src="Hobbit.webp" class="book-img" alt="O Hobbit">
@@ -117,5 +168,36 @@
 
 </main>
 
+
+<script>
+  // vista atual: 'livros' ou 'noticias'
+  let vistaAtual = 'livros';
+
+  function mostrar(vista) {
+    const panel      = document.getElementById('newsPanel');
+    const secLivros  = document.getElementById('secLivros');
+    const btnNews    = document.getElementById('btnNoticias');
+    const btnEmp     = document.getElementById('btnEmprestados');
+
+    if (vista === 'noticias') {
+      // Mostra notícias, esconde livros
+      panel.classList.add('open');
+      secLivros.style.display = 'none';
+      btnNews.classList.add('news-open');
+      btnEmp.classList.remove('news-open');
+    } else {
+      // Mostra livros, esconde notícias
+      panel.classList.remove('open');
+      secLivros.style.display = '';
+      btnEmp.classList.add('news-open');
+      btnNews.classList.remove('news-open');
+    }
+
+    vistaAtual = vista;
+  }
+
+  // Inicia com livros ativos e botão Mais Emprestados destacado
+  mostrar('livros');
+</script>
 </body>
 </html>
