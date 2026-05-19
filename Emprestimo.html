@@ -3,19 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Estação Literária</title>
+  <title>Estação Literária — Empréstimos</title>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="leitor.css">
+
 </head>
 <body class="page-flex">
 
+<!-- ── HEADER ── -->
 <header class="header">
   <div class="logo">
-    <img src="Biblioteca2.png" alt="Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-    <div class="logo-icon-fallback">
+    <img src="Biblioteca2.png" alt="Logo"
+         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+    <div class="logo-icon-fallback" style="display:none">
       <span class="material-symbols-outlined">auto_stories</span>
     </div>
     <h1>Biblioteca</h1>
@@ -27,16 +29,16 @@
     <a href="Conta.html">Conta</a>
   </nav>
   <div class="right-area">
-    <input class="search" type="text" placeholder="Pesquisar...">
+    <input class="search" type="text" placeholder="Pesquisar..." id="campoBuscaHeader">
     <div class="avatar">
-      <img src="https://static.wikia.nocookie.net/hoducks/images/5/56/Kevin_Kaslana.jpg/revision/latest/thumbnail/width/360/height/360?cb=20250121140658" alt="Usuário"
-           onerror="this.parentElement.style.background='linear-gradient(135deg,#192447,#1e2a50)'; this.style.display='none'; this.parentElement.textContent='U';">
+      <span class="material-symbols-outlined">person</span>
     </div>
   </div>
 </header>
 
 <div class="page-body">
 
+  <!-- ── SIDEBAR ── -->
   <aside class="sidebar">
     <h2 class="sidebar-title">Portal do Leitor</h2>
     <p class="sidebar-subtitle">Estação Central</p>
@@ -52,183 +54,198 @@
     </nav>
   </aside>
 
+  <!-- ── MAIN ── -->
   <main class="main">
 
     <section class="hero">
-      <h2>Bem-vindo à Estação Literária</h2>
-      <p>Continue sua jornada entre livros. Gerencie seus empréstimos.</p>
-      <div class="actions">
-        <button class="btn btn-primary">
-          <span class="material-symbols-outlined sm">trending_up</span>
-          Ultimos Emprestados
-        </button>
-      </div>
+      <h2>Meus Empréstimos</h2>
+      <p>Acompanhe seus livros ativos e o histórico completo de leituras.</p>
     </section>
 
+    <!-- ── LIVROS ATIVOS ── -->
     <div class="section-header">
-      <span class="section-title">Meus Empréstimos</span>
+      <span class="section-title">Livros Ativos</span>
       <div class="limit-bar-wrap">
         <span class="limit-label">
           <strong id="loan-count">0</strong><strong>/5</strong> livros
         </span>
         <div class="limit-track">
-          <div class="limit-fill" id="limit-fill" style="width: 0%"></div>
+          <div class="limit-fill" id="limit-fill" style="width:0%"></div>
         </div>
       </div>
     </div>
 
-    <div class="loans-card" id="loans-card"></div>
+    <div class="loans-wrap" id="loans-wrap"></div>
 
-    <div>
-      <span class="section-title">Historico</span>
+    <!-- ── HISTÓRICO EM CARDS ── -->
+    <div class="historico-section">
+      <div class="section-header" style="margin-bottom:1.25rem;">
+        <span class="section-title">Histórico de Empréstimos</span>
+        <input type="text" class="historico-busca" id="campoBusca"
+               placeholder="Buscar título ou autor...">
+      </div>
+      <div class="historico-grid" id="historico-grid"></div>
     </div>
 
-    <section class="book-grid" id="book-list">
-
-      <div class="book-card" data-id="1" data-title="O Hobbit" data-author="J.R.R. Tolkien">
-        <div class="book-img-wrap">
-          <img src="Hobbit.webp" class="book-img" alt="O Hobbit"
-               onerror="this.parentElement.innerHTML='<div class=\'book-img-ph\'><span class=\'material-symbols-outlined\'>menu_book</span></div>'">
-        </div>
-        <div class="book-body">
-          <h3>O Hobbit</h3>
-          <p>J.R.R. Tolkien</p>
-          <div class="book-footer">
-            <button class="btn-borrow" onclick="borrowBook(this, 1, 'O Hobbit', 'J.R.R. Tolkien')">
-              <span class="material-symbols-outlined sm">add</span> Emprestar
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="book-card" data-id="2" data-title="Harry Potter" data-author="J.K. Rowling">
-        <div class="book-img-wrap">
-          <img src="HarryPotter.jpg" class="book-img" alt="Harry Potter"
-               onerror="this.parentElement.innerHTML='<div class=\'book-img-ph\'><span class=\'material-symbols-outlined\'>menu_book</span></div>'">
-        </div>
-        <div class="book-body">
-          <h3>Harry Potter</h3>
-          <p>J.K. Rowling</p>
-          <div class="book-footer">
-            <button class="btn-borrow" onclick="borrowBook(this, 2, 'Harry Potter', 'J.K. Rowling')">
-              <span class="material-symbols-outlined sm">add</span> Emprestar
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="book-card" data-id="3" data-title="Assassin's Creed" data-author="Anton Gill">
-        <div class="book-img-wrap">
-          <img src="AssassinCreed.jpg" class="book-img" alt="Assassin's Creed"
-               onerror="this.parentElement.innerHTML='<div class=\'book-img-ph\'><span class=\'material-symbols-outlined\'>menu_book</span></div>'">
-        </div>
-        <div class="book-body">
-          <h3>Assassin's Creed</h3>
-          <p>Anton Gill</p>
-          <div class="book-footer">
-            <button class="btn-borrow" onclick="borrowBook(this, 3, 'Assassin\'s Creed', 'Anton Gill')">
-              <span class="material-symbols-outlined sm">add</span> Emprestar
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="book-card" data-id="4" data-title="Tower of God" data-author="SIU">
-        <div class="book-img-ph">
-          <img src="https://livrariascuritiba.vteximg.com.br/arquivos/ids/2184938-1000-1000/LV520518.jpg?v=638822975842800000" class="book-img" alt="Tower of God">
-        </div>
-        <div class="book-body">
-          <h3>Tower of God</h3>
-          <p>SIU</p>
-          <div class="book-footer">
-            <button class="btn-borrow" onclick="borrowBook(this, 4, 'Tower of God', 'SIU')">
-              <span class="material-symbols-outlined sm">add</span> Emprestar
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="book-card" data-id="5" data-title="Pai Rico Pai Pobre" data-author="Robert Kiyosaki">
-        <div class="book-img-ph">
-          <img src="https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTSlXVHkVYztlc7pjEh_CrUZU-KymzNepFVMY73srE0b93p1H97AKPC89IBK2cv4l35hsaow6KtMHoJBnLNwpM3ru_pPFYO_jX6MsnUjb8&usqp=CAc" class="book-img" alt="Pai Rico Pai Pobre">
-        </div>
-        <div class="book-body">
-          <h3>Pai Rico Pai Pobre</h3>
-          <p>Robert Kiyosaki</p>
-          <div class="book-footer">
-            <button class="btn-borrow" onclick="borrowBook(this, 5, 'Pai Rico Pai Pobre', 'Robert Kiyosaki')">
-              <span class="material-symbols-outlined sm">add</span> Emprestar
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="book-card" data-id="6" data-title="Dom Quixote" data-author="Miguel de Cervantes">
-        <div class="book-img-ph">
-          <img src="https://www.lpm.com.br/livros/imagens/dom_quixote_hq_9788525425669_hd.jpg" class="book-img" alt="Dom Quixote">
-        </div>
-        <div class="book-body">
-          <h3>Dom Quixote</h3>
-          <p>Miguel de Cervantes</p>
-          <div class="book-footer">
-            <button class="btn-borrow" onclick="borrowBook(this, 6, 'Dom Quixote', 'Miguel de Cervantes')">
-              <span class="material-symbols-outlined sm">add</span> Emprestar
-            </button>
-          </div>
-        </div>
-      </div>
-
-    </section>
   </main>
 </div>
 
+<!-- ── MODAL RENOVAÇÃO ── -->
+<div class="modal-overlay" id="modalRenovacao" onclick="fecharModalSeForaDele(event)">
+  <div class="modal-box">
+    <div class="modal-icon">🔄</div>
+    <h3 id="modal-titulo-livro">Renovar Empréstimo</h3>
+    <p>Tem certeza que deseja renovar este livro por mais <strong>30 dias</strong>?</p>
+    <div class="nova-data" id="modal-nova-data"></div>
+    <div class="modal-acoes">
+      <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-confirmar-renew" onclick="confirmarRenovacao()">Renovar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL TICKET ── -->
+<div class="modal-overlay-ticket" id="modalOverlay" onclick="fecharTicketSeForaDele(event)">
+  <div class="ticket-wrap">
+    <div class="ticket">
+      <div class="ticket-header">
+        <div class="ticket-logo">
+          <span class="material-symbols-outlined">auto_stories</span>
+        </div>
+        <h2>Estação Literária</h2>
+        <p>Comprovante de Empréstimo</p>
+      </div>
+      <div class="perforation"><div class="perf-line"></div></div>
+      <div class="ticket-body">
+        <div class="status-badge">
+          <span class="material-symbols-outlined" style="font-size:14px">check_circle</span>
+          Empréstimo Confirmado
+        </div>
+        <div class="field-group">
+          <div class="field-row">
+            <span class="field-label">Leitor</span>
+            <div class="field-dots"></div>
+            <span class="field-value" id="tk-user"></span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">ID do Leitor</span>
+            <div class="field-dots"></div>
+            <span class="field-value mono" id="tk-userid"></span>
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="field-group">
+          <div class="field-row">
+            <span class="field-label">Título</span>
+            <div class="field-dots"></div>
+            <span class="field-value" id="tk-title"></span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Autor</span>
+            <div class="field-dots"></div>
+            <span class="field-value" id="tk-author"></span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Pagamento</span>
+            <div class="field-dots"></div>
+            <span class="field-value" id="tk-pagamento">—</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Valor pago</span>
+            <div class="field-dots"></div>
+            <span class="field-value" style="color:#00f5d4;font-weight:700;">R$ 15,00</span>
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="dates-grid">
+          <div class="date-box">
+            <div class="date-box-label">📅 Empréstimo</div>
+            <div class="date-box-value" id="tk-borrowed"></div>
+          </div>
+          <div class="date-box">
+            <div class="date-box-label">⏰ Devolução</div>
+            <div class="date-box-value" id="tk-due"></div>
+          </div>
+        </div>
+        <div class="instr-block">
+          <div class="instr-title">
+            <span class="material-symbols-outlined" style="font-size:14px">info</span>
+            Instruções
+          </div>
+          <ul>
+            <li>Retire o livro na recepção apresentando este comprovante</li>
+            <li>Prazo de devolução: 30 dias</li>
+            <li>Renovações permitidas: até 2 vezes</li>
+            <li>Multa por atraso: R$ 1,00 por dia</li>
+          </ul>
+        </div>
+        <div class="qr-section">
+          <div class="qr-box">
+            <span class="material-symbols-outlined">qr_code</span>
+          </div>
+          <div class="qr-info">
+            <span>Número do Ticket</span>
+            <strong id="tk-ticketnum">#EST-000000</strong>
+          </div>
+        </div>
+      </div>
+      <div class="ticket-footer">
+        <button class="btn-back" onclick="fecharTicket()">
+          <span class="material-symbols-outlined" style="font-size:16px">arrow_back</span>
+          Voltar
+        </button>
+        <button class="btn-print" onclick="window.print()">
+          <span class="material-symbols-outlined" style="font-size:16px">print</span>
+          Imprimir
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOASTS ── -->
 <div class="toast-wrap" id="toast-wrap"></div>
 
+<!-- ── MODAL DE PAGAMENTO ── -->
+<script src="pagamento-modal.js"></script>
+
 <script>
-  /* ════════════════════════════════════
+  /* ══════════════════════════════════════════
      CONSTANTES
-  ════════════════════════════════════ */
+  ══════════════════════════════════════════ */
   const MAX_LOANS    = 5;
   const MAX_RENEWALS = 2;
-  const STORAGE_KEY  = 'biblioteca_loans'; // chave compartilhada com Devolução
+  const STORAGE_KEY  = 'biblioteca_loans';
+  const HISTORY_KEY  = 'biblioteca_history';
 
-  /* ════════════════════════════════════
-     PERSISTÊNCIA — localStorage
-  ════════════════════════════════════ */
-  function loadLoans() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : null;
-    } catch { return null; }
+  /* ══════════════════════════════════════════
+     PERSISTÊNCIA
+  ══════════════════════════════════════════ */
+  function loadLoans()   { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? []; } catch { return []; } }
+  function saveLoans()   { localStorage.setItem(STORAGE_KEY, JSON.stringify(loans)); }
+  function loadHistory() { try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) ?? defaultHistory(); } catch { return defaultHistory(); } }
+  function saveHistory() { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); }
+
+  function defaultHistory() {
+    return [
+      { id:'h1', title:'O Hobbit',      author:'J.R.R. Tolkien',   img:'Hobbit.webp',         borrowedAt:'2026-01-10', returnedAt:'2026-02-09', renewals:1, status:'devolvido' },
+      { id:'h2', title:'Harry Potter',  author:'J.K. Rowling',     img:'HarryPotter.jpg',      borrowedAt:'2026-02-14', returnedAt:'2026-03-10', renewals:0, status:'devolvido' },
+      { id:'h3', title:"Assassin's Creed", author:'Anton Gill',    img:'AssassinCreed.jpg',    borrowedAt:'2026-03-01', returnedAt:'2026-03-28', renewals:2, status:'renovado'  },
+    ];
   }
 
-  function saveLoans() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(loans));
-  }
+  /* ══════════════════════════════════════════
+     ESTADO
+  ══════════════════════════════════════════ */
+  let loans         = loadLoans();
+  let history       = loadHistory();
+  let idParaRenovar = null;
+  const usuarioLogado = {
+    id:   localStorage.getItem('usuario_id')   || '001',
+    nome: localStorage.getItem('usuario_nome') || 'Leitor',
+  };
 
-  /* Estado inicial — usa localStorage se já existir, senão usa os valores padrão */
-  let loans = loadLoans() ?? [
-    {
-      id: 1,
-      title: 'O Hobbit',
-      author: 'J.R.R. Tolkien',
-      borrowedAt: '2026-04-01',
-      dueDate: '2026-05-10',
-      renewals: 0,
-      late: false
-    },
-    {
-      id: 2,
-      title: 'Harry Potter',
-      author: 'J.K. Rowling',
-      borrowedAt: '2026-04-05',
-      dueDate: '2026-04-15',
-      renewals: 1,
-      late: true
-    }
-  ];
-
-  /* Recalcula o campo `late` com base na data atual */
+  // Recalcula atraso
   (function recalcLate() {
     const today = new Date(); today.setHours(0,0,0,0);
     loans.forEach(l => {
@@ -238,49 +255,39 @@
     saveLoans();
   })();
 
-  /* ════════════════════════════════════
-     RENDER
-  ════════════════════════════════════ */
+  /* ══════════════════════════════════════════
+     RENDER — LIVROS ATIVOS
+  ══════════════════════════════════════════ */
   function renderLoans() {
-    const card    = document.getElementById('loans-card');
+    const wrap    = document.getElementById('loans-wrap');
     const countEl = document.getElementById('loan-count');
     const fill    = document.getElementById('limit-fill');
+    const n       = loans.length;
 
-    const n = loans.length;
     countEl.textContent = n;
     countEl.className   = n >= MAX_LOANS ? 'at-limit' : '';
+    fill.style.width    = ((n / MAX_LOANS) * 100) + '%';
+    fill.className      = 'limit-fill' + (n >= MAX_LOANS ? ' full' : n >= 4 ? ' warn' : '');
 
-    const pct = (n / MAX_LOANS) * 100;
-    fill.style.width = pct + '%';
-    fill.className   = 'limit-fill' + (n >= MAX_LOANS ? ' full' : n >= 4 ? ' warn' : '');
-
-    /* Atualiza botões do catálogo */
-    const borrowedIds = loans.map(l => l.id);
-    document.querySelectorAll('.btn-borrow').forEach(btn => {
-      const bookCard       = btn.closest('.book-card');
-      const bookId         = bookCard ? parseInt(bookCard.dataset.id) : null;
-      const alreadyBorrowed = borrowedIds.includes(bookId);
-      btn.disabled = n >= MAX_LOANS || alreadyBorrowed;
-      btn.innerHTML = alreadyBorrowed
-        ? '<span class="material-symbols-outlined sm">check</span> Emprestado'
-        : '<span class="material-symbols-outlined sm">add</span> Emprestar';
-    });
-
-    if (loans.length === 0) {
-      card.innerHTML = `
+    if (n === 0) {
+      wrap.innerHTML = `
         <div class="loans-empty">
           <span class="material-symbols-outlined">auto_stories</span>
-          Nenhum livro emprestado no momento.<br>Escolha um título no catálogo abaixo!
+          Você não tem livros emprestados no momento.<br>
+          Use o botão <strong>Emprestar Novamente</strong> no histórico abaixo!
         </div>`;
       return;
     }
 
-    card.innerHTML = loans.map(loan => {
-      const late     = loan.late;
-      const canRenew = loan.renewals < MAX_RENEWALS && !late;
+    wrap.innerHTML = loans.map(loan => {
+      const dias     = calcDias(loan.dueDate);
+      const canRenew = loan.renewals < MAX_RENEWALS && !loan.late;
+      let sc = 's-ok', st = 'Em dia';
+      if (loan.late)      { sc = 's-late'; st = 'Atrasado'; }
+      else if (dias <= 5) { sc = 's-warn'; st = `Vence em ${dias}d`; }
 
       return `
-      <div class="loan-row" id="loan-${loan.id}">
+      <div class="loan-row${loan.late ? ' late' : ''}" id="loan-${loan.id}">
         <div class="loan-cover-ph">
           <span class="material-symbols-outlined">menu_book</span>
         </div>
@@ -288,33 +295,18 @@
           <div class="loan-title">${loan.title}</div>
           <div class="loan-author">${loan.author}</div>
           <div class="loan-dates">
-            <span>
-              <span class="material-symbols-outlined">calendar_today</span>
-              Retirada: ${formatDate(loan.borrowedAt)}
-            </span>
-            <span>
-              <span class="material-symbols-outlined">${late ? 'warning' : 'event'}</span>
-              Devolução: ${formatDate(loan.dueDate)}
-            </span>
+            <span><span class="material-symbols-outlined">calendar_today</span>Retirada: ${fmt(loan.borrowedAt)}</span>
+            <span><span class="material-symbols-outlined">${loan.late?'warning':'event'}</span>Devolução: ${fmt(loan.dueDate)}</span>
           </div>
         </div>
         <div class="loan-right">
-          <span class="status ${late ? 'status-late' : 'status-ok'}">
-            ${late ? 'Atrasado' : 'Em dia'}
-          </span>
+          <span class="loan-status ${sc}">${st}</span>
           <div class="loan-actions">
-            <button
-              class="btn-renew"
-              onclick="renewLoan(${loan.id})"
+            <button class="btn-renew-active" onclick="abrirModalRenovacao(${loan.id})"
               ${canRenew ? '' : 'disabled'}
-              title="${loan.renewals >= MAX_RENEWALS ? 'Limite de renovações atingido' : late ? 'Não é possível renovar livro em atraso' : 'Renovar por mais 14 dias'}"
-            >
-              <span class="material-symbols-outlined sm">autorenew</span>
+              title="${loan.renewals >= MAX_RENEWALS ? 'Limite atingido' : loan.late ? 'Não renovável em atraso' : 'Renovar 30 dias'}">
+              <span class="material-symbols-outlined">autorenew</span>
               Renovar${loan.renewals > 0 ? ` (${loan.renewals}/${MAX_RENEWALS})` : ''}
-            </button>
-            <button class="btn-return" onclick="returnLoan(${loan.id})">
-              <span class="material-symbols-outlined sm">assignment_return</span>
-              Devolver
             </button>
           </div>
         </div>
@@ -322,84 +314,169 @@
     }).join('');
   }
 
-  /* ════════════════════════════════════
-     AÇÕES
-  ════════════════════════════════════ */
-  function borrowBook(btn, id, title, author) {
-    if (loans.length >= MAX_LOANS) {
-      showToast('⚠ Limite de 5 livros atingido.', 'warn'); return;
-    }
-    if (loans.find(l => l.id === id)) {
-      showToast('Este livro já está na sua lista.', 'warn'); return;
+  /* ══════════════════════════════════════════
+     RENDER — HISTÓRICO EM CARDS
+  ══════════════════════════════════════════ */
+  function renderHistorico(filtro = '') {
+    const grid = document.getElementById('historico-grid');
+    const q    = filtro.toLowerCase();
+
+    let lista = [...history].reverse();
+    if (q) lista = lista.filter(h => h.title.toLowerCase().includes(q) || h.author.toLowerCase().includes(q));
+
+    if (lista.length === 0) {
+      grid.innerHTML = `<div class="hist-vazio">Nenhum livro encontrado no histórico.</div>`;
+      return;
     }
 
+    const ativosIds   = loans.map(l => l.id);
+    const cheio       = loans.length >= MAX_LOANS;
+
+    grid.innerHTML = lista.map(h => {
+      const jaAtivo = ativosIds.includes(h.id);
+      const bloqueado = cheio || jaAtivo;
+      const badgeClass = `hb-${h.status}`;
+      const badgeText  = h.status === 'devolvido' ? 'Devolvido' : h.status === 'renovado' ? 'Renovado' : 'Atrasado';
+
+      return `
+      <div class="hist-card">
+        <div class="hist-img-wrap">
+          ${h.img
+            ? `<img src="${h.img}" alt="${h.title}" onerror="this.parentElement.innerHTML='<div class=\\'hist-img-ph\\'><span class=\\'material-symbols-outlined\\' style=\\'font-size:2rem\\'>menu_book</span></div>'">`
+            : `<div class="hist-img-ph"><span class="material-symbols-outlined" style="font-size:2rem">menu_book</span></div>`
+          }
+        </div>
+        <div class="hist-body">
+          <span class="hist-badge ${badgeClass}">${badgeText}</span>
+          <h3>${h.title}</h3>
+          <p>${h.author}</p>
+          <div class="hist-meta">
+            <span><span class="material-symbols-outlined">calendar_today</span>Retirada: ${fmt(h.borrowedAt)}</span>
+            <span><span class="material-symbols-outlined">event_available</span>Devolvido: ${fmt(h.returnedAt)}</span>
+            <span><span class="material-symbols-outlined">autorenew</span>Renovações: ${h.renewals}x</span>
+          </div>
+          <div class="hist-footer">
+            <button class="btn-emprestar-hist"
+              onclick="emprestarDoHistorico('${h.id}','${h.title.replace(/'/g,"\\'")}','${h.author.replace(/'/g,"\\'")}','${h.img||''}')"
+              ${bloqueado ? 'disabled' : ''}
+              title="${cheio ? 'Limite de 5 livros atingido' : jaAtivo ? 'Este livro já está ativo' : 'Emprestar novamente'}">
+              <span class="material-symbols-outlined sm">add</span>
+              ${jaAtivo ? 'Já Ativo' : 'Emprestar Novamente'}
+            </button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  /* ══════════════════════════════════════════
+     EMPRESTAR DO HISTÓRICO → PAGAMENTO → TICKET
+  ══════════════════════════════════════════ */
+  function emprestarDoHistorico(id, title, author, img) {
+    if (loans.length >= MAX_LOANS) { showToast('Limite de 5 livros atingido.', 'warn'); return; }
+    if (loans.find(l => l.id == id)) { showToast('Este livro já está ativo.', 'warn'); return; }
+    // Abre o modal de pagamento
+    PG.abrir({ id, titulo: title, autor: author, img });
+  }
+
+  // Chamada pelo pagamento-modal.js após confirmação do pagamento
+  function openTicket(livro, metodoPagamento) {
     const today = new Date();
-    const due   = new Date(today);
-    due.setDate(due.getDate() + 14);
+    const due   = new Date(today); due.setDate(due.getDate() + 30);
 
-    loans.push({
-      id,
-      title,
-      author,
-      borrowedAt: toISO(today),
-      dueDate:    toISO(due),
-      renewals:   0,
-      late:       false
-    });
+    document.getElementById('tk-user').textContent      = usuarioLogado.nome;
+    document.getElementById('tk-userid').textContent    = '#' + usuarioLogado.id;
+    document.getElementById('tk-title').textContent     = livro.titulo || livro.title || '';
+    document.getElementById('tk-author').textContent    = livro.autor  || livro.author || '';
+    document.getElementById('tk-pagamento').textContent = metodoPagamento || '—';
+    document.getElementById('tk-borrowed').textContent  = fmt(toISO(today));
+    document.getElementById('tk-due').textContent       = fmt(toISO(due));
+    document.getElementById('tk-ticketnum').textContent = genTicketNum();
 
-    saveLoans(); // ← sincroniza com Devolução
-    renderLoans();
-    showToast(`"${title}" emprestado com sucesso!`, 'ok');
-  }
-
-  function renewLoan(id) {
-    const loan = loans.find(l => l.id === id);
-    if (!loan) return;
-
-    if (loan.renewals >= MAX_RENEWALS) {
-      showToast('Limite de renovações atingido.', 'error'); return;
-    }
-    if (loan.late) {
-      showToast('Não é possível renovar um livro em atraso.', 'error'); return;
+    // Adiciona ao array de empréstimos ativos
+    if (!loans.find(l => String(l.id) == String(livro.id))) {
+      loans.push({
+        id:         String(livro.id),
+        title:      livro.titulo || livro.title,
+        author:     livro.autor  || livro.author,
+        borrowedAt: toISO(today),
+        dueDate:    toISO(due),
+        renewals:   0,
+        late:       false,
+      });
+      saveLoans();
+      renderLoans();
+      renderHistorico(document.getElementById('campoBusca').value);
     }
 
-    const due = new Date(loan.dueDate);
-    due.setDate(due.getDate() + 14);
-    loan.dueDate = toISO(due);
-    loan.renewals++;
-
-    saveLoans(); // ← sincroniza com Devolução
-    renderLoans();
-    showToast(`"${loan.title}" renovado! Nova devolução: ${formatDate(loan.dueDate)}`, 'ok');
+    document.getElementById('modalOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
   }
 
-  function returnLoan(id) {
-    const loan = loans.find(l => l.id === id);
-    if (!loan) return;
-    loans = loans.filter(l => l.id !== id);
-    saveLoans(); // ← sincroniza com Devolução
-    renderLoans();
-    showToast(`"${loan.title}" devolvido. Obrigado!`, 'ok');
+  function fecharTicket() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function fecharTicketSeForaDele(e) {
+    if (e.target.id === 'modalOverlay') fecharTicket();
   }
 
-  /* ════════════════════════════════════
-     TOAST / UTILITÁRIOS
-  ════════════════════════════════════ */
-  function showToast(msg, type = 'ok') {
-    const wrap = document.getElementById('toast-wrap');
-    const t    = document.createElement('div');
-    t.className = `toast ${type}`;
-    t.textContent = msg;
+  /* ══════════════════════════════════════════
+     MODAL DE RENOVAÇÃO
+  ══════════════════════════════════════════ */
+  function abrirModalRenovacao(id) {
+    const loan = loans.find(l => String(l.id) === String(id)); if (!loan) return;
+    idParaRenovar = id;
+    const novaData = new Date(loan.dueDate); novaData.setDate(novaData.getDate() + 30);
+    document.getElementById('modal-titulo-livro').textContent = loan.title;
+    document.getElementById('modal-nova-data').textContent    = 'Nova data de devolução: ' + fmt(toISO(novaData));
+    document.getElementById('modalRenovacao').classList.add('aberto');
+    document.body.style.overflow = 'hidden';
+  }
+  function fecharModal() {
+    document.getElementById('modalRenovacao').classList.remove('aberto');
+    document.body.style.overflow = '';
+    idParaRenovar = null;
+  }
+  function fecharModalSeForaDele(e) { if (e.target.id === 'modalRenovacao') fecharModal(); }
+
+  function confirmarRenovacao() {
+    const loan = loans.find(l => String(l.id) === String(idParaRenovar)); if (!loan) return;
+    if (loan.renewals >= MAX_RENEWALS) { showToast('Limite de renovações atingido.','error'); fecharModal(); return; }
+    if (loan.late)                     { showToast('Não renovável com atraso.','error'); fecharModal(); return; }
+
+    history.push({ id:String('h'+Date.now()), title:loan.title, author:loan.author, img:loan.img||'',
+      borrowedAt:loan.borrowedAt, returnedAt:toISO(new Date()), renewals:loan.renewals+1, status:'renovado' });
+
+    const nd = new Date(loan.dueDate); nd.setDate(nd.getDate()+30);
+    loan.dueDate = toISO(nd); loan.renewals++; loan.late = false;
+
+    saveLoans(); saveHistory(); fecharModal();
+    renderLoans(); renderHistorico(document.getElementById('campoBusca').value);
+    showToast(`"${loan.title}" renovado! Nova devolução: ${fmt(loan.dueDate)}`, 'ok');
+  }
+
+  /* ══════════════════════════════════════════
+     UTILITÁRIOS
+  ══════════════════════════════════════════ */
+  function toISO(d)  { return d.toISOString().split('T')[0]; }
+  function fmt(iso)  { if (!iso) return '—'; const [y,m,d]=iso.split('-'); return `${d}/${m}/${y}`; }
+  function calcDias(iso) { const t=new Date();t.setHours(0,0,0,0); const d=new Date(iso);d.setHours(0,0,0,0); return Math.round((d-t)/86400000); }
+  function genTicketNum() { return '#EST-' + Math.floor(100000 + Math.random() * 900000); }
+
+  function showToast(msg, type='ok') {
+    const wrap=document.getElementById('toast-wrap');
+    const t=document.createElement('div'); t.className=`toast ${type}`; t.textContent=msg;
     wrap.appendChild(t);
-    setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 350); }, 3200);
+    setTimeout(()=>{ t.classList.add('out'); setTimeout(()=>t.remove(),350); },3200);
   }
 
-  function toISO(date)    { return date.toISOString().split('T')[0]; }
-  function formatDate(iso) {
-    if (!iso) return '—';
-    const [y, m, d] = iso.split('-');
-    return `${d}/${m}/${y}`;
-  }
+  /* Busca no histórico */
+  let debounce;
+  document.getElementById('campoBusca').addEventListener('input', e => {
+    clearTimeout(debounce);
+    debounce = setTimeout(() => renderHistorico(e.target.value), 300);
+  });
 
   /* Nav ativa */
   const currentPage = location.pathname.split('/').pop();
@@ -407,7 +484,11 @@
     if (a.getAttribute('href') === currentPage) a.classList.add('active');
   });
 
+  /* ══════════════════════════════════════════
+     INICIALIZAÇÃO
+  ══════════════════════════════════════════ */
   renderLoans();
+  renderHistorico();
 </script>
 </body>
 </html>
