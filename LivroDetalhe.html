@@ -48,7 +48,7 @@
 
       <!-- Mobile CTA -->
       <div class="mobile-cta">
-        <button class="btn-loan" onclick="openTicket()">
+        <button class="btn-loan" onclick="PG.abrir(livro)">
           <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">qr_code_scanner</span>
           SOLICITAR EMPRÉSTIMO
         </button>
@@ -109,7 +109,7 @@
       </div>
 
       <!-- Desktop CTA -->
-      <button class="btn-loan" onclick="openTicket()">
+      <button class="btn-loan" onclick="PG.abrir(livro)">
         <div class="btn-shine"></div>
         <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">qr_code_scanner</span>
         <span>SOLICITAR EMPRÉSTIMO</span>
@@ -173,6 +173,16 @@
               <span class="field-label">Código do Livro</span>
               <div class="field-dots"></div>
               <span class="field-value mono" id="tk-isbn"></span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Pagamento</span>
+              <div class="field-dots"></div>
+              <span class="field-value" id="tk-pagamento">—</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Valor pago</span>
+              <div class="field-dots"></div>
+              <span class="field-value" style="color:#00f5d4;font-weight:700;">R$ 15,00</span>
             </div>
           </div>
 
@@ -300,20 +310,26 @@
       return 'EMP-' + String(Math.floor(Math.random() * 99999) + 1).padStart(6, '0');
     }
 
-    function openTicket() {
+    function openTicket(livroParam, metodoPagamento) {
+      // livroParam pode vir do PG.abrir (objeto) ou direto
+      const l = livroParam || livro;
       const today = new Date();
       const due   = new Date(today);
-      due.setDate(due.getDate() + 14);
+      due.setDate(due.getDate() + 30); // 30 dias = 1 mês
 
       document.getElementById('tk-user').textContent     = usuarioLogado.nome;
       document.getElementById('tk-userid').textContent   = '#' + usuarioLogado.id;
-      document.getElementById('tk-title').textContent    = livro ? livro.titulo : '—';
-      document.getElementById('tk-author').textContent   = livro ? livro.autor  : '—';
-      document.getElementById('tk-isbn').textContent     = livro ? livro.isbn   : '—';
+      document.getElementById('tk-title').textContent    = l ? l.titulo : '—';
+      document.getElementById('tk-author').textContent   = l ? l.autor  : '—';
+      document.getElementById('tk-isbn').textContent     = l ? l.isbn   : '—';
       document.getElementById('tk-borrowed').textContent = formatDate(today);
       document.getElementById('tk-due').textContent      = formatDate(due);
       document.getElementById('tk-reqdate').textContent  = formatDate(today);
       document.getElementById('tk-ticketnum').textContent = genTicketNum();
+
+      // Método de pagamento
+      const pgEl = document.getElementById('tk-pagamento');
+      if (pgEl) pgEl.textContent = metodoPagamento || '—';
 
       document.getElementById('modalOverlay').classList.add('open');
       document.body.style.overflow = 'hidden';
@@ -335,5 +351,7 @@
     });
   </script>
 
+<!-- Modal de Pagamento -->
+<script src="pagamento-modal.js"></script>
 </body>
 </html>
