@@ -679,3 +679,169 @@ body.page-detalhe main {
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(0,245,212,.4);
 }
+
+
+/* ════════════════════════════════════════
+   EMPRÉSTIMO — Histórico em cards + loans
+   ════════════════════════════════════════ */
+
+/* Barra de limite */
+.limit-bar-wrap { display:flex; align-items:center; gap:.75rem; }
+.limit-label { font-size:.82rem; color:var(--on-surface-variant); white-space:nowrap; }
+.limit-label strong { color:var(--on-surface); }
+.limit-label strong.at-limit { color:var(--error); }
+.limit-track { width:120px; height:6px; border-radius:99px; background:rgba(255,255,255,.08); overflow:hidden; }
+.limit-fill { height:100%; border-radius:99px; background:var(--primary); transition:width .4s ease, background .3s; }
+.limit-fill.warn { background:#f4e48a; }
+.limit-fill.full { background:var(--error); }
+
+/* Livros ativos */
+.loans-wrap { display:flex; flex-direction:column; gap:.75rem; margin-bottom:2.5rem; }
+.loans-empty {
+  text-align:center; padding:2.5rem 1rem;
+  color:var(--on-surface-variant); font-size:.9rem; line-height:1.8;
+  background:var(--surface-container); border:1px solid var(--outline-variant);
+  border-radius:14px;
+}
+.loans-empty .material-symbols-outlined { display:block; font-size:2.5rem; margin-bottom:.5rem; color:var(--primary); opacity:.5; }
+.loan-row {
+  display:flex; align-items:center; gap:1rem;
+  background:var(--surface-container); border:1px solid var(--outline-variant);
+  border-radius:14px; padding:1rem 1.2rem; transition:border-color .2s;
+}
+.loan-row:hover { border-color:rgba(0,245,212,.2); }
+.loan-row.late  { border-color:rgba(255,113,108,.3); }
+.loan-cover-ph {
+  width:44px; height:60px; border-radius:6px; flex-shrink:0;
+  background:var(--surface-container-high);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--on-surface-variant);
+}
+.loan-info { flex:1; min-width:0; }
+.loan-title  { font-weight:600; font-size:.95rem; color:var(--on-surface); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.loan-author { font-size:.8rem; color:var(--on-surface-variant); margin:2px 0 6px; }
+.loan-dates  { display:flex; gap:1rem; flex-wrap:wrap; }
+.loan-dates span { display:flex; align-items:center; gap:4px; font-size:.78rem; color:var(--on-surface-variant); }
+.loan-dates .material-symbols-outlined { font-size:14px; }
+.loan-right { display:flex; flex-direction:column; align-items:flex-end; gap:.6rem; flex-shrink:0; }
+.loan-actions { display:flex; gap:.5rem; }
+
+/* Status badges do empréstimo */
+.loan-status { display:inline-block; padding:3px 12px; border-radius:20px; font-size:.73rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+.s-ok   { background:rgba(0,245,212,.12);  color:#00f5d4; }
+.s-late { background:rgba(255,113,108,.12); color:#ff716c; }
+.s-warn { background:rgba(244,228,138,.12); color:#f4e48a; }
+
+/* Botão renovar */
+.btn-renew-active {
+  display:flex; align-items:center; gap:4px;
+  background:rgba(0,245,212,.1); border:1px solid rgba(0,245,212,.25);
+  color:#00f5d4; border-radius:8px;
+  padding:.4rem .85rem; font-size:.78rem; font-weight:600;
+  cursor:pointer; transition:background .2s, opacity .2s; white-space:nowrap;
+}
+.btn-renew-active:hover:not(:disabled) { background:rgba(0,245,212,.2); }
+.btn-renew-active:disabled { opacity:.35; cursor:not-allowed; }
+.btn-renew-active .material-symbols-outlined { font-size:15px; }
+
+/* Modal de renovação */
+.modal-overlay-renew {
+  display:none; position:fixed; inset:0; z-index:9000;
+  background:rgba(5,13,37,.85); backdrop-filter:blur(8px);
+  align-items:center; justify-content:center;
+}
+.modal-overlay-renew.aberto { display:flex; }
+.modal-box {
+  background:#0d1b3e; border:1px solid rgba(0,245,212,.2);
+  border-radius:20px; padding:2rem; width:380px; max-width:95vw;
+  box-shadow:0 30px 80px rgba(0,0,0,.6);
+  animation:entrar-modal .25s cubic-bezier(.22,1,.36,1); text-align:center;
+}
+@keyframes entrar-modal { from{opacity:0;transform:translateY(20px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);} }
+.modal-icon { font-size:2.8rem; margin-bottom:.5rem; }
+.modal-box h3 { color:#fff; font-size:1.1rem; margin:0 0 .4rem; }
+.modal-box p  { color:#8899bb; font-size:.87rem; margin:0 0 1.5rem; line-height:1.5; }
+.modal-box .nova-data {
+  background:rgba(0,245,212,.08); border:1px solid rgba(0,245,212,.2);
+  border-radius:10px; padding:.6rem 1rem; margin-bottom:1.5rem;
+  color:#00f5d4; font-weight:700; font-size:1rem;
+}
+.modal-acoes { display:flex; gap:.75rem; }
+.btn-cancelar { flex:1; padding:.75rem; border-radius:10px; border:1px solid rgba(255,255,255,.12); background:transparent; color:#8899bb; cursor:pointer; font-size:.875rem; }
+.btn-confirmar-renew { flex:1; padding:.75rem; border-radius:10px; border:none; background:linear-gradient(135deg,#00f5d4,#00c9aa); color:#00221a; font-weight:700; cursor:pointer; font-size:.875rem; }
+.btn-confirmar-renew:hover { opacity:.9; }
+
+/* Histórico em cards */
+.historico-section { margin-top:2rem; }
+.historico-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:1.75rem; }
+.hist-card {
+  background:var(--surface-container-low); border-radius:1rem; overflow:hidden;
+  border:1px solid var(--border); display:flex; flex-direction:column;
+  transition:box-shadow .3s, transform .3s, border-color .3s;
+}
+.hist-card:hover {
+  transform:translateY(-6px);
+  box-shadow:0 20px 40px rgba(0,0,0,.4), 0 0 0 1px rgba(115,255,227,.15), 0 0 30px rgba(115,255,227,.08);
+  border-color:rgba(115,255,227,.2);
+}
+.hist-img-wrap { aspect-ratio:2/3; overflow:hidden; position:relative; background:var(--surface-container-highest); display:flex; align-items:center; justify-content:center; color:var(--outline); }
+.hist-img-wrap img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s ease; }
+.hist-card:hover .hist-img-wrap img { transform:scale(1.06); }
+.hist-img-ph { width:100%; aspect-ratio:2/3; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--surface-container-highest),var(--surface-variant)); color:var(--outline); }
+.hist-body { padding:1rem 1.125rem 1.25rem; border-top:1px solid var(--border); flex:1; display:flex; flex-direction:column; gap:.25rem; }
+.hist-body h3 { font-family:'Space Grotesk',sans-serif; font-size:.9375rem; font-weight:700; color:var(--on-background); line-height:1.3; }
+.hist-body p  { font-size:.8125rem; color:var(--on-surface-variant); font-weight:300; }
+.hist-meta { display:flex; flex-direction:column; gap:3px; margin:.5rem 0; }
+.hist-meta span { font-size:.72rem; color:var(--on-surface-variant); display:flex; align-items:center; gap:4px; }
+.hist-meta .material-symbols-outlined { font-size:13px; }
+.hist-badge { display:inline-block; padding:2px 10px; border-radius:20px; font-size:.7rem; font-weight:700; margin-bottom:.5rem; align-self:flex-start; }
+.hb-devolvido { background:rgba(0,245,212,.12);   color:#00f5d4; }
+.hb-renovado  { background:rgba(244,228,138,.12); color:#f4e48a; }
+.hb-atrasado  { background:rgba(255,113,108,.12); color:#ff716c; }
+.hist-footer { margin-top:auto; padding-top:.75rem; display:flex; gap:.5rem; }
+.btn-emprestar-hist {
+  flex:1; background:linear-gradient(to right,var(--primary),var(--primary-container));
+  color:var(--on-primary); font-size:.75rem; font-weight:700;
+  padding:.5rem; border-radius:.375rem; border:none;
+  box-shadow:0 4px 12px -4px rgba(0,245,212,.4);
+  transition:box-shadow .2s, transform .2s;
+  font-family:inherit; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:.3rem;
+}
+.btn-emprestar-hist:hover { box-shadow:0 6px 16px rgba(0,245,212,.3); transform:translateY(-1px); }
+.btn-emprestar-hist:disabled { opacity:.4; cursor:not-allowed; transform:none; box-shadow:none; }
+
+/* Modal do Ticket (Empréstimo) */
+.modal-overlay-ticket {
+  position:fixed; inset:0; background:rgba(0,0,0,.75);
+  backdrop-filter:blur(6px); z-index:8000;
+  display:flex; align-items:center; justify-content:center;
+  padding:1.5rem; opacity:0; pointer-events:none; transition:opacity .3s ease;
+}
+.modal-overlay-ticket.open { opacity:1; pointer-events:all; }
+.modal-overlay-ticket .ticket-wrap {
+  transform:translateY(24px) scale(.97); transition:transform .3s ease;
+  max-height:90vh; overflow-y:auto; border-radius:1.25rem;
+  scrollbar-width:thin; scrollbar-color:rgba(115,255,227,.2) transparent;
+}
+.modal-overlay-ticket.open .ticket-wrap { transform:translateY(0) scale(1); }
+
+/* Busca do histórico */
+.historico-busca {
+  background:var(--surface-container-high); border:1px solid var(--border);
+  border-radius:9999px; padding:.5rem 1.25rem; width:220px;
+  font-size:.875rem; outline:none; color:var(--on-surface);
+  transition:border-color .25s, box-shadow .25s; font-family:inherit;
+}
+.historico-busca:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(115,255,227,.1); }
+.historico-busca::placeholder { color:var(--on-surface-variant); }
+
+/* Estado vazio do histórico */
+.hist-vazio { grid-column:1/-1; text-align:center; padding:3rem; color:var(--on-surface-variant); font-size:.9rem; }
+
+/* Responsivo */
+@media (max-width:600px) {
+  .loan-row { flex-wrap:wrap; }
+  .loan-right { align-items:flex-start; width:100%; flex-direction:row; justify-content:space-between; }
+  .historico-grid { grid-template-columns:repeat(2,1fr); gap:1rem; }
+}
