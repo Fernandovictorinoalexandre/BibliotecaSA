@@ -294,6 +294,16 @@
             <div class="field-dots"></div>
             <span class="field-value mono" id="tk-isbn"></span>
           </div>
+          <div class="field-row">
+            <span class="field-label">Pagamento</span>
+            <div class="field-dots"></div>
+            <span class="field-value" id="tk-pagamento">—</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Valor pago</span>
+            <div class="field-dots"></div>
+            <span class="field-value" style="color:#00f5d4;font-weight:700;">R$ 15,00</span>
+          </div>
         </div>
 
         <hr class="divider">
@@ -437,12 +447,12 @@
   }
 
   // ══════════════════════════════════════
-  // EMPRESTAR — abre o modal do ticket
+  // EMPRESTAR — abre o modal de pagamento primeiro
   // ══════════════════════════════════════
   function emprestarLivro(id) {
     const livro = livros[id];
     if (!livro) return;
-    openTicket(livro);
+    PG.abrir(livro); // abre pagamento → depois abre o ticket
   }
 
   // ══════════════════════════════════════
@@ -500,7 +510,34 @@
       card.style.display = titulo.includes(valor) ? 'block' : 'none';
     });
   });
+  // ══════════════════════════════════════
+  // OPEN TICKET — agora recebe o método de pagamento
+  // ══════════════════════════════════════
+  function openTicket(livro, metodoPagamento) {
+    const today = new Date();
+    const due = new Date(today);
+    due.setDate(due.getDate() + 30); // 30 dias = 1 mês
+
+    document.getElementById('tk-user').textContent    = usuarioLogado.nome;
+    document.getElementById('tk-userid').textContent  = '#' + usuarioLogado.id;
+    document.getElementById('tk-title').textContent   = livro.titulo;
+    document.getElementById('tk-author').textContent  = livro.autor;
+    document.getElementById('tk-isbn').textContent    = livro.isbn;
+    document.getElementById('tk-borrowed').textContent = formatDate(today);
+    document.getElementById('tk-due').textContent     = formatDate(due);
+    document.getElementById('tk-reqdate').textContent = formatDate(today);
+    document.getElementById('tk-ticketnum').textContent = genTicketNum();
+
+    // Adiciona o método de pagamento no ticket se existir o elemento
+    const pgEl = document.getElementById('tk-pagamento');
+    if (pgEl) pgEl.textContent = metodoPagamento || '—';
+
+    document.getElementById('modalOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
 </script>
 
+<!-- Modal de Pagamento -->
+<script src="pagamento-modal.js"></script>
 </body>
 </html>
