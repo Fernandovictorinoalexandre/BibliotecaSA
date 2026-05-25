@@ -210,6 +210,8 @@
 <script src="pagamento-modal.js"></script>
 
 <script>
+  if (!localStorage.getItem('logado')) window.location.href = 'LoginUsuario.html';
+
   /* ══════════════════════════════════════════
      CONSTANTES
   ══════════════════════════════════════════ */
@@ -227,11 +229,7 @@
   function saveHistory() { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); }
 
   function defaultHistory() {
-    return [
-      { id:'h1', title:'O Hobbit',      author:'J.R.R. Tolkien',   img:'Hobbit.webp',         borrowedAt:'2026-01-10', returnedAt:'2026-02-09', renewals:1, status:'devolvido' },
-      { id:'h2', title:'Harry Potter',  author:'J.K. Rowling',     img:'HarryPotter.jpg',      borrowedAt:'2026-02-14', returnedAt:'2026-03-10', renewals:0, status:'devolvido' },
-      { id:'h3', title:"Assassin's Creed", author:'Anton Gill',    img:'AssassinCreed.jpg',    borrowedAt:'2026-03-01', returnedAt:'2026-03-28', renewals:2, status:'renovado'  },
-    ];
+    return []; // histórico real vem do banco via Conta.html
   }
 
   /* ══════════════════════════════════════════
@@ -407,6 +405,20 @@
       saveLoans();
       renderLoans();
       renderHistorico(document.getElementById('campoBusca').value);
+
+      // Registra empréstimo no banco de dados
+      fetch('http://localhost:9999/Estacao-refatorado/php/emprestimos.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          usuario_id:              parseInt(usuarioLogado.id) || null,
+          livro_id:                parseInt(livro.id)         || null,
+          data_emprestimo:         toISO(today),
+          data_devolucao_prevista: toISO(due),
+          metodo_pagamento:        metodoPagamento || null,
+          valor_pago:              15.00,
+        }),
+      }).catch(() => { /* falha silenciosa */ });
     }
 
     document.getElementById('modalOverlay').classList.add('open');
@@ -454,6 +466,21 @@
     saveLoans(); saveHistory(); fecharModal();
     renderLoans(); renderHistorico(document.getElementById('campoBusca').value);
     showToast(`"${loan.title}" renovado! Nova devolução: ${fmt(loan.dueDate)}`, 'ok');
+
+    // Sincroniza renovação com o banco de dados
+    // loan.id aqui é o id do localStorage; tentamos renovar via API usando usuario_id + livro_id
+    fetch(`http://localhost:9999/Estacao-refatorado/php/emprestimos.php?usuario_id=${usuarioLogado.id}&livro_id=${loan.id}`)
+      .then(r => r.json())
+      .then(lista => {
+        const emp = Array.isArray(lista) ? lista.find(e => e.data_devolucao_real === null) : null;
+        if (emp) {
+          fetch(`http://localhost:9999/Estacao-refatorado/php/emprestimos.php?id=${emp.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ renovar: true }),
+          }).catch(() => {});
+        }
+      }).catch(() => {});
   }
 
   /* ══════════════════════════════════════════
@@ -490,5 +517,6 @@
   renderLoans();
   renderHistorico();
 </script>
+<script src="busca-global.js"></script>
 </body>
 </html>
