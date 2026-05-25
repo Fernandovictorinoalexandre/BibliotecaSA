@@ -279,6 +279,8 @@
   /* ══════════════════════════════════════
      CONFIGURAÇÕES
   ══════════════════════════════════════ */
+  if (!localStorage.getItem('logado')) window.location.href = 'LoginUsuario.html';
+
   const FINE_PER_DAY = 1.00;
   const STORAGE_KEY  = 'biblioteca_loans';
   const TODAY = new Date(); TODAY.setHours(0,0,0,0);
@@ -543,6 +545,23 @@
       : `"${loan.title}" devolvido! Entregue o livro na biblioteca em até 1 dia.`,
       fine>0?'warn':'ok'
     );
+
+    // Sincroniza devolução com o banco de dados
+    const usuarioId = localStorage.getItem('usuario_id');
+    if (usuarioId) {
+      fetch(`http://localhost:9999/Estacao-refatorado/php/emprestimos.php?usuario_id=${usuarioId}&livro_id=${loan.id}`)
+        .then(r => r.json())
+        .then(lista => {
+          const emp = Array.isArray(lista) ? lista.find(e => e.data_devolucao_real === null) : null;
+          if (emp) {
+            fetch(`http://localhost:9999/Estacao-refatorado/php/emprestimos.php?id=${emp.id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ devolver: true, multa_paga: fine > 0 ? 1 : 0 }),
+            }).catch(() => {});
+          }
+        }).catch(() => {});
+    }
   }
 
   /* ══════════════════════════════════════
