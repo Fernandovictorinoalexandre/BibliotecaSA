@@ -240,62 +240,73 @@
   </div>
 
   <script>
+    if (!localStorage.getItem('logado')) window.location.href = 'LoginUsuario.html';
+
     // ══════════════════════════════════════
     // METADADOS EXTRAS POR LIVRO
     // (dados que não estão no localStorage, mas são fixos por livro)
     // ══════════════════════════════════════
-    const metadados = {
-      'harry-potter':      { genero: 'Fantasia',        paginas: '309',  prateleira: 'Setor B // Prateleira 2', codigo: '0001' },
-      'hobbit':            { genero: 'Alta Fantasia',   paginas: '310',  prateleira: 'Setor A // Prateleira 4', codigo: '0042' },
-      'maldicao-mar':      { genero: 'Fantasia/Terror', paginas: '342',  prateleira: 'Setor C // Prateleira 1', codigo: '0087' },
-      'assassins-creed':   { genero: 'Romance/Fantasia',  paginas: '400',  prateleira: 'Setor D // Prateleira 3', codigo: '0115' },
-      'coroa-sombras':     { genero: 'Fantasia/Romance',paginas: '418',  prateleira: 'Setor B // Prateleira 5', codigo: '0063' },
-      'nome-vento':        { genero: 'Fantasia Épica',  paginas: '662',  prateleira: 'Setor A // Prateleira 2', codigo: '0029' },
-      'mar-sem-estrelas':  { genero: 'Fantasia/Mistério',paginas:'389',  prateleira: 'Setor C // Prateleira 4', codigo: '0074' },
-      'feiticeiro-terramar':{ genero: 'Fantasia',       paginas: '183',  prateleira: 'Setor A // Prateleira 6', codigo: '0011' },
-    };
+    const metadados = {}; // campos extras por livro (gênero, páginas, prateleira) — removido;
 
     // ══════════════════════════════════════
     // DADOS DO USUÁRIO LOGADO
     // ══════════════════════════════════════
     const usuarioLogado = {
-      nome: 'Kevin Kaslana',
-      id: '2451'
+      nome: localStorage.getItem('usuario_nome') || 'Leitor',
+      id:   localStorage.getItem('usuario_id')   || '0',
     };
 
     // ══════════════════════════════════════
-    // CARREGAR LIVRO DO localStorage
+    // CARREGAR LIVRO — API primeiro, localStorage como fallback
     // ══════════════════════════════════════
-    const livro = JSON.parse(localStorage.getItem('livro'));
+    function preencherLivro(livro) {
+      if (!livro) { window.location.href = 'CatalogoLivros.html'; return; }
 
-    if (livro) {
-      // Preenche título da aba
       document.title = `${livro.titulo} - Estação Literária`;
 
-      // Capa
-      document.getElementById('book-cover').src = livro.capa;
-      document.getElementById('book-cover').alt = livro.titulo;
+      const cover = document.getElementById('book-cover');
+      if (cover) { cover.src = livro.capa || ''; cover.alt = livro.titulo; }
 
-      // Título e autor
-      document.getElementById('book-title').textContent  = livro.titulo;
-      document.getElementById('book-author').textContent = livro.autor;
+      document.getElementById('book-title').textContent  = livro.titulo  || '—';
+      document.getElementById('book-author').textContent = livro.autor   || '—';
+      document.getElementById('book-isbn').textContent   = livro.isbn    || '—';
+      document.getElementById('book-desc').textContent   = livro.descricao || livro.desc || 'Sem descrição disponível.';
 
-      // ISBN
-      document.getElementById('book-isbn').textContent = livro.isbn;
-
-      // Descrição
-      document.getElementById('book-desc').textContent = livro.desc;
-
-      // Metadados extras (gênero, páginas, prateleira, código)
-      const meta = metadados[livro.id];
+      // Metadados extras do objeto hardcoded (fallback enquanto o banco não tiver esses campos)
+      const meta = metadados[livro.id] || metadados[String(livro.id)];
       if (meta) {
         document.getElementById('book-genre').textContent  = meta.genero;
         document.getElementById('book-pages').textContent  = meta.paginas;
         document.getElementById('shelf-label').textContent = meta.prateleira;
         document.getElementById('cover-label').textContent = `Arquivo Códice // ${meta.codigo}`;
       }
+    }
+
+    // Tenta buscar pelo id ou isbn do livro salvo no localStorage
+    const livroLS = JSON.parse(localStorage.getItem('livro') || 'null');
+
+    if (livroLS && livroLS.id) {
+      // Tenta buscar dados atualizados do banco
+      fetch(`http://localhost:9999/Estacao-refatorado/php/livros.php?id=${livroLS.id}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(dados => {
+          if (dados && dados.id) {
+            // Normaliza campos (API usa 'titulo', não 'title')
+            preencherLivro({
+              id:        dados.id,
+              titulo:    dados.titulo,
+              autor:     dados.autor,
+              isbn:      dados.isbn,
+              capa:      dados.capa,
+              descricao: dados.descricao,
+            });
+          } else {
+            // Fallback para localStorage se API não retornar dados
+            preencherLivro(livroLS);
+          }
+        })
+        .catch(() => preencherLivro(livroLS));
     } else {
-      // Se não há livro no localStorage, volta para o catálogo
       window.location.href = 'CatalogoLivros.html';
     }
 
@@ -353,5 +364,6 @@
 
 <!-- Modal de Pagamento -->
 <script src="pagamento-modal.js"></script>
+<script src="busca-global.js"></script>
 </body>
 </html>
