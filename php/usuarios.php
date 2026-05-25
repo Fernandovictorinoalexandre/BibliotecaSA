@@ -1,12 +1,6 @@
 <?php
 // ═══════════════════════════════════════════════════════
 // php/usuarios.php — CRUD de Usuários
-// Rotas:
-//   GET    /php/usuarios.php          → lista todos
-//   GET    /php/usuarios.php?id=N     → busca um
-//   POST   /php/usuarios.php          → cria
-//   PUT    /php/usuarios.php?id=N     → atualiza
-//   DELETE /php/usuarios.php?id=N     → remove
 // ═══════════════════════════════════════════════════════
 
 require_once __DIR__ . '/conexao.php';
@@ -14,8 +8,6 @@ require_once __DIR__ . '/conexao.php';
 $metodo = $_SERVER['REQUEST_METHOD'];
 $id     = isset($_GET['id']) ? (int) $_GET['id'] : null;
 $pdo    = getConexao();
-
-// ── Helpers ─────────────────────────────────────────────
 
 function bodyJson(): array {
     $raw = file_get_contents('php://input');
@@ -57,17 +49,24 @@ if ($metodo === 'GET') {
     $busca = $_GET['busca'] ?? '';
     if ($busca) {
         $stmt = $pdo->prepare(
-            'SELECT id, nome, email, data_nasc, status, criado_em
-             FROM usuarios
-             WHERE nome LIKE ? OR email LIKE ?
-             ORDER BY nome'
+            'SELECT u.id, u.nome, u.email, u.data_nasc, u.status, u.criado_em,
+                    COUNT(CASE WHEN e.data_devolucao_real IS NULL THEN 1 END) AS emprestimos_ativos
+             FROM usuarios u
+             LEFT JOIN emprestimos e ON e.usuario_id = u.id
+             WHERE u.nome LIKE ? OR u.email LIKE ?
+             GROUP BY u.id
+             ORDER BY u.nome'
         );
         $like = "%$busca%";
         $stmt->execute([$like, $like]);
     } else {
         $stmt = $pdo->query(
-            'SELECT id, nome, email, data_nasc, status, criado_em
-             FROM usuarios ORDER BY nome'
+            'SELECT u.id, u.nome, u.email, u.data_nasc, u.status, u.criado_em,
+                    COUNT(CASE WHEN e.data_devolucao_real IS NULL THEN 1 END) AS emprestimos_ativos
+             FROM usuarios u
+             LEFT JOIN emprestimos e ON e.usuario_id = u.id
+             GROUP BY u.id
+             ORDER BY u.nome'
         );
     }
     responder(200, $stmt->fetchAll());
@@ -80,7 +79,6 @@ if ($metodo === 'POST') {
     $err = validarUsuario($d);
     if ($err) responder(422, ['erro' => $err]);
 
-    // Verifica e-mail duplicado
     $chk = $pdo->prepare('SELECT id FROM usuarios WHERE email = ?');
     $chk->execute([$d['email']]);
     if ($chk->fetch()) responder(409, ['erro' => 'E-mail já cadastrado.']);
@@ -111,22 +109,19 @@ if ($metodo === 'PUT') {
     if (!$id) responder(400, ['erro' => 'ID obrigatório para atualização.']);
 
     $d   = bodyJson();
-    $err = validarUsuario($d, false);   // campos opcionais na edição
+    $err = validarUsuario($d, false);
     if ($err) responder(422, ['erro' => $err]);
 
-    // Verifica existência
     $chk = $pdo->prepare('SELECT id FROM usuarios WHERE id = ?');
     $chk->execute([$id]);
     if (!$chk->fetch()) responder(404, ['erro' => 'Usuário não encontrado.']);
 
-    // Verifica e-mail duplicado (outro usuário)
     if (!empty($d['email'])) {
         $chk2 = $pdo->prepare('SELECT id FROM usuarios WHERE email = ? AND id != ?');
         $chk2->execute([$d['email'], $id]);
         if ($chk2->fetch()) responder(409, ['erro' => 'E-mail já usado por outro usuário.']);
     }
 
-    // Monta SET dinamicamente (atualiza apenas campos enviados)
     $campos = [];
     $params = [];
 
@@ -150,11 +145,34 @@ if ($metodo === 'PUT') {
 if ($metodo === 'DELETE') {
     if (!$id) responder(400, ['erro' => 'ID obrigatório para exclusão.']);
 
+    $d     = bodyJson();
+    $senha = $d['senha'] ?? '';
+
+    if (empty($senha)) responder(422, ['erro' => 'Senha obrigatória para excluir a conta.']);
+
+    // Verifica senha
+    $chk = $pdo->prepare('SELECT senha FROM usuarios WHERE id = ?');
+    $chk->execute([$id]);
+    $usuario = $chk->fetch();
+
+    if (!$usuario) responder(404, ['erro' => 'Usuário não encontrado.']);
+
+    if (!password_verify($senha, $usuario['senha'])) {
+        responder(401, ['erro' => 'Senha incorreta. Tente novamente.']);
+    }
+
+    // Bloqueia se tiver empréstimos ativos
+    $emp = $pdo->prepare("SELECT COUNT(*) FROM emprestimos WHERE usuario_id = ? AND status IN ('ativo','atrasado') AND data_devolucao_real IS NULL");
+    $emp->execute([$id]);
+    if ($emp->fetchColumn() > 0) {
+        responder(409, ['erro' => 'Você possui livros em aberto. Devolva-os antes de excluir a conta.']);
+    }
+
     $stmt = $pdo->prepare('DELETE FROM usuarios WHERE id = ?');
     $stmt->execute([$id]);
 
     $stmt->rowCount()
-        ? responder(200, ['mensagem' => 'Usuário removido com sucesso.'])
+        ? responder(200, ['mensagem' => 'Conta excluída com sucesso.'])
         : responder(404, ['erro' => 'Usuário não encontrado.']);
 }
 
