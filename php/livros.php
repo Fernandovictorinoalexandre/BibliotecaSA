@@ -13,6 +13,7 @@ require_once __DIR__ . '/conexao.php';
 
 $metodo = $_SERVER['REQUEST_METHOD'];
 $id     = isset($_GET['id']) ? (int) $_GET['id'] : null;
+$busca  = isset($_GET['busca']) ? trim($_GET['busca']) : '';
 $pdo    = getConexao();
 
 // ── Helpers ─────────────────────────────────────────────
@@ -54,17 +55,25 @@ if ($metodo === 'GET') {
             : responder(404, ['erro' => 'Livro não encontrado.']);
     }
 
-    $busca = $_GET['busca'] ?? '';
     if ($busca) {
         $stmt = $pdo->prepare(
-            'SELECT * FROM livros
-             WHERE titulo LIKE ? OR autor LIKE ? OR isbn LIKE ?
-             ORDER BY titulo'
+            'SELECT l.*,
+                    (l.quantidade - COALESCE((SELECT COUNT(*) FROM emprestimos e
+                     WHERE e.livro_id = l.id AND e.data_devolucao_real IS NULL), 0)) AS quantidade_disponivel
+             FROM livros l
+             WHERE l.titulo LIKE ? OR l.autor LIKE ? OR l.isbn LIKE ?
+             ORDER BY l.titulo'
         );
         $like = "%$busca%";
         $stmt->execute([$like, $like, $like]);
     } else {
-        $stmt = $pdo->query('SELECT * FROM livros ORDER BY titulo');
+        $stmt = $pdo->query(
+            'SELECT l.*,
+                    (l.quantidade - COALESCE((SELECT COUNT(*) FROM emprestimos e
+                     WHERE e.livro_id = l.id AND e.data_devolucao_real IS NULL), 0)) AS quantidade_disponivel
+             FROM livros l
+             ORDER BY l.titulo'
+        );
     }
     responder(200, $stmt->fetchAll());
 }
@@ -85,8 +94,8 @@ if ($metodo === 'POST') {
     if ($chk->fetch()) responder(409, ['erro' => 'ISBN já cadastrado.']);
 
     $stmt = $pdo->prepare(
-        'INSERT INTO livros (titulo, autor, isbn, editora, data_publicacao, quantidade, status)
-         VALUES (:titulo, :autor, :isbn, :editora, :data_publicacao, :quantidade, :status)'
+        'INSERT INTO livros (titulo, autor, isbn, editora, data_publicacao, quantidade, status, capa, descricao, categoria)
+         VALUES (:titulo, :autor, :isbn, :editora, :data_publicacao, :quantidade, :status, :capa, :descricao, :categoria)'
     );
     $stmt->execute([
         ':titulo'          => trim($d['titulo']),
@@ -96,6 +105,9 @@ if ($metodo === 'POST') {
         ':data_publicacao' => $d['data_publicacao']        ?? null,
         ':quantidade'      => isset($d['quantidade'])      ? (int)$d['quantidade'] : 1,
         ':status'          => $d['status']                 ?? 'disponivel',
+        ':capa'            => isset($d['capa'])            ? trim($d['capa'])     : null,
+        ':descricao'       => isset($d['descricao'])       ? trim($d['descricao']): null,
+        ':categoria'       => isset($d['categoria'])       ? trim($d['categoria']): 'Geral',
     ]);
 
     responder(201, [
@@ -138,6 +150,9 @@ if ($metodo === 'PUT') {
     if (isset($d['data_publicacao']))  { $campos[] = 'data_publicacao = ?'; $params[] = $d['data_publicacao'] ?: null; }
     if (isset($d['quantidade']))       { $campos[] = 'quantidade = ?';      $params[] = (int)$d['quantidade']; }
     if (!empty($d['status']))          { $campos[] = 'status = ?';          $params[] = $d['status']; }
+    if (isset($d['capa']))             { $campos[] = 'capa = ?';            $params[] = trim($d['capa']) ?: null; }
+    if (isset($d['descricao']))        { $campos[] = 'descricao = ?';       $params[] = trim($d['descricao']) ?: null; }
+    if (!empty($d['categoria']))       { $campos[] = 'categoria = ?';       $params[] = trim($d['categoria']); }
 
     if (empty($campos)) responder(400, ['erro' => 'Nenhum campo para atualizar.']);
 
