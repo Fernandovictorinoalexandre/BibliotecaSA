@@ -6,16 +6,17 @@
   <title>Catálogo — Estação Literária</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="leitor.css">
+
 </head>
 <body class="page-catalogo">
 
-<!-- NAVBAR -->
+<!-- ── NAVBAR ── -->
 <header class="navbar">
   <div class="logo-area">
-    <img src="Biblioteca2.png" width="60" alt="Logo">
+    <img src="Biblioteca2.png" width="60" alt="Logo"
+         onerror="this.style.display='none'">
     <h1>BIBLIOTECA</h1>
   </div>
 
@@ -27,14 +28,14 @@
   </nav>
 
   <div class="right-area">
-    <input type="text" placeholder="Pesquisar..." class="search">
+    <input type="text" id="campoBusca" placeholder="Pesquisar título ou autor..." class="search">
     <div class="user-avatar">
-      <img src="https://static.wikia.nocookie.net/hoducks/images/5/56/Kevin_Kaslana.jpg/revision/latest/thumbnail/width/360/height/360?cb=20250121140658" alt="Usuário">
+      <span class="material-symbols-outlined">person</span>
     </div>
   </div>
 </header>
 
-<!-- SIDE NAV -->
+<!-- ── SIDEBAR ── -->
 <aside class="side-nav">
   <div class="side-nav-header">
     <h3 class="side-nav-title">Portal do Leitor</h3>
@@ -42,192 +43,83 @@
   </div>
 
   <p class="side-nav-section-label">Categorias</p>
-  <div class="side-nav-section">
-    <a class="side-nav-link" href="#">
-      <span class="material-symbols-outlined">favorite</span>
-      <span class="link-label">Romance</span>
+  <div class="side-nav-section" id="categorias-nav">
+    <a class="side-nav-link active" href="#" data-cat="todos" onclick="filtrarCategoria(event, 'todos')">
+      <span class="material-symbols-outlined">grid_view</span>
+      <span class="link-label">Todos</span>
     </a>
-    <a class="side-nav-link active" href="#">
+    <a class="side-nav-link" href="#" data-cat="Fantasia" onclick="filtrarCategoria(event, 'Fantasia')">
       <span class="material-symbols-outlined">auto_awesome</span>
       <span class="link-label">Fantasia</span>
     </a>
-    <a class="side-nav-link" href="#">
+    <a class="side-nav-link" href="#" data-cat="Romance" onclick="filtrarCategoria(event, 'Romance')">
+      <span class="material-symbols-outlined">favorite</span>
+      <span class="link-label">Romance</span>
+    </a>
+    <a class="side-nav-link" href="#" data-cat="Terror" onclick="filtrarCategoria(event, 'Terror')">
       <span class="material-symbols-outlined">skull</span>
       <span class="link-label">Terror</span>
     </a>
-    <a class="side-nav-link" href="#">
+    <a class="side-nav-link" href="#" data-cat="Aventura" onclick="filtrarCategoria(event, 'Aventura')">
       <span class="material-symbols-outlined">explore</span>
       <span class="link-label">Aventura</span>
     </a>
-    <a class="side-nav-link" href="#">
-      <span class="material-symbols-outlined">auto_stories</span>
-      <span class="link-label">Manhwa</span>
+    <a class="side-nav-link" href="#" data-cat="Ficção Científica" onclick="filtrarCategoria(event, 'Ficção Científica')">
+      <span class="material-symbols-outlined">rocket_launch</span>
+      <span class="link-label">Ficção Científica</span>
     </a>
   </div>
 </aside>
 
-<!-- MAIN -->
+<!-- ── MAIN ── -->
 <main>
 
   <header class="page-header">
     <div class="page-title-row">
       <h1 class="page-title">Explorar Catálogo</h1>
-      <span class="page-subtitle">/ Fantasia</span>
+      <span class="page-subtitle" id="subtitulo-categoria">/ Todos</span>
     </div>
-    <p class="page-desc">Navegue pelos registros ancestrais e novos portais literários da nossa estação digital.</p>
+    <p class="page-desc">Navegue pelos títulos disponíveis e realize seu próximo empréstimo.</p>
   </header>
 
-  <section class="book-grid">
-
-    <!-- Card 1 — Harry Potter -->
-    <div class="book-card" data-id="harry-potter">
-      <div class="book-cover-wrap">
-        <img src="HarryPotter.jpg" alt="Harry Potter"/>
-        <div class="cover-gradient"></div>
-      </div>
-      <div class="book-body">
-        <div class="book-title-row">
-          <h3 class="book-title">Harry Potter</h3>
-          <span class="badge">Novo</span>
-        </div>
-        <p class="book-desc">Harry Potter é uma série de sete romances de fantasia escrita pela autora britânica J. K. Rowling.</p>
-        <div class="book-actions">
-          <button class="btn btn-secondary" onclick="verDetalhes('harry-potter')">Ver Detalhes</button>
-          <button class="btn btn-primary" onclick="emprestarLivro('harry-potter')">Emprestar</button>
-        </div>
+  <!-- TOOLBAR -->
+  <div class="catalogo-toolbar">
+    <div class="catalogo-toolbar-left">
+      <button class="filter-chip active" data-status="todos" onclick="filtrarStatus(event,'todos')">
+        <span class="material-symbols-outlined">menu_book</span> Todos
+      </button>
+      <button class="filter-chip" data-status="disponivel" onclick="filtrarStatus(event,'disponivel')">
+        <span class="material-symbols-outlined">check_circle</span> Disponíveis
+      </button>
+      <button class="filter-chip" data-status="emprestado" onclick="filtrarStatus(event,'emprestado')">
+        <span class="material-symbols-outlined">hourglass_empty</span> Emprestados
+      </button>
+    </div>
+    <div class="catalogo-toolbar-right">
+      <select class="sort-select" id="sortSelect" onchange="aplicarFiltros()">
+        <option value="titulo">A → Z</option>
+        <option value="titulo-desc">Z → A</option>
+        <option value="autor">Por Autor</option>
+        <option value="recente">Mais Recentes</option>
+      </select>
+      <div class="view-toggle">
+        <button class="view-btn active" id="btnGrid" onclick="setView('grid')" title="Grade">
+          <span class="material-symbols-outlined">grid_view</span>
+        </button>
+        <button class="view-btn" id="btnList" onclick="setView('list')" title="Lista">
+          <span class="material-symbols-outlined">view_list</span>
+        </button>
       </div>
     </div>
+  </div>
 
-    <!-- Card 2 — O Hobbit -->
-    <div class="book-card" data-id="hobbit">
-      <div class="book-cover-wrap">
-        <img src="https://m.media-amazon.com/images/I/91M9xPIf10L.jpg" alt="O Hobbit"/>
-        <div class="cover-gradient"></div>
-      </div>
-      <div class="book-body">
-        <div class="book-title-row">
-          <h3 class="book-title">O Hobbit</h3>
-        </div>
-        <p class="book-desc">Um livro infantojuvenil de alta fantasia.</p>
-        <div class="book-actions">
-          <button class="btn btn-secondary" onclick="verDetalhes('hobbit')">Ver Detalhes</button>
-          <button class="btn btn-primary" onclick="emprestarLivro('hobbit')">Emprestar</button>
-        </div>
-      </div>
-    </div>
+  <p class="result-count" id="result-count"></p>
 
-    <!-- Card 3 — A Maldição do Mar -->
-    <div class="book-card" data-id="maldicao-mar">
-      <div class="book-cover-wrap">
-        <img src="https://m.media-amazon.com/images/I/81kQ2kkTI8L.jpg" alt="A maldição do mar"/>
-        <div class="cover-gradient"></div>
-      </div>
-      <div class="book-body">
-        <div class="book-title-row">
-          <h3 class="book-title">A maldição do mar</h3>
-        </div>
-        <p class="book-desc">Quando corpos de garotos começam a aparecer no litoral da cidade de Sparrow, alguns moradores se perguntam se a antiga lenda sobre as bruxas vingativas seria verdade.</p>
-        <div class="book-actions">
-          <button class="btn btn-secondary" onclick="verDetalhes('maldicao-mar')">Ver Detalhes</button>
-          <button class="btn btn-primary" onclick="emprestarLivro('maldicao-mar')">Emprestar</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Card 4 — Assassin's Creed -->
-    <div class="book-card" data-id="assassins-creed">
-      <div class="book-cover-wrap">
-        <img src="AssassinCreed.jpg" alt="Assassin's Creed"/>
-        <div class="cover-gradient"></div>
-      </div>
-      <div class="book-body">
-        <div class="book-title-row">
-          <h3 class="book-title">Assassin's Creed</h3>
-        </div>
-        <p class="book-desc">Uma coleção de romances ambientados no universo dos videogames Assassin's Creed.</p>
-        <div class="book-actions">
-          <button class="btn btn-secondary" onclick="verDetalhes('assassins-creed')">Ver Detalhes</button>
-          <button class="btn btn-primary" onclick="emprestarLivro('assassins-creed')">Emprestar</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Card 5 — Coroa de Sombras -->
-    <div class="book-card" data-id="coroa-sombras">
-      <div class="book-cover-wrap">
-        <img src="https://m.media-amazon.com/images/I/911+kloXIRL.jpg" alt="Coroa de Sombras"/>
-        <div class="cover-gradient"></div>
-      </div>
-      <div class="book-body">
-        <div class="book-title-row">
-          <h3 class="book-title">Coroa de Sombras</h3>
-        </div>
-        <p class="book-desc">Se prepare para mergulhar nas intrigas da corte (e do coração).</p>
-        <div class="book-actions">
-          <button class="btn btn-secondary" onclick="verDetalhes('coroa-sombras')">Ver Detalhes</button>
-          <button class="btn btn-primary" onclick="emprestarLivro('coroa-sombras')">Emprestar</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Card 6 — O Nome do Vento -->
-    <div class="book-card" data-id="nome-vento">
-      <div class="book-cover-wrap">
-        <img src="https://m.media-amazon.com/images/I/81CGmkRG9GL._AC_UF1000,1000_QL80_.jpg" alt="O Nome do Vento"/>
-        <div class="cover-gradient"></div>
-      </div>
-      <div class="book-body">
-        <div class="book-title-row">
-          <h3 class="book-title">O Nome do Vento</h3>
-        </div>
-        <p class="book-desc">O Nome do Vento é um livro de fantasia escrito pelo norte-americano Patrick Rothfuss.</p>
-        <div class="book-actions">
-          <button class="btn btn-secondary" onclick="verDetalhes('nome-vento')">Ver Detalhes</button>
-          <button class="btn btn-primary" onclick="emprestarLivro('nome-vento')">Emprestar</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Card 7 — Um Mar Sem Estrelas -->
-    <div class="book-card" data-id="mar-sem-estrelas">
-      <div class="book-cover-wrap">
-        <img src="https://m.media-amazon.com/images/I/81ORe57k3vS.jpg" alt="Um Mar Sem Estrelas"/>
-        <div class="cover-gradient"></div>
-      </div>
-      <div class="book-body">
-        <div class="book-title-row">
-          <h3 class="book-title">Um Mar Sem Estrelas</h3>
-        </div>
-        <p class="book-desc">Acompanha Zachary Ezra Rawlins, um estudante que encontra um livro misterioso contendo uma história de sua própria infância.</p>
-        <div class="book-actions">
-          <button class="btn btn-secondary" onclick="verDetalhes('mar-sem-estrelas')">Ver Detalhes</button>
-          <button class="btn btn-primary" onclick="emprestarLivro('mar-sem-estrelas')">Emprestar</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Card 8 — O Feiticeiro de Terramar -->
-    <div class="book-card" data-id="feiticeiro-terramar">
-      <div class="book-cover-wrap">
-        <img src="https://m.media-amazon.com/images/I/61Nvp78uhGL._AC_UF1000,1000_QL80_.jpg" alt="O Feiticeiro de Terramar"/>
-        <div class="cover-gradient"></div>
-      </div>
-      <div class="book-body">
-        <div class="book-title-row">
-          <h3 class="book-title">O Feiticeiro de Terramar</h3>
-        </div>
-        <p class="book-desc">A Wizard of Earthsea é um romance de fantasia escrito por Ursula K. Le Guin.</p>
-        <div class="book-actions">
-          <button class="btn btn-secondary" onclick="verDetalhes('feiticeiro-terramar')">Ver Detalhes</button>
-          <button class="btn btn-primary" onclick="emprestarLivro('feiticeiro-terramar')">Emprestar</button>
-        </div>
-      </div>
-    </div>
-
-  </section>
+  <!-- GRID DE LIVROS -->
+  <section class="book-grid" id="bookGrid"></section>
 
   <footer class="footer">
-    <p>© 2024 Estação Literária. Navegando pelo conhecimento infinito.</p>
+    <p>© 2026 Estação Literária. Navegando pelo conhecimento infinito.</p>
     <div class="footer-links">
       <a href="#">Privacidade</a>
       <a href="#">Termos de Serviço</a>
@@ -237,13 +129,10 @@
 
 </main>
 
-<!-- ══════════════════════════════════════
-     MODAL — TICKET DE EMPRÉSTIMO
-══════════════════════════════════════ -->
+<!-- ── MODAL TICKET ── -->
 <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
   <div class="ticket-wrap">
     <div class="ticket">
-
       <div class="ticket-header">
         <div class="ticket-logo">
           <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">auto_stories</span>
@@ -252,17 +141,12 @@
         <p>ESTAÇÃO LITERÁRIA — BIBLIOTECA</p>
         <p>Comprovante de retirada do livro</p>
       </div>
-
-      <div class="perforation">
-        <div class="perf-line"></div>
-      </div>
-
+      <div class="perforation"><div class="perf-line"></div></div>
       <div class="ticket-body">
         <div class="status-badge">
           <div class="pulse"></div>
           Empréstimo Ativo
         </div>
-
         <div class="field-group">
           <div class="field-row">
             <span class="field-label">Usuário</span>
@@ -275,9 +159,7 @@
             <span class="field-value mono" id="tk-userid"></span>
           </div>
         </div>
-
         <hr class="divider">
-
         <div class="field-group">
           <div class="field-row">
             <span class="field-label">Livro</span>
@@ -305,9 +187,7 @@
             <span class="field-value" style="color:#00f5d4;font-weight:700;">R$ 15,00</span>
           </div>
         </div>
-
         <hr class="divider">
-
         <div class="dates-grid">
           <div class="date-box">
             <div class="date-box-label">📅 Empréstimo</div>
@@ -318,11 +198,9 @@
             <div class="date-box-value" id="tk-due"></div>
           </div>
         </div>
-
         <div class="instr-block">
           <div class="instr-title">
-            <span class="material-symbols-outlined">warning</span>
-            Instruções
+            <span class="material-symbols-outlined">warning</span> Instruções
           </div>
           <ul>
             <li>Imprima este ticket ou salve o número</li>
@@ -330,7 +208,6 @@
             <li>O funcionário confirmará no sistema</li>
           </ul>
         </div>
-
         <div class="qr-section">
           <div class="qr-box">
             <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">qr_code</span>
@@ -338,206 +215,364 @@
           <div class="qr-info">
             <span>Data da Solicitação</span>
             <strong id="tk-reqdate"></strong>
-            <span style="margin-top:0.3rem">Número do Ticket</span>
+            <span style="margin-top:.3rem">Número do Ticket</span>
             <strong id="tk-ticketnum"></strong>
           </div>
         </div>
       </div>
-
       <div class="ticket-footer">
         <button class="btn-print" onclick="window.print()">
-          <span class="material-symbols-outlined">print</span>
-          Imprimir Ticket
+          <span class="material-symbols-outlined">print</span> Imprimir Ticket
         </button>
-        <button class="btn-back" onclick="event.stopPropagation(); closeTicket()">
-          <span class="material-symbols-outlined">arrow_back</span>
-          Voltar
+        <button class="btn-back" onclick="closeTicket()">
+          <span class="material-symbols-outlined">arrow_back</span> Voltar
         </button>
       </div>
-
     </div>
   </div>
 </div>
 
-<script>
-  // ══════════════════════════════════════
-  // BANCO DE DADOS DOS LIVROS
-  // ══════════════════════════════════════
-  const livros = {
-    'harry-potter': {
-      id: 'harry-potter',
-      titulo: 'Harry Potter',
-      autor: 'J. K. Rowling',
-      isbn: '978-8532530783',
-      capa: 'HarryPotter.jpg',
-      desc: 'Harry Potter descobre, aos 11 anos, que é um bruxo e vai estudar na Escola de Magia e Bruxaria de Hogwarts. Lá, faz amigos, aprende magia e enfrenta mistérios envolvendo a Pedra Filosofal — um objeto poderoso cobiçado por forças sombrias ligadas ao passado de seus pais.'
-    },
-    'hobbit': {
-      id: 'hobbit',
-      titulo: 'O Hobbit',
-      autor: 'J.R.R. Tolkien',
-      isbn: '978-8595084742',
-      capa: 'https://m.media-amazon.com/images/I/91M9xPIf10L.jpg',
-      desc: 'Bilbo Bolseiro, um hobbit tranquilo, é levado a uma aventura inesperada com um grupo de anões e o mago Gandalf. A missão é recuperar um tesouro guardado pelo dragão Smaug, mas Bilbo acaba descobrindo coragem e inteligência que nem sabia possuir..'
-    },
-    'maldicao-mar': {
-      id: 'maldicao-mar',
-      titulo: 'A Maldição do Mar',
-      autor: 'Shea Ernshaw',
-      isbn: '978-8551004296',
-      capa: 'https://m.media-amazon.com/images/I/81kQ2kkTI8L.jpg',
-      desc: 'Na cidade de Sparrow, três irmãs acusadas de bruxaria foram afogadas séculos atrás. Todo verão, seus espíritos retornam possuindo garotas locais para atrair jovens ao mar e matá-los. Penny vive ali e tenta sobreviver à maldição — até que um forasteiro chega e tudo começa a mudar.'
-    },
-    'assassins-creed': {
-      id: 'assassins-creed',
-      titulo: "Assassin's Creed",
-      autor: 'Oliver Bowden',
-      isbn: '978-8501092929',
-      capa: 'AssassinCreed.jpg',
-      desc: "A história acompanha Ezio Auditore, um jovem italiano que busca vingança após sua família ser traída e assassinada. Ao longo do caminho, ele se torna um assassino habilidoso, mergulhando em uma conspiração envolvendo poder, política e segredos antigos."
-    },
-    'coroa-sombras': {
-      id: 'coroa-sombras',
-      titulo: 'Coroa de Sombras',
-      autor: 'Sarah J. Maas',
-      isbn: '978-8501401370',
-      capa: 'https://m.media-amazon.com/images/I/911+kloXIRL.jpg',
-      desc: ', acompanha Alessandra Stathos, uma jovem ambiciosa que planeja seduzir o misterioso Rei das Sombras, casar-se com ele e matá-lo para assumir o reino. O romance enemies to lovers foca na corte e poderes do rei, mostrando a anti-heroína superando desafios para se tornar rainha.'
-    },
-    'nome-vento': {
-      id: 'nome-vento',
-      titulo: 'O Nome do Vento',
-      autor: 'Patrick Rothfuss',
-      isbn: '978-8598078359',
-      capa: 'https://m.media-amazon.com/images/I/81CGmkRG9GL._AC_UF1000,1000_QL80_.jpg',
-      desc: 'Kvothe, uma figura lendária, conta sua própria história: de um garoto órfão que vive nas ruas até se tornar um dos maiores magos de sua época. A narrativa mistura magia, música e tragédia, revelando como nasce uma lenda.'
-    },
-    'mar-sem-estrelas': {
-      id: 'mar-sem-estrelas',
-      titulo: 'Um Mar Sem Estrelas',
-      autor: 'Erin Morgenstern',
-      isbn: '978-8551005743',
-      capa: 'https://m.media-amazon.com/images/I/81ORe57k3vS.jpg',
-      desc: 'Zachary descobre um livro misterioso que conta uma história sobre ele mesmo. Isso o leva a um mundo oculto de bibliotecas secretas, portas mágicas e sociedades enigmáticas, onde realidade e fantasia se misturam.'
-    },
-    'feiticeiro-terramar': {
-      id: 'feiticeiro-terramar',
-      titulo: 'O Feiticeiro de Terramar',
-      autor: 'Ursula K. Le Guin',
-      isbn: '978-8578270698',
-      capa: 'https://m.media-amazon.com/images/I/61Nvp78uhGL._AC_UF1000,1000_QL80_.jpg',
-      desc: 'Ged, um jovem com grande talento mágico, entra para uma escola de magia, mas sua arrogância o leva a libertar uma força sombria. A partir daí, ele precisa enfrentar seus próprios erros em uma jornada de autoconhecimento e equilíbrio.'
-    }
-  };
-
-  // Dados do usuário logado
-  const usuarioLogado = {
-    nome: 'Kevin Kaslana',
-    id: '2451'
-  };
-
-  // ══════════════════════════════════════
-  // VER DETALHES — salva no localStorage e redireciona
-  // ══════════════════════════════════════
-  function verDetalhes(id) {
-    const livro = livros[id];
-    if (!livro) return;
-    localStorage.setItem('livro', JSON.stringify(livro));
-    window.location.href = `LivroDetalhe.html?livro=${id}`;
-  }
-
-  // ══════════════════════════════════════
-  // EMPRESTAR — abre o modal de pagamento primeiro
-  // ══════════════════════════════════════
-  function emprestarLivro(id) {
-    const livro = livros[id];
-    if (!livro) return;
-    PG.abrir(livro); // abre pagamento → depois abre o ticket
-  }
-
-  // ══════════════════════════════════════
-  // MODAL DO TICKET
-  // ══════════════════════════════════════
-  function formatDate(date) {
-    return date.toLocaleDateString('pt-BR');
-  }
-
-  function genTicketNum() {
-    return 'EMP-' + String(Math.floor(Math.random() * 99999) + 1).padStart(6, '0');
-  }
-
-  function openTicket(livro) {
-    const today = new Date();
-    const due = new Date(today);
-    due.setDate(due.getDate() + 14);
-
-    document.getElementById('tk-user').textContent    = usuarioLogado.nome;
-    document.getElementById('tk-userid').textContent  = '#' + usuarioLogado.id;
-    document.getElementById('tk-title').textContent   = livro.titulo;
-    document.getElementById('tk-author').textContent  = livro.autor;
-    document.getElementById('tk-isbn').textContent    = livro.isbn;
-    document.getElementById('tk-borrowed').textContent = formatDate(today);
-    document.getElementById('tk-due').textContent     = formatDate(due);
-    document.getElementById('tk-reqdate').textContent = formatDate(today);
-    document.getElementById('tk-ticketnum').textContent = genTicketNum();
-
-    document.getElementById('modalOverlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeTicket() {
-    document.getElementById('modalOverlay').classList.remove('open');
-    document.body.style.overflow = '';
-  }
-
-  function handleOverlayClick(e) {
-    if (e.target === document.getElementById('modalOverlay')) {
-      closeTicket();
-    }
-  }
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeTicket();
-  });
-
-  // ══════════════════════════════════════
-  // BUSCA
-  // ══════════════════════════════════════
-  document.querySelector('.search').addEventListener('input', function () {
-    const valor = this.value.toLowerCase();
-    document.querySelectorAll('.book-card').forEach(card => {
-      const titulo = card.querySelector('.book-title').innerText.toLowerCase();
-      card.style.display = titulo.includes(valor) ? 'block' : 'none';
-    });
-  });
-  // ══════════════════════════════════════
-  // OPEN TICKET — agora recebe o método de pagamento
-  // ══════════════════════════════════════
-  function openTicket(livro, metodoPagamento) {
-    const today = new Date();
-    const due = new Date(today);
-    due.setDate(due.getDate() + 30); // 30 dias = 1 mês
-
-    document.getElementById('tk-user').textContent    = usuarioLogado.nome;
-    document.getElementById('tk-userid').textContent  = '#' + usuarioLogado.id;
-    document.getElementById('tk-title').textContent   = livro.titulo;
-    document.getElementById('tk-author').textContent  = livro.autor;
-    document.getElementById('tk-isbn').textContent    = livro.isbn;
-    document.getElementById('tk-borrowed').textContent = formatDate(today);
-    document.getElementById('tk-due').textContent     = formatDate(due);
-    document.getElementById('tk-reqdate').textContent = formatDate(today);
-    document.getElementById('tk-ticketnum').textContent = genTicketNum();
-
-    // Adiciona o método de pagamento no ticket se existir o elemento
-    const pgEl = document.getElementById('tk-pagamento');
-    if (pgEl) pgEl.textContent = metodoPagamento || '—';
-
-    document.getElementById('modalOverlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-</script>
+<div class="toast-wrap" id="toast-wrap"></div>
 
 <!-- Modal de Pagamento -->
 <script src="pagamento-modal.js"></script>
+
+<script>
+/* ══════════════════════════════════════════
+   CONFIGURAÇÃO
+══════════════════════════════════════════ */
+const API_LIVROS = 'http://localhost:9999/Estacao-refatorado/php/livros.php';
+
+// Proteção de página
+if (!localStorage.getItem('logado')) {
+  window.location.href = 'LoginUsuario.html';
+}
+
+if (!localStorage.getItem('logado')) window.location.href = 'LoginUsuario.html';
+
+const usuarioLogado = {
+  id:   localStorage.getItem('usuario_id')   || '001',
+  nome: localStorage.getItem('usuario_nome') || 'Leitor',
+};
+
+// Fallback local — usado se o banco não responder
+const LIVROS_LOCAL = []; // fallback vazio
+
+/* ══════════════════════════════════════════
+   ESTADO
+══════════════════════════════════════════ */
+let todosLivros    = [];
+let filtroCategoria = 'todos';
+let filtroStatus    = 'todos';
+let filtroBusca     = '';
+let vistaAtual      = 'grid';
+let livroAtivoPag   = null; // livro aberto no pagamento
+
+/* ══════════════════════════════════════════
+   CARREGAR LIVROS DO BANCO
+══════════════════════════════════════════ */
+async function carregarLivros() {
+  renderSkeleton();
+  try {
+    const resp = await fetch(API_LIVROS);
+    if (!resp.ok) throw new Error('Servidor retornou erro ' + resp.status);
+    const dados = await resp.json();
+
+    // Normaliza campos do banco para o formato interno
+    todosLivros = dados.map(l => ({
+      id:        String(l.id),
+      titulo:    l.titulo,
+      autor:     l.autor,
+      isbn:      l.isbn,
+      status:    l.status    || 'disponivel',
+      editora:   l.editora   || '',
+      categoria: l.categoria || 'Geral',
+      capa:      l.capa      || '',
+      desc:      l.descricao || '',
+      quantidade: Number(l.quantidade) || 0,
+    }));
+
+    aplicarFiltros();
+  } catch (err) {
+    console.warn('Banco indisponível, usando fallback local:', err.message);
+    todosLivros = LIVROS_LOCAL;
+    aplicarFiltros();
+    showToast('Exibindo dados locais — banco não respondeu.', 'erro');
+  }
+}
+
+/* ══════════════════════════════════════════
+   FILTROS
+══════════════════════════════════════════ */
+function filtrarCategoria(e, cat) {
+  e.preventDefault();
+  filtroCategoria = cat;
+  document.getElementById('subtitulo-categoria').textContent =
+    '/ ' + (cat === 'todos' ? 'Todos' : cat);
+  document.querySelectorAll('.side-nav-link').forEach(a => {
+    a.classList.toggle('active', a.dataset.cat === cat);
+  });
+  aplicarFiltros();
+}
+
+function filtrarStatus(e, status) {
+  filtroStatus = status;
+  document.querySelectorAll('.filter-chip').forEach(c =>
+    c.classList.toggle('active', c.dataset.status === status));
+  aplicarFiltros();
+}
+
+function aplicarFiltros() {
+  let lista = [...todosLivros];
+
+  // Categoria
+  if (filtroCategoria !== 'todos')
+    lista = lista.filter(l => l.categoria === filtroCategoria);
+
+  // Status
+  if (filtroStatus !== 'todos')
+    lista = lista.filter(l => l.status === filtroStatus);
+
+  // Busca
+  if (filtroBusca) {
+    const q = filtroBusca.toLowerCase();
+    lista = lista.filter(l =>
+      l.titulo.toLowerCase().includes(q) ||
+      l.autor.toLowerCase().includes(q)  ||
+      (l.isbn || '').includes(q)
+    );
+  }
+
+  // Ordenação
+  const sort = document.getElementById('sortSelect').value;
+  if (sort === 'titulo')      lista.sort((a,b) => a.titulo.localeCompare(b.titulo));
+  if (sort === 'titulo-desc') lista.sort((a,b) => b.titulo.localeCompare(a.titulo));
+  if (sort === 'autor')       lista.sort((a,b) => a.autor.localeCompare(b.autor));
+  if (sort === 'recente')     lista.reverse();
+
+  renderGrid(lista);
+}
+
+/* ══════════════════════════════════════════
+   RENDER SKELETON
+══════════════════════════════════════════ */
+function renderSkeleton() {
+  const grid = document.getElementById('bookGrid');
+  grid.className = 'skeleton-grid';
+  grid.innerHTML = Array(8).fill('').map(() => `
+    <div class="skeleton-card">
+      <div class="skeleton-img"></div>
+      <div class="skeleton-body">
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line short"></div>
+        <div class="skeleton-line btn"></div>
+      </div>
+    </div>`).join('');
+  document.getElementById('result-count').textContent = '';
+}
+
+/* ══════════════════════════════════════════
+   RENDER GRID
+══════════════════════════════════════════ */
+function renderGrid(lista) {
+  const grid  = document.getElementById('bookGrid');
+  const count = document.getElementById('result-count');
+
+  grid.className = 'book-grid' + (vistaAtual === 'list' ? ' list-view' : '');
+  count.innerHTML = `<strong>${lista.length}</strong> livro${lista.length !== 1 ? 's' : ''} encontrado${lista.length !== 1 ? 's' : ''}`;
+
+  if (lista.length === 0) {
+    grid.innerHTML = `
+      <div class="catalogo-vazio">
+        <span class="material-symbols-outlined">search_off</span>
+        <h3>Nenhum livro encontrado</h3>
+        <p>Tente ajustar os filtros ou a busca.</p>
+      </div>`;
+    return;
+  }
+
+  const emprestadosAtivos = JSON.parse(localStorage.getItem('biblioteca_loans') || '[]');
+
+  grid.innerHTML = lista.map(livro => {
+    const jaEmprestado = emprestadosAtivos.some(e => String(e.id) === String(livro.id));
+    const qtdDisp      = parseInt(livro.quantidade_disponivel ?? livro.quantidade) || 0;
+    const disponivel   = qtdDisp > 0 && !jaEmprestado;
+    const capaSrc      = livro.capa || '';
+
+    return `
+    <div class="book-card" data-id="${livro.id}">
+      <div class="book-cover-wrap">
+        ${capaSrc
+          ? `<img src="${capaSrc}" alt="${livro.titulo}"
+               onerror="this.parentElement.innerHTML='<div class=\\'book-img-ph\\'><span class=\\'material-symbols-outlined\\' style=\\'font-size:2.5rem\\'>menu_book</span></div>'">`
+          : `<div class="book-img-ph"><span class="material-symbols-outlined" style="font-size:2.5rem">menu_book</span></div>`
+        }
+        <div class="cover-gradient"></div>
+      </div>
+      <div class="book-body">
+        <div class="book-title-row">
+          <h3 class="book-title">${livro.titulo}</h3>
+          <span class="avail-badge ${disponivel ? 'avail-ok' : 'avail-emp'}">
+            ${disponivel ? 'Disponível' : 'Emprestado'}
+          </span>
+        </div>
+        <p style="font-size:.78rem;color:var(--on-surface-variant);margin:0 0 4px;">${livro.autor}</p>
+        <p class="book-desc">${livro.desc || ''}</p>
+        <div class="book-actions">
+          <button class="btn btn-secondary" onclick="verDetalhes('${livro.id}')">
+            Ver Detalhes
+          </button>
+          <button class="btn btn-primary"
+            onclick="emprestarLivro('${livro.id}')"
+            ${!disponivel ? 'disabled style="opacity:.4;cursor:not-allowed"' : ''}>
+            ${jaEmprestado ? 'Em uso' : 'Emprestar'}
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════
+   VISTA GRID / LISTA
+══════════════════════════════════════════ */
+function setView(v) {
+  vistaAtual = v;
+  document.getElementById('btnGrid').classList.toggle('active', v === 'grid');
+  document.getElementById('btnList').classList.toggle('active', v === 'list');
+  aplicarFiltros();
+}
+
+/* ══════════════════════════════════════════
+   AÇÕES DOS CARDS
+══════════════════════════════════════════ */
+function verDetalhes(id) {
+  const livro = todosLivros.find(l => String(l.id) === String(id));
+  if (!livro) return;
+  localStorage.setItem('livro', JSON.stringify(livro));
+  window.location.href = `LivroDetalhe.html?livro=${id}`;
+}
+
+function emprestarLivro(id) {
+  const livro = todosLivros.find(l => String(l.id) === String(id));
+  if (!livro) return;
+  if (livro.status !== 'disponivel') { showToast('Este livro não está disponível.', 'erro'); return; }
+
+  const loans = JSON.parse(localStorage.getItem('biblioteca_loans') || '[]');
+  if (loans.length >= 5) { showToast('Você já tem 5 livros emprestados.', 'erro'); return; }
+  if (loans.some(e => String(e.id) === String(livro.id))) { showToast('Você já tem este livro.', 'erro'); return; }
+
+  livroAtivoPag = livro;
+  PG.abrir(livro);
+}
+
+/* ══════════════════════════════════════════
+   TICKET (chamado pelo pagamento-modal.js)
+══════════════════════════════════════════ */
+function openTicket(livro, metodoPagamento) {
+  const today = new Date();
+  const due   = new Date(today); due.setDate(due.getDate() + 30);
+  const fmt   = d => d.toLocaleDateString('pt-BR');
+
+  document.getElementById('tk-user').textContent     = usuarioLogado.nome;
+  document.getElementById('tk-userid').textContent   = '#' + usuarioLogado.id;
+  document.getElementById('tk-title').textContent    = livro.titulo;
+  document.getElementById('tk-author').textContent   = livro.autor;
+  document.getElementById('tk-isbn').textContent     = livro.isbn || '—';
+  document.getElementById('tk-pagamento').textContent= metodoPagamento || '—';
+  document.getElementById('tk-borrowed').textContent = fmt(today);
+  document.getElementById('tk-due').textContent      = fmt(due);
+  document.getElementById('tk-reqdate').textContent  = fmt(today);
+  document.getElementById('tk-ticketnum').textContent= 'EMP-' + String(Math.floor(Math.random()*99999)+1).padStart(6,'0');
+
+  // Salva no localStorage de empréstimos ativos
+  const loans = JSON.parse(localStorage.getItem('biblioteca_loans') || '[]');
+  if (!loans.some(e => String(e.id) === String(livro.id))) {
+    const toISO = d => d.toISOString().split('T')[0];
+    loans.push({
+      id:        livro.id,
+      title:     livro.titulo,
+      author:    livro.autor,
+      img:       livro.capa || '',
+      borrowedAt:toISO(today),
+      dueDate:   toISO(due),
+      renewals:  0,
+      late:      false,
+    });
+    localStorage.setItem('biblioteca_loans', JSON.stringify(loans));
+
+    // Registra no banco de dados
+    fetch('http://localhost:9999/Estacao-refatorado/php/emprestimos.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        usuario_id:              parseInt(usuarioLogado.id) || null,
+        livro_id:                parseInt(livro.id)         || null,
+        data_emprestimo:         toISO(today),
+        data_devolucao_prevista: toISO(due),
+        metodo_pagamento:        metodoPagamento            || null,
+        valor_pago:              15.00,
+      }),
+    }).catch(() => {}); // falha silenciosa — empréstimo já salvo no localStorage
+  }
+
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeTicket() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  aplicarFiltros(); // atualiza badges após emprestar
+}
+
+function handleOverlayClick(e) {
+  if (e.target.id === 'modalOverlay') closeTicket();
+}
+
+/* ══════════════════════════════════════════
+   BUSCA COM DEBOUNCE
+══════════════════════════════════════════ */
+let debounce;
+document.getElementById('campoBusca').addEventListener('input', e => {
+  clearTimeout(debounce);
+  debounce = setTimeout(() => {
+    filtroBusca = e.target.value.trim();
+    aplicarFiltros();
+  }, 300);
+});
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+function showToast(msg, type = 'ok') {
+  const wrap = document.getElementById('toast-wrap');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`; t.textContent = msg;
+  wrap.appendChild(t);
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 350); }, 3200);
+}
+
+/* ESC fecha ticket */
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTicket(); });
+
+/* ══════════════════════════════════════════
+   INICIALIZAÇÃO
+══════════════════════════════════════════ */
+// ── Lê parâmetro de busca da URL ─────────────────────
+// Ex: CatalogoLivros.html?busca=harry+potter
+(function lerBuscaDaURL() {
+  const params = new URLSearchParams(window.location.search);
+  const termoBusca = params.get('busca');
+  if (termoBusca && termoBusca.trim()) {
+    filtroBusca = termoBusca.trim();
+    // Preenche o campo de busca visualmente
+    const campoBuscaEl = document.getElementById('campoBusca');
+    if (campoBuscaEl) campoBuscaEl.value = filtroBusca;
+  }
+})();
+
+carregarLivros();
+</script>
 </body>
 </html>
