@@ -495,3 +495,23 @@ tr:last-child td { border-bottom: none; }
 @media (max-width: 600px) {
   .news-grid { grid-template-columns: 1fr; }
 }
+
+
+/* ── Conta: btn-excluir (from inline) ── */
+.btn-excluir {
+      width: 100%;
+      margin-top: .5rem;
+      padding: .65rem 1rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255,113,108,.35);
+      background: transparent;
+      color: #ff716c;
+      font-size: .875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+    }
+    .btn-excluir:hover {
+      background: rgba(255,113,108,.1);
+      border-color: #ff716c;
+    }
