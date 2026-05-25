@@ -131,73 +131,97 @@
   </div>
 
   <section class="book-grid" id="secLivros">
-
-    <div class="book-card">
-      <img src="Hobbit.webp" class="book-img" alt="O Hobbit">
-      <div class="book-body">
-        <h3>O Hobbit</h3>
-        <p>J.R.R. Tolkien</p>
-      </div>
-    </div>
-
-    <div class="book-card">
-      <img src="HarryPotter.jpg" class="book-img" alt="Harry Potter">
-      <div class="book-body">
-        <h3>Harry Potter</h3>
-        <p>J.K. Rowling</p>
-      </div>
-    </div>
-
-    <div class="book-card">
-      <img src="AssassinCreed.jpg" class="book-img" alt="Assassin's Creed">
-      <div class="book-body">
-        <h3>Assassin's Creed</h3>
-        <p>Anton Gill</p>
-      </div>
-    </div>
-
-    <div class="book-card">
-      <img src="https://livrariascuritiba.vteximg.com.br/arquivos/ids/2184938-1000-1000/LV520518.jpg?v=638822975842800000" class="book-img" alt="O Hobbit">
-      <div class="book-body">
-        <h3>Tower of God</h3>
-        <p>SIU</p>
-      </div>
-    </div>
-
+    <div id="livros-loading" style="text-align:center;padding:2rem;color:var(--on-surface-variant);font-size:.9rem;">Carregando...</div>
   </section>
 
 </main>
 
 
 <script>
-  // vista atual: 'livros' ou 'noticias'
+  const API_LIVROS = 'http://localhost:9999/Estacao-refatorado/php/livros.php';
+  const API_EMP    = 'http://localhost:9999/Estacao-refatorado/php/emprestimos.php';
+
+  if (!localStorage.getItem('logado')) window.location.href = 'LoginUsuario.html';
+
+  // Saudação personalizada
+  const nomeUsuario = localStorage.getItem('usuario_nome') || 'Leitor';
+  const heroTitle = document.querySelector('.hero h2');
+  if (heroTitle) heroTitle.textContent = `Bem-vindo, ${nomeUsuario.split(' ')[0]}!`;
+
   let vistaAtual = 'livros';
 
   function mostrar(vista) {
-    const panel      = document.getElementById('newsPanel');
-    const secLivros  = document.getElementById('secLivros');
-    const btnNews    = document.getElementById('btnNoticias');
-    const btnEmp     = document.getElementById('btnEmprestados');
+    const panel     = document.getElementById('newsPanel');
+    const secLivros = document.getElementById('secLivros');
+    const btnNews   = document.getElementById('btnNoticias');
+    const btnEmp    = document.getElementById('btnEmprestados');
 
     if (vista === 'noticias') {
-      // Mostra notícias, esconde livros
       panel.classList.add('open');
       secLivros.style.display = 'none';
       btnNews.classList.add('news-open');
       btnEmp.classList.remove('news-open');
     } else {
-      // Mostra livros, esconde notícias
       panel.classList.remove('open');
       secLivros.style.display = '';
       btnEmp.classList.add('news-open');
       btnNews.classList.remove('news-open');
     }
-
     vistaAtual = vista;
   }
 
-  // Inicia com livros ativos e botão Mais Emprestados destacado
+  // Carregar livros mais recentes do banco
+  async function carregarLivros() {
+    const sec = document.getElementById('secLivros');
+    try {
+      const resp  = await fetch(API_LIVROS);
+      const lista = await resp.json();
+
+      // Pega os 8 livros disponíveis mais recentes
+      const disponiveis = lista
+        .filter(l => l.status === 'disponivel')
+        .slice(0, 8);
+
+      if (!disponiveis.length) {
+        sec.innerHTML = '<p style="text-align:center;color:var(--on-surface-variant);padding:2rem;">Nenhum livro disponível no momento.</p>';
+        return;
+      }
+
+      sec.innerHTML = disponiveis.map(l => `
+        <div class="book-card" onclick="verLivro(${l.id})" style="cursor:pointer;">
+          ${l.capa
+            ? `<img src="${l.capa}" class="book-img" alt="${l.titulo}"
+                onerror="this.parentElement.querySelector('.book-img-ph').style.display='flex';this.style.display='none'">
+               <div class="book-img-ph" style="display:none;align-items:center;justify-content:center;height:160px;font-size:2rem;">📖</div>`
+            : `<div class="book-img-ph" style="display:flex;align-items:center;justify-content:center;height:160px;font-size:2rem;">📖</div>`
+          }
+          <div class="book-body">
+            <h3>${l.titulo}</h3>
+            <p>${l.autor}</p>
+            ${l.categoria ? `<span style="font-size:.72rem;color:var(--primary);font-weight:600;">${l.categoria}</span>` : ''}
+          </div>
+        </div>`).join('');
+    } catch {
+      sec.innerHTML = '<p style="text-align:center;color:#ff716c;padding:2rem;">Erro ao carregar livros.</p>';
+    }
+  }
+
+  function verLivro(id) {
+    // Busca o livro e navega para o detalhe
+    fetch(`${API_LIVROS}?id=${id}`)
+      .then(r => r.json())
+      .then(l => {
+        localStorage.setItem('livro', JSON.stringify({
+          id: l.id, titulo: l.titulo, autor: l.autor,
+          isbn: l.isbn, capa: l.capa, descricao: l.descricao,
+        }));
+        window.location.href = 'LivroDetalhe.html';
+      }).catch(() => window.location.href = 'CatalogoLivros.html');
+  }
+
   mostrar('livros');
+  carregarLivros();
 </script>
+<script src="busca-global.js"></script>
 </body>
 </html>
