@@ -132,20 +132,20 @@
 // BASE DE CONHECIMENTO LOCAL — sem API, sem internet
 const BASE = [
   {
-    tags: ['emprestar','emprestimo','pegar','retirar','como pego','quero um livro'],
-    r: 'Para realizar um empréstimo, acesse o **Catálogo** no menu superior, encontre o livro e clique em "Emprestar". 📖\n\nO prazo padrão é **14 dias**. Você pode ter até **3 livros** ao mesmo tempo.\n\nSe o livro estiver indisponível, faça uma **reserva** — ela fica ativa por 48h após a devolução.'
+    tags: ['emprestar','emprestimo','pegar','retirar','como pego','quero um livro','valor','custa','quanto'],
+    r: 'Para realizar um empréstimo, acesse o **Catálogo** no menu superior, encontre o livro e clique em "Emprestar". 📖\n\nO empréstimo custa **R$ 15,00** (pago via **PIX ou cartão**). O prazo é de **30 dias**.\n\nVocê pode ter até **5 livros** ao mesmo tempo — desde que não tenha mais de **2 em atraso**.\n\nSe o livro estiver indisponível, faça uma **reserva**.'
   },
   {
     tags: ['renovar','renovacao','estender','mais tempo','prorrogar'],
     r: 'A renovação é simples! Vá em **Minha Conta → Empréstimos Ativos** e clique em "Renovar". 🔄\n\nCada livro pode ser renovado **1 vez**, por mais **7 dias**.\n\nNão é possível renovar com multa pendente ou se outro leitor reservou o livro.'
   },
   {
-    tags: ['devolver','devolucao','entregar','retornar'],
-    r: 'A devolução pode ser feita de duas formas:\n\n📍 **Presencialmente** — no balcão da biblioteca.\n💻 **Pelo sistema** — em "Meus Empréstimos" (o livro ainda deve ser entregue fisicamente).\n\nO prazo termina às 23h59 do dia indicado.'
+    tags: ['devolver','devolucao','entregar','retornar','como devolver','prazo devolucao'],
+    r: 'Para devolver, clique no botão de devolução em **Meus Empréstimos**. 📦\n\nApós isso, você tem **1 dia** para entregar o livro fisicamente na biblioteca.\n\n⚠️ Se não entregar no prazo, o empréstimo é **reativado automaticamente** e uma **multa é cobrada**.\n\nO mesmo vale para livros já em atraso — a multa é aplicada normalmente.'
   },
   {
     tags: ['multa','atraso','debito','pagar','pagamento','atrasado','credito'],
-    r: 'As multas são de **R$ 0,50 por dia de atraso** por livro. 💳\n\nPara pagar, acesse **Minha Conta → Multas** e escolha:\n- PIX\n- Cartão de crédito/débito\n- Créditos literários acumulados\n\nApós o pagamento, novos empréstimos são liberados em até 1 hora.'
+    r: 'Multas são geradas em dois casos: 💳\n\n1. **Livro em atraso** — passado o prazo de 30 dias\n2. **Devolução não entregue** — se clicar em devolver mas não levar o livro à biblioteca em 1 dia, o empréstimo é reativado e a multa é cobrada\n\nPagamento via **PIX ou cartão** em **Minha Conta → Multas**.\n\n⚠️ Com **2 ou mais livros em atraso**, novos empréstimos ficam bloqueados.'
   },
   {
     tags: ['senha','recuperar senha','esqueci','acesso','login','entrar','bloqueado','chave'],
@@ -169,7 +169,7 @@ const BASE = [
   },
   {
     tags: ['limite','quantos livros','maximo','quantidade','quantos posso'],
-    r: 'Cada usuário pode ter:\n\n📚 Até **3 livros** emprestados\n📋 Até **2 reservas** ativas\n🔄 Cada livro pode ser renovado **1 vez**\n\nCom multas pendentes, novos empréstimos ficam bloqueados.'
+    r: 'Cada usuário pode ter:\n\n📚 Até **5 livros** emprestados simultaneamente\n🕒 Prazo de **30 dias** por livro\n\n⚠️ Com **2 ou mais livros em atraso**, novos empréstimos ficam bloqueados — mesmo que o pagamento esteja pendente.'
   },
   {
     tags: ['ticket','chamado','contato','falar','humano','atendente','reclamar','problema','ajuda'],
@@ -239,13 +239,67 @@ function enviarTexto(texto) {
   document.getElementById('chat-msgs').appendChild(typing);
   scrollMsgs();
   setTimeout(() => {
-    typing.remove();
-    renderMsg(buscar(texto), 'ia');
-    digitando = false;
-    document.getElementById('btn-enviar').disabled = false;
-    document.getElementById('chat-input').focus();
+  typing.remove();
+
+  buscarIA(texto);
 
   }, 650 + Math.random() * 550);
+}
+
+async function buscarIA(texto) {
+
+// tenta responder pela base local
+const respostaLocal = buscar(texto);
+
+// se encontrou resposta boa
+if (!PADRAO.includes(respostaLocal)) {
+
+  renderMsg(respostaLocal, 'ia');
+
+  digitando = false;
+
+  document.getElementById('btn-enviar').disabled = false;
+
+  document.getElementById('chat-input').focus();
+
+  return;
+}
+
+// se não encontrou -> Gemini
+try {
+
+  const resposta = await fetch('gemini.php', {
+
+    method: 'POST',
+
+    headers: {
+      'Content-Type': 'application/json'
+    },
+
+    body: JSON.stringify({
+      pergunta: texto
+    })
+
+  });
+
+  const data = await resposta.json();
+
+  renderMsg(data.resposta, 'ia');
+
+} catch (erro) {
+
+  renderMsg(
+    'Os arquivos da estação estão temporariamente inacessíveis. 🌌',
+    'ia'
+  );
+
+}
+
+digitando = false;
+
+document.getElementById('btn-enviar').disabled = false;
+
+document.getElementById('chat-input').focus();
 }
 
 function renderMsg(texto, tipo) {
@@ -287,5 +341,6 @@ function boasVindas() {
 
 window.addEventListener('DOMContentLoaded', boasVindas);
 </script>
+<script src="busca-global.js"></script>
 </body>
 </html>
