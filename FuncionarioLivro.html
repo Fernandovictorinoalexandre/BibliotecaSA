@@ -7,91 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="funcionario.css">
-  <style>
-    /* ── Modal ── */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0; z-index: 2000;
-      background: rgba(5,13,37,.8); backdrop-filter: blur(6px);
-      align-items: center; justify-content: center;
-    }
-    .modal-overlay.aberto { display: flex; }
-    .modal {
-      background: var(--surface-container); border: 1px solid var(--outline-variant);
-      border-radius: 16px; padding: 2rem; width: 520px; max-width: 95vw;
-      box-shadow: 0 24px 64px rgba(0,0,0,.5); max-height: 90vh; overflow-y: auto;
-    }
-    .modal h3 { font-size: 1.2rem; color: var(--primary); margin-bottom: 1.5rem; }
-    .modal .input-group { margin-bottom: 1rem; }
-    .modal label { display: block; font-size: .8rem; color: var(--on-surface-variant); margin-bottom: 4px; }
-    .modal input, .modal select {
-      width: 100%; padding: .6rem .9rem; border-radius: 8px;
-      background: var(--surface-container-high);
-      border: 1px solid var(--outline-variant);
-      color: var(--on-surface); font-size: .9rem;
-    }
-    .modal input:focus, .modal select:focus {
-      outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--glow);
-    }
-    .modal-acoes { display: flex; gap: .75rem; justify-content: flex-end; margin-top: 1.5rem; }
-    .btn-modal-cancel {
-      padding: .6rem 1.2rem; border-radius: 8px; border: 1px solid var(--outline-variant);
-      background: transparent; color: var(--on-surface-variant); cursor: pointer; font-size: .875rem;
-    }
-    .btn-modal-save {
-      padding: .6rem 1.4rem; border-radius: 8px; border: none;
-      background: var(--primary); color: var(--on-primary); cursor: pointer;
-      font-size: .875rem; font-weight: 600;
-    }
-
-    /* ── Toast ── */
-    .toast {
-      position: fixed; bottom: 2rem; right: 2rem; z-index: 9999;
-      padding: .85rem 1.4rem; border-radius: 10px;
-      font-size: .9rem; font-weight: 600;
-      opacity: 0; transform: translateY(12px);
-      transition: opacity .3s, transform .3s; pointer-events: none;
-    }
-    .toast.show { opacity: 1; transform: translateY(0); }
-    .toast.sucesso { background: #00f5d4; color: #00443a; }
-    .toast.erro    { background: #ff716c; color: #fff; }
-
-    /* ── Badges ── */
-    .badge {
-      display: inline-block; padding: 2px 10px; border-radius: 20px;
-      font-size: .75rem; font-weight: 600;
-    }
-    .badge.disponivel   { background: rgba(0,245,212,.15); color: #00f5d4; }
-    .badge.emprestado   { background: rgba(244,228,138,.15); color: #f4e48a; }
-    .badge.indisponivel { background: rgba(255,113,108,.15); color: #ff716c; }
-
-    .modal-confirm p { color: var(--on-surface-variant); margin-bottom: 1.5rem; font-size: .95rem; }
-    .btn-modal-del {
-      padding: .6rem 1.4rem; border-radius: 8px; border: none;
-      background: var(--error); color: #fff; cursor: pointer;
-      font-size: .875rem; font-weight: 600;
-    }
-
-    .spinner {
-      display: inline-block; width: 14px; height: 14px;
-      border: 2px solid rgba(255,255,255,.3); border-top-color: #fff;
-      border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .btn-acao {
-      padding: 4px 10px; border-radius: 6px; border: none;
-      font-size: .78rem; cursor: pointer; font-weight: 600;
-    }
-    .btn-editar  { background: rgba(115,255,227,.15); color: var(--primary); }
-    .btn-excluir { background: rgba(255,113,108,.15); color: var(--error); margin-left: 6px; }
-    .btn-editar:hover  { background: rgba(115,255,227,.3); }
-    .btn-excluir:hover { background: rgba(255,113,108,.3); }
-
-    .empty-state { text-align: center; padding: 3rem; color: var(--on-surface-variant); }
-
-    /* Tabela livros — colunas menores */
-    .table td, .table th { font-size: .82rem; }
-  </style>
 </head>
 <body class="page-func">
 
@@ -122,7 +37,15 @@
     <a href="FuncionarioUsuario.html" class="nav-item">
       <span class="material-symbols-outlined">swap_horiz</span>Usuários
     </a>
+    <a href="GestaoFuncionario.html" class="nav-item">
+      <span class="material-symbols-outlined">badge</span>Funcionários
+    </a>
   </nav>
+  <div style="margin-top:auto;padding:20px 12px;">
+    <button onclick="logout()" style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,113,108,.25);background:rgba(255,113,108,.08);color:#ff716c;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background .2s;" onmouseover="this.style.background='rgba(255,113,108,.18)'" onmouseout="this.style.background='rgba(255,113,108,.08)'">
+      <span class="material-symbols-outlined" style="font-size:18px;">logout</span>Sair
+    </button>
+  </div>
 </aside>
 
 <!-- MAIN -->
@@ -192,6 +115,23 @@
       <input type="number" id="editQtd" min="0">
     </div>
     <div class="input-group">
+      <label>Categoria</label>
+      <select id="editCategoria">
+        <option value="Geral">Geral</option>
+        <option value="Fantasia">Fantasia</option>
+        <option value="Ficção Científica">Ficção Científica</option>
+        <option value="Romance">Romance</option>
+        <option value="Terror">Terror</option>
+        <option value="Aventura">Aventura</option>
+        <option value="Mistério">Mistério</option>
+        <option value="História">História</option>
+        <option value="Biografia">Biografia</option>
+        <option value="Autoajuda">Autoajuda</option>
+        <option value="Infantil">Infantil</option>
+        <option value="Clássico">Clássico</option>
+      </select>
+    </div>
+    <div class="input-group">
       <label>Status</label>
       <select id="editStatus">
         <option value="disponivel">Disponível</option>
@@ -221,7 +161,15 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  const API = 'php/livros.php';
+  if (localStorage.getItem('func_logado') !== 'true') window.location.href = 'LoginFuncionario.html';
+  async function logout() {
+    try { await fetch('http://localhost:9999/Estacao-refatorado/php/logout.php', { method: 'POST' }); } catch {}
+    ['func_logado','func_id','func_nome','func_email','func_cargo','func_matricula']
+      .forEach(k => localStorage.removeItem(k));
+    window.location.href = 'LoginFuncionario.html';
+  }
+
+  const API = 'http://localhost:9999/Estacao-refatorado/php/livros.php';
   let idParaDeletar = null;
 
   function toast(msg, tipo = 'sucesso') {
@@ -251,7 +199,10 @@
         <td>${l.isbn}</td>
         <td>${l.editora ?? '—'}</td>
         <td>${l.quantidade}</td>
-        <td><span class="badge ${l.status}">${l.status}</span></td>
+        <td>
+          <span class="badge ${l.status}">${l.status}</span>
+          ${l.quantidade > 1 ? `<div style="font-size:.72rem;color:var(--on-surface-variant);margin-top:2px;">${l.quantidade_disponivel ?? 0} dispon.</div>` : ''}
+        </td>
         <td>
           <button class="btn-acao btn-editar"  onclick="abrirEdicao(${l.id})">Editar</button>
           <button class="btn-acao btn-excluir" onclick="abrirExclusao(${l.id}, '${l.titulo.replace(/'/g,"\\'")}')">Excluir</button>
@@ -287,10 +238,11 @@
       document.getElementById('editTitulo').value  = l.titulo;
       document.getElementById('editAutor').value   = l.autor;
       document.getElementById('editIsbn').value    = l.isbn;
-      document.getElementById('editEditora').value = l.editora ?? '';
-      document.getElementById('editDataPub').value = l.data_publicacao ?? '';
-      document.getElementById('editQtd').value     = l.quantidade;
-      document.getElementById('editStatus').value  = l.status;
+      document.getElementById('editEditora').value   = l.editora ?? '';
+      document.getElementById('editDataPub').value   = l.data_publicacao ?? '';
+      document.getElementById('editQtd').value        = l.quantidade;
+      document.getElementById('editCategoria').value  = l.categoria ?? 'Geral';
+      document.getElementById('editStatus').value     = l.status;
       abrirModal('modalEdicao');
     } catch {
       toast('Erro ao buscar dados do livro.', 'erro');
@@ -306,6 +258,7 @@
       editora:         document.getElementById('editEditora').value.trim() || null,
       data_publicacao: document.getElementById('editDataPub').value || null,
       quantidade:      parseInt(document.getElementById('editQtd').value) || 0,
+      categoria:       document.getElementById('editCategoria').value,
       status:          document.getElementById('editStatus').value,
     };
 
