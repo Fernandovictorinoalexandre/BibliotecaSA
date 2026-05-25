@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Estação Literária — Gestão de Funcionários</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="funcionario.css">
+</head>
+<body class="page-func">
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <div class="logo-area">
+    <img src="Biblioteca2.png" width="60">
+    <h1>BIBLIOTECA</h1>
+  </div>
+  <nav class="menu">
+    <a href="PainelFuncionario.html">Dashboard</a>
+    <a href="#" class="active">Funcionários</a>
+  </nav>
+  <div class="right-area">
+    <input type="text" placeholder="Pesquisar..." class="search" id="campoBusca" oninput="buscar(this.value)">
+    <span id="func-nome-nav" style="font-size:.82rem;color:var(--on-surface-variant);white-space:nowrap;"></span>
+    <button class="btn-logout" onclick="logout()">Sair</button>
+    <div class="user-avatar">
+      <span class="material-symbols-outlined">person</span>
+    </div>
+  </div>
+</header>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <h1 class="logo">Estação Literária</h1>
+  <nav>
+    <a href="EmprestimoFuncionario.html" class="nav-item">
+      <span class="material-symbols-outlined">grid_view</span>Empréstimos
+    </a>
+    <a href="FuncionarioLivro.html" class="nav-item">
+      <span class="material-symbols-outlined">auto_stories</span>Livros
+    </a>
+    <a href="FuncionarioUsuario.html" class="nav-item">
+      <span class="material-symbols-outlined">swap_horiz</span>Usuários
+    </a>
+    <a href="GestaoFuncionario.html" class="nav-item active">
+      <span class="material-symbols-outlined">badge</span>Funcionários
+    </a>
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <header class="header">
+    <h2>Gestão de Funcionários</h2>
+    <p style="font-size:.78rem;color:var(--on-surface-variant);">Cadastro, edição e remoção de funcionários</p>
+  </header>
+
+  <!-- STATS -->
+  <section class="grid">
+    <div class="card"><p>Total</p><h3 id="statTotal">—</h3></div>
+    <div class="card"><p>Ativos</p><h3 id="statAtivo" style="color:#00f5d4;">—</h3></div>
+    <div class="card"><p>De folga</p><h3 id="statFolga" style="color:#f4e48a;">—</h3></div>
+    <div class="card"><p>Suspensos</p><h3 id="statSuspenso" style="color:#ff716c;">—</h3></div>
+  </section>
+
+  <!-- TABELA -->
+  <section class="table-section fade-up">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <h2>Funcionários</h2>
+      <button class="btn-primary" onclick="abrirCadastro()"
+        style="padding:.5rem 1.2rem;border-radius:8px;font-size:.875rem;border:none;cursor:pointer;">
+        + Novo Funcionário
+      </button>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nome</th>
+            <th>E-mail</th>
+            <th>Cargo</th>
+            <th>Matrícula</th>
+            <th>Status</th>
+            <th>Cadastro</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="corpoTabela">
+          <tr><td colspan="8" class="empty-state">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<!-- ── MODAL CADASTRO ── -->
+<div class="modal-overlay" id="modalCadastro">
+  <div class="modal">
+    <h3>Novo Funcionário</h3>
+
+    <div class="input-group">
+      <label>Nome completo *</label>
+      <input type="text" id="cadNome" placeholder="Ex: Maria Silva">
+    </div>
+    <div class="input-group">
+      <label>E-mail *</label>
+      <input type="email" id="cadEmail" placeholder="funcionario@biblioteca.com">
+    </div>
+    <div class="input-group">
+      <label>Senha *</label>
+      <input type="password" id="cadSenha" placeholder="Mínimo 6 caracteres">
+    </div>
+    <div class="input-group">
+      <label>Matrícula *</label>
+      <input type="text" id="cadMatricula" placeholder="Ex: BIB0042" style="text-transform:uppercase;">
+    </div>
+    <div class="input-group">
+      <label>Cargo</label>
+      <select id="cadCargo">
+        <option value="Bibliotecário">Bibliotecário</option>
+        <option value="Assistente">Assistente</option>
+        <option value="Administrador">Administrador</option>
+        <option value="Estagiário">Estagiário</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label>Status</label>
+      <select id="cadStatus">
+        <option value="ativo">Ativo</option>
+        <option value="folga">De folga</option>
+        <option value="suspenso">Suspenso</option>
+      </select>
+    </div>
+
+    <div class="modal-acoes">
+      <button class="btn-modal-cancel" onclick="fecharModal('modalCadastro')">Cancelar</button>
+      <button class="btn-modal-save" id="btnCadastrar" onclick="cadastrar()">Cadastrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL EDIÇÃO ── -->
+<div class="modal-overlay" id="modalEdicao">
+  <div class="modal">
+    <h3>Editar Funcionário</h3>
+    <input type="hidden" id="editId">
+
+    <div class="input-group">
+      <label>Nome completo</label>
+      <input type="text" id="editNome">
+    </div>
+    <div class="input-group">
+      <label>E-mail</label>
+      <input type="email" id="editEmail">
+    </div>
+    <div class="input-group">
+      <label>Nova senha <span style="color:var(--on-surface-variant);font-weight:400;">(deixe em branco para manter)</span></label>
+      <input type="password" id="editSenha" placeholder="Mínimo 6 caracteres">
+    </div>
+    <div class="input-group">
+      <label>Matrícula</label>
+      <input type="text" id="editMatricula" style="text-transform:uppercase;">
+    </div>
+    <div class="input-group">
+      <label>Cargo</label>
+      <select id="editCargo">
+        <option value="Bibliotecário">Bibliotecário</option>
+        <option value="Assistente">Assistente</option>
+        <option value="Administrador">Administrador</option>
+        <option value="Estagiário">Estagiário</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label>Status</label>
+      <select id="editStatus">
+        <option value="ativo">Ativo</option>
+        <option value="folga">De folga</option>
+        <option value="suspenso">Suspenso</option>
+      </select>
+    </div>
+
+    <div class="modal-acoes">
+      <button class="btn-modal-cancel" onclick="fecharModal('modalEdicao')">Cancelar</button>
+      <button class="btn-modal-save" id="btnSalvar" onclick="salvarEdicao()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL EXCLUSÃO ── -->
+<div class="modal-overlay" id="modalExclusao">
+  <div class="modal" style="width:420px;">
+    <h3>Excluir Funcionário</h3>
+    <p class="modal-confirm">Tem certeza que deseja excluir <strong id="nomeParaDeletar"></strong>?
+      Esta ação não pode ser desfeita. Funcionários com empréstimos vinculados não podem ser removidos.</p>
+    <div class="modal-acoes">
+      <button class="btn-modal-cancel" onclick="fecharModal('modalExclusao')">Cancelar</button>
+      <button class="btn-modal-del"    id="btnDeletar" onclick="confirmarExclusao()">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = 'http://localhost:9999/Estacao-refatorado/php/funcionarios.php';
+  let idParaDeletar = null;
+  let todosFunc = [];
+
+  // ── Proteção de rota ─────────────────────────────────
+  if (localStorage.getItem('func_logado') !== 'true') {
+    window.location.href = 'LoginFuncionario.html';
+  }
+  document.getElementById('func-nome-nav').textContent =
+    localStorage.getItem('func_nome') || 'Funcionário';
+
+  // ── Utilitários ──────────────────────────────────────
+  function toast(msg, tipo = 'sucesso') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = `toast ${tipo} show`;
+    setTimeout(() => el.classList.remove('show'), 3500);
+  }
+  function abrirModal(id)  { document.getElementById(id).classList.add('aberto'); }
+  function fecharModal(id) { document.getElementById(id).classList.remove('aberto'); }
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) fecharModal(m.id); });
+  });
+  function fmt(iso) {
+    if (!iso) return '—';
+    const [y,m,d] = iso.split('T')[0].split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  // ── Renderizar tabela ────────────────────────────────
+  function renderizarTabela(lista) {
+    const tbody = document.getElementById('corpoTabela');
+    if (!lista.length) {
+      tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Nenhum funcionário encontrado.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = lista.map(f => `
+      <tr>
+        <td style="font-family:monospace;font-size:.82rem;color:var(--on-surface-variant);">${f.id}</td>
+        <td style="font-weight:600;">${f.nome}</td>
+        <td style="font-size:.85rem;color:var(--on-surface-variant);">${f.email}</td>
+        <td style="font-size:.85rem;">${f.cargo}</td>
+        <td style="font-family:monospace;font-size:.82rem;">${f.matricula}</td>
+        <td><span class="badge ${f.status}">${f.status}</span></td>
+        <td style="font-size:.8rem;color:var(--on-surface-variant);">${fmt(f.criado_em)}</td>
+        <td>
+          <button class="btn-acao btn-editar"  onclick="abrirEdicao(${f.id})">Editar</button>
+          <button class="btn-acao btn-excluir" onclick="abrirExclusao(${f.id}, '${f.nome.replace(/'/g,"\\'")}')">Excluir</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // ── Carregar lista ───────────────────────────────────
+  async function carregarFuncionarios(busca = '') {
+    try {
+      const url  = busca ? `${API}?busca=${encodeURIComponent(busca)}` : API;
+      const resp = await fetch(url);
+      todosFunc  = await resp.json();
+
+      renderizarTabela(todosFunc);
+
+      document.getElementById('statTotal').textContent   = todosFunc.length;
+      document.getElementById('statAtivo').textContent   = todosFunc.filter(f => f.status === 'ativo').length;
+      document.getElementById('statFolga').textContent   = todosFunc.filter(f => f.status === 'folga').length;
+      document.getElementById('statSuspenso').textContent= todosFunc.filter(f => f.status === 'suspenso').length;
+
+    } catch {
+      document.getElementById('corpoTabela').innerHTML =
+        '<tr><td colspan="8" class="empty-state">Erro ao carregar dados. Verifique a conexão.</td></tr>';
+    }
+  }
+
+  function buscar(valor) {
+    clearTimeout(buscar._t);
+    buscar._t = setTimeout(() => carregarFuncionarios(valor.trim()), 350);
+  }
+
+  // ── Cadastro ─────────────────────────────────────────
+  function abrirCadastro() {
+    document.getElementById('cadNome').value      = '';
+    document.getElementById('cadEmail').value     = '';
+    document.getElementById('cadSenha').value     = '';
+    document.getElementById('cadMatricula').value = '';
+    document.getElementById('cadCargo').value     = 'Bibliotecário';
+    document.getElementById('cadStatus').value    = 'ativo';
+    abrirModal('modalCadastro');
+  }
+
+  async function cadastrar() {
+    const payload = {
+      nome:      document.getElementById('cadNome').value.trim(),
+      email:     document.getElementById('cadEmail').value.trim(),
+      senha:     document.getElementById('cadSenha').value,
+      matricula: document.getElementById('cadMatricula').value.trim(),
+      cargo:     document.getElementById('cadCargo').value,
+      status:    document.getElementById('cadStatus').value,
+    };
+
+    if (!payload.nome || !payload.email || !payload.senha || !payload.matricula) {
+      toast('Preencha todos os campos obrigatórios.', 'erro');
+      return;
+    }
+
+    const btn = document.getElementById('btnCadastrar');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>';
+
+    try {
+      const resp = await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const dados = await resp.json();
+
+      if (!resp.ok) {
+        toast(dados.erro || 'Erro ao cadastrar.', 'erro');
+      } else {
+        toast('Funcionário cadastrado com sucesso!');
+        fecharModal('modalCadastro');
+        carregarFuncionarios();
+      }
+    } catch {
+      toast('Erro de conexão.', 'erro');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Cadastrar';
+    }
+  }
+
+  // ── Edição ───────────────────────────────────────────
+  async function abrirEdicao(id) {
+    try {
+      const resp = await fetch(`${API}?id=${id}`);
+      const f    = await resp.json();
+
+      document.getElementById('editId').value        = f.id;
+      document.getElementById('editNome').value      = f.nome;
+      document.getElementById('editEmail').value     = f.email;
+      document.getElementById('editSenha').value     = '';
+      document.getElementById('editMatricula').value = f.matricula;
+      document.getElementById('editCargo').value     = f.cargo;
+      document.getElementById('editStatus').value    = f.status;
+
+      abrirModal('modalEdicao');
+    } catch {
+      toast('Erro ao buscar dados do funcionário.', 'erro');
+    }
+  }
+
+  async function salvarEdicao() {
+    const id = document.getElementById('editId').value;
+    const payload = {
+      nome:      document.getElementById('editNome').value.trim(),
+      email:     document.getElementById('editEmail').value.trim(),
+      matricula: document.getElementById('editMatricula').value.trim(),
+      cargo:     document.getElementById('editCargo').value,
+      status:    document.getElementById('editStatus').value,
+    };
+    const senha = document.getElementById('editSenha').value;
+    if (senha) payload.senha = senha;
+
+    const btn = document.getElementById('btnSalvar');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>';
+
+    try {
+      const resp = await fetch(`${API}?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const dados = await resp.json();
+
+      if (!resp.ok) {
+        toast(dados.erro || 'Erro ao salvar.', 'erro');
+      } else {
+        toast('Funcionário atualizado com sucesso!');
+        fecharModal('modalEdicao');
+        carregarFuncionarios();
+      }
+    } catch {
+      toast('Erro de conexão.', 'erro');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Salvar';
+    }
+  }
+
+  // ── Exclusão ─────────────────────────────────────────
+  function abrirExclusao(id, nome) {
+    idParaDeletar = id;
+    document.getElementById('nomeParaDeletar').textContent = nome;
+    abrirModal('modalExclusao');
+  }
+
+  async function confirmarExclusao() {
+    const btn = document.getElementById('btnDeletar');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>';
+
+    try {
+      const resp = await fetch(`${API}?id=${idParaDeletar}`, { method: 'DELETE' });
+      const dados = await resp.json();
+
+      if (!resp.ok) {
+        toast(dados.erro || 'Erro ao excluir.', 'erro');
+      } else {
+        toast('Funcionário removido com sucesso!');
+        fecharModal('modalExclusao');
+        carregarFuncionarios();
+      }
+    } catch {
+      toast('Erro de conexão.', 'erro');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Excluir';
+      idParaDeletar  = null;
+    }
+  }
+
+  // ── Logout ───────────────────────────────────────────
+  async function logout() {
+    try { await fetch('http://localhost:9999/Estacao-refatorado/php/logout.php', { method: 'POST' }); } catch {}
+    ['func_logado','func_id','func_nome','func_email','func_cargo','func_matricula']
+      .forEach(k => localStorage.removeItem(k));
+    window.location.href = 'LoginFuncionario.html';
+  }
+
+  carregarFuncionarios();
+</script>
+</body>
+</html>
