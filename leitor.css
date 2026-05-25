@@ -845,3 +845,114 @@ body.page-detalhe main {
   .loan-right { align-items:flex-start; width:100%; flex-direction:row; justify-content:space-between; }
   .historico-grid { grid-template-columns:repeat(2,1fr); gap:1rem; }
 }
+
+
+/* ════════════════════════════════════════
+   CATÁLOGO — Toolbar, skeleton, filtros
+   ════════════════════════════════════════ */
+
+/* Toolbar de filtros */
+.catalogo-toolbar { display:flex; align-items:center; gap:.75rem; flex-wrap:wrap; margin-bottom:1.5rem; }
+.catalogo-toolbar-left  { display:flex; gap:.5rem; flex-wrap:wrap; flex:1; }
+.catalogo-toolbar-right { display:flex; gap:.5rem; align-items:center; }
+
+.filter-chip {
+  display:inline-flex; align-items:center; gap:.35rem;
+  padding:.35rem .85rem; border-radius:9999px;
+  border:1px solid var(--outline-variant); background:var(--surface-container);
+  color:var(--on-surface-variant); font-size:.78rem; font-weight:600;
+  cursor:pointer; transition:all .2s; white-space:nowrap; font-family:inherit;
+}
+.filter-chip:hover { border-color:var(--primary); color:var(--primary); }
+.filter-chip.active { background:rgba(0,245,212,.12); border-color:var(--primary); color:var(--primary); }
+.filter-chip .material-symbols-outlined { font-size:15px; }
+
+.sort-select {
+  background:var(--surface-container); border:1px solid var(--outline-variant);
+  color:var(--on-surface); border-radius:9999px; padding:.35rem 1rem;
+  font-size:.78rem; font-family:inherit; outline:none; cursor:pointer;
+  transition:border-color .2s;
+}
+.sort-select:focus { border-color:var(--primary); }
+.sort-select option { background:#0d1b3e; }
+
+.view-toggle { display:flex; gap:.25rem; }
+.view-btn {
+  width:32px; height:32px; border-radius:8px;
+  border:1px solid var(--outline-variant);
+  background:var(--surface-container); color:var(--on-surface-variant);
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:all .2s;
+}
+.view-btn .material-symbols-outlined { font-size:16px; }
+.view-btn.active { background:rgba(0,245,212,.12); border-color:var(--primary); color:var(--primary); }
+
+/* Contador de resultados */
+.result-count { font-size:.8rem; color:var(--on-surface-variant); margin-bottom:1.25rem; }
+.result-count strong { color:var(--primary); }
+
+/* Skeleton loading */
+.skeleton-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:1.5rem; }
+.skeleton-card { background:var(--surface-container); border-radius:1rem; overflow:hidden; border:1px solid var(--outline-variant); }
+.skeleton-img {
+  aspect-ratio:2/3;
+  background:linear-gradient(90deg,var(--surface-container-high) 25%,var(--surface-container-highest) 50%,var(--surface-container-high) 75%);
+  background-size:200% 100%; animation:shimmer 1.4s infinite;
+}
+.skeleton-body { padding:1rem; display:flex; flex-direction:column; gap:.5rem; }
+.skeleton-line {
+  height:10px; border-radius:99px;
+  background:linear-gradient(90deg,var(--surface-container-high) 25%,var(--surface-container-highest) 50%,var(--surface-container-high) 75%);
+  background-size:200% 100%; animation:shimmer 1.4s infinite;
+}
+.skeleton-line.short { width:60%; }
+.skeleton-line.btn   { height:32px; border-radius:8px; margin-top:.5rem; }
+@keyframes shimmer { to { background-position:-200% 0; } }
+
+/* Vista lista */
+.book-grid.list-view { display:flex; flex-direction:column; gap:.75rem; }
+.book-grid.list-view .book-card { display:flex; flex-direction:row; border-radius:12px; max-height:140px; }
+.book-grid.list-view .book-cover-wrap { width:90px; min-width:90px; aspect-ratio:unset; height:140px; }
+.book-grid.list-view .book-body { flex-direction:row; align-items:center; gap:1rem; flex-wrap:wrap; }
+.book-grid.list-view .book-title-row { margin-bottom:0; }
+.book-grid.list-view .book-desc { display:none; }
+.book-grid.list-view .book-actions { margin-top:0; margin-left:auto; }
+
+/* Badges de disponibilidade */
+.avail-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:.68rem; font-weight:700; text-transform:uppercase;
+  padding:2px 8px; border-radius:99px;
+}
+.avail-ok  { background:rgba(0,245,212,.1);  color:#00f5d4; }
+.avail-emp { background:rgba(255,113,108,.1); color:#ff716c; }
+.avail-badge::before { content:''; width:6px; height:6px; border-radius:50%; background:currentColor; }
+
+/* Placeholder de capa sem imagem */
+.book-img-ph {
+  width:100%; aspect-ratio:2/3;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg,var(--surface-container-highest),var(--surface-variant));
+  color:var(--outline);
+}
+
+/* Estado vazio */
+.catalogo-vazio { grid-column:1/-1; text-align:center; padding:4rem 1rem; color:var(--on-surface-variant); }
+.catalogo-vazio .material-symbols-outlined { font-size:3rem; color:var(--primary); opacity:.4; display:block; margin-bottom:1rem; }
+.catalogo-vazio h3 { font-size:1.1rem; color:var(--on-surface); margin-bottom:.4rem; }
+
+/* Estado de erro de conexão */
+.catalogo-erro { grid-column:1/-1; text-align:center; padding:3rem 1rem; background:rgba(255,113,108,.06); border:1px solid rgba(255,113,108,.2); border-radius:14px; }
+.catalogo-erro .material-symbols-outlined { font-size:2.5rem; color:#ff716c; display:block; margin-bottom:.75rem; }
+.catalogo-erro h3 { color:#ff716c; margin-bottom:.4rem; }
+.catalogo-erro p  { color:var(--on-surface-variant); font-size:.875rem; margin-bottom:1rem; }
+.btn-retry { background:rgba(255,113,108,.15); border:1px solid rgba(255,113,108,.3); color:#ff716c; padding:.5rem 1.2rem; border-radius:8px; cursor:pointer; font-family:inherit; font-size:.875rem; font-weight:600; transition:background .2s; }
+.btn-retry:hover { background:rgba(255,113,108,.25); }
+
+/* Toast */
+.toast-wrap { position:fixed; bottom:1.5rem; right:1.5rem; z-index:9999; display:flex; flex-direction:column; gap:.5rem; }
+.toast { padding:.7rem 1.2rem; border-radius:10px; font-size:.875rem; font-weight:600; animation:toastIn .3s ease; pointer-events:none; }
+.toast.ok   { background:#00f5d4; color:#00221a; }
+.toast.erro { background:#ff716c; color:#fff; }
+.toast.out  { opacity:0; transition:opacity .35s; }
+@keyframes toastIn { from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);} }
