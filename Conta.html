@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minha Conta — Estação Literária</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="usuario.css">
+</head>
+<body class="page-internal">
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <div class="logo-area">
+    <img src="Biblioteca2.png" width="60" onerror="this.style.display='none'">
+    <h1>BIBLIOTECA</h1>
+  </div>
+  <nav class="menu">
+    <a href="PainelUsuario.html">Início</a>
+    <a href="CatalogoLivros.html">Catálogo</a>
+    <a href="Suporte.html">Suporte</a>
+    <a href="Conta.html" class="active">Conta</a>
+  </nav>
+  <div class="right-area">
+    <input type="text" placeholder="Pesquisar..." class="search">
+    <div class="user-avatar">
+      <span class="material-symbols-outlined">person</span>
+    </div>
+  </div>
+</header>
+
+<!-- CONTEÚDO -->
+<main class="container-conta">
+
+  <!-- PERFIL -->
+  <section class="perfil">
+    <div class="card perfil-card">
+      <div class="user-avatar" style="width:80px;height:80px;margin:0 auto 1rem;font-size:2rem;border-radius:50%;background:rgba(0,245,212,.1);border:2px solid rgba(0,245,212,.2);display:flex;align-items:center;justify-content:center;color:var(--primary);">
+        <span id="avatar-inicial" style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.8rem;">?</span>
+      </div>
+      <h1 id="perfil-nome">Carregando...</h1>
+      <p id="perfil-email" style="color:var(--on-surface-variant);font-size:.875rem;"></p>
+
+      <div class="stats">
+        <div>
+          <strong id="stat-ativos">0</strong>
+          <span>Em mãos</span>
+        </div>
+        <div>
+          <strong id="stat-historico">0</strong>
+          <span>Histórico</span>
+        </div>
+        <div>
+          <strong id="stat-multa" style="color:#ff716c;">R$ 0</strong>
+          <span>Multa</span>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="abrirModalEditar()">Editar Perfil</button>
+      <button class="btn btn-primary" onclick="logout()">Sair da Conta</button>
+      <button class="btn btn-excluir" onclick="abrirModalExcluir()">Excluir Conta</button>
+    </div>
+
+    <div class="card">
+      <h3>Status da Conta</h3>
+      <div style="display:flex;flex-direction:column;gap:.6rem;margin-top:.75rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:.85rem;color:var(--on-surface-variant);">Situação</span>
+          <span id="status-conta" style="background:rgba(0,245,212,.12);color:#00f5d4;padding:2px 10px;border-radius:20px;font-size:.72rem;font-weight:700;">Ativa</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="font-size:.85rem;color:var(--on-surface-variant);">ID do Leitor</span>
+          <span id="perfil-id" style="font-family:monospace;font-size:.85rem;color:var(--primary);">#—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="font-size:.85rem;color:var(--on-surface-variant);">Livros ativos</span>
+          <span id="livros-ativos-label" style="font-size:.85rem;font-weight:600;">0 / 5</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ATIVIDADES -->
+  <section class="atividades">
+    <div class="header">
+      <h2>Livros em mãos</h2>
+      <a href="Emprestimo.html" class="ver">Ver empréstimos →</a>
+    </div>
+
+    <div class="card tabela">
+      <table>
+        <thead>
+          <tr>
+            <th>Livro</th>
+            <th>Retirada</th>
+            <th>Devolução</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-ativos"></tbody>
+      </table>
+    </div>
+
+    <div class="header" style="margin-top:1.5rem;">
+      <h2>Histórico de Leituras</h2>
+      <a href="Emprestimo.html" class="ver">Ver tudo →</a>
+    </div>
+
+    <div class="card tabela">
+      <table>
+        <thead>
+          <tr>
+            <th>Livro</th>
+            <th>Retirada</th>
+            <th>Devolvido em</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-hist"></tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<!-- MODAL EDITAR PERFIL -->
+<div id="modal-editar" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(5,13,37,.8);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+  <div style="background:var(--surface-container);border:1px solid var(--outline-variant);border-radius:16px;padding:2rem;width:460px;max-width:95vw;box-shadow:0 24px 64px rgba(0,0,0,.5);">
+    <h3 style="font-size:1.1rem;color:var(--primary);margin-bottom:1.25rem;">Editar Perfil</h3>
+    <div style="margin-bottom:.9rem;">
+      <label style="font-size:.8rem;color:var(--on-surface-variant);display:block;margin-bottom:4px;">Nome</label>
+      <input id="edit-nome" type="text" style="width:100%;padding:.6rem .9rem;border-radius:8px;background:var(--surface-container-high);border:1px solid var(--outline-variant);color:var(--on-surface);font-size:.9rem;box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:.9rem;">
+      <label style="font-size:.8rem;color:var(--on-surface-variant);display:block;margin-bottom:4px;">E-mail</label>
+      <input id="edit-email" type="email" style="width:100%;padding:.6rem .9rem;border-radius:8px;background:var(--surface-container-high);border:1px solid var(--outline-variant);color:var(--on-surface);font-size:.9rem;box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:.9rem;">
+      <label style="font-size:.8rem;color:var(--on-surface-variant);display:block;margin-bottom:4px;">Nova senha <span style="font-weight:400;">(deixe em branco para manter)</span></label>
+      <input id="edit-senha" type="password" placeholder="Mínimo 6 caracteres" style="width:100%;padding:.6rem .9rem;border-radius:8px;background:var(--surface-container-high);border:1px solid var(--outline-variant);color:var(--on-surface);font-size:.9rem;box-sizing:border-box;">
+    </div>
+    <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:1.25rem;">
+      <button onclick="fecharModalEditar()" style="padding:.6rem 1.2rem;border-radius:8px;border:1px solid var(--outline-variant);background:transparent;color:var(--on-surface-variant);cursor:pointer;font-size:.875rem;">Cancelar</button>
+      <button id="btn-salvar-perfil" onclick="salvarPerfil()" style="padding:.6rem 1.4rem;border-radius:8px;border:none;background:var(--primary);color:var(--on-primary);cursor:pointer;font-size:.875rem;font-weight:600;">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EXCLUIR CONTA -->
+<div id="modal-excluir" style="
+  display:none; position:fixed; inset:0; z-index:9999;
+  background:rgba(0,0,0,.7); backdrop-filter:blur(4px);
+  align-items:center; justify-content:center;">
+
+  <div style="
+    background:var(--surface); border:1px solid rgba(255,113,108,.25);
+    border-radius:16px; padding:2rem; width:100%; max-width:400px; margin:1rem;
+    box-shadow:0 0 40px rgba(255,113,108,.15);">
+
+    <div style="text-align:center; margin-bottom:1.25rem;">
+      <div style="
+        width:56px; height:56px; border-radius:50%; margin:0 auto .75rem;
+        background:rgba(255,113,108,.12); border:2px solid rgba(255,113,108,.3);
+        display:flex; align-items:center; justify-content:center;
+        font-size:1.5rem;">⚠️</div>
+      <h3 style="margin:0 0 .4rem; color:#ff716c;">Excluir Conta</h3>
+      <p style="margin:0; font-size:.875rem; color:var(--on-surface-variant); line-height:1.5;">
+        Esta ação é <strong style="color:#ff716c;">permanente e irreversível</strong>.<br>
+        Todos os seus dados serão removidos.
+      </p>
+    </div>
+
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:.8rem; color:var(--on-surface-variant); display:block; margin-bottom:.4rem;">
+        Confirme sua senha para continuar
+      </label>
+      <input type="password" id="senha-excluir" placeholder="Sua senha atual"
+        style="
+          width:100%; box-sizing:border-box;
+          background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
+          border-radius:10px; padding:.75rem 1rem; color:var(--on-surface);
+          font-size:.9rem; outline:none; transition:border .2s;"
+        oninput="document.getElementById('err-excluir').style.display='none'">
+      <span id="err-excluir" style="
+        color:#ff716c; font-size:.78rem; margin-top:.35rem;
+        display:none; padding-left:.25rem;"></span>
+    </div>
+
+    <div style="display:flex; gap:.75rem;">
+      <button onclick="fecharModalExcluir()" style="
+        flex:1; padding:.75rem; border-radius:10px; border:1px solid rgba(255,255,255,.12);
+        background:transparent; color:var(--on-surface); font-size:.9rem;
+        font-weight:600; cursor:pointer;">
+        Cancelar
+      </button>
+      <button id="btn-confirmar-excluir" onclick="confirmarExcluir()" style="
+        flex:1; padding:.75rem; border-radius:10px; border:none;
+        background:#ff716c; color:#fff; font-size:.9rem;
+        font-weight:700; cursor:pointer;">
+        Excluir Conta
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div>Estação Literária</div>
+  <div>© 2026 Todos os direitos reservados</div>
+</footer>
+
+<script>
+  const API = 'http://localhost:9999/Estacao-refatorado/php/usuarios.php';
+  const API_EMP = 'http://localhost:9999/Estacao-refatorado/php/emprestimos.php';
+
+  if (!localStorage.getItem('logado')) window.location.href = 'LoginUsuario.html';
+
+  const id    = localStorage.getItem('usuario_id')    || '';
+  const nome  = localStorage.getItem('usuario_nome')  || 'Usuário';
+  const email = localStorage.getItem('usuario_email') || '';
+
+  document.getElementById('perfil-nome').textContent    = nome;
+  document.getElementById('perfil-email').textContent   = email;
+  document.getElementById('perfil-id').textContent      = '#' + id;
+  document.getElementById('avatar-inicial').textContent = nome.charAt(0).toUpperCase();
+
+  // ── Utilitários ─────────────────────────────────────
+  function fmt(iso) {
+    if (!iso) return '—';
+    const [y, m, d] = iso.split('T')[0].split('-');
+    return `${d}/${m}/${y}`;
+  }
+  function isLate(iso) {
+    const due = new Date(iso); due.setHours(0,0,0,0);
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    return due < hoje;
+  }
+  function toast(msg, tipo = 'sucesso') {
+    const el = document.getElementById('toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.className = `toast ${tipo} show`;
+    setTimeout(() => el.classList.remove('show'), 3500);
+  }
+
+  // ── Carregar empréstimos ativos do banco ─────────────
+  async function carregarAtivos() {
+    try {
+      const resp = await fetch(`${API_EMP}?usuario_id=${id}`);
+      const lista = await resp.json();
+      const ativos = Array.isArray(lista) ? lista.filter(e => !e.data_devolucao_real) : [];
+
+      document.getElementById('stat-ativos').textContent = ativos.length;
+
+      let multa = 0;
+      ativos.forEach(e => { if (isLate(e.data_devolucao_prevista)) {
+        const dias = Math.floor((Date.now() - new Date(e.data_devolucao_prevista)) / 86400000);
+        multa += dias;
+      }});
+      const multaEl = document.getElementById('stat-multa');
+      multaEl.textContent = 'R$ ' + multa.toFixed(2).replace('.', ',');
+      if (multa > 0) multaEl.style.color = '#ff716c';
+
+      const tb = document.getElementById('tbody-ativos');
+      if (!ativos.length) {
+        tb.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:1.5rem;color:var(--on-surface-variant);">Nenhum livro emprestado no momento.</td></tr>';
+      } else {
+        tb.innerHTML = ativos.map(e => {
+          const late = isLate(e.data_devolucao_prevista);
+          return `<tr>
+            <td><div class="livro"><div><strong>${e.titulo}</strong><small>${e.autor}</small></div></div></td>
+            <td>${fmt(e.data_emprestimo)}</td>
+            <td class="${late ? 'status-late' : 'status-ok'}">${fmt(e.data_devolucao_prevista)}${late ? ' ⚠' : ''}</td>
+          </tr>`;
+        }).join('');
+      }
+    } catch {
+      document.getElementById('tbody-ativos').innerHTML =
+        '<tr><td colspan="3" style="text-align:center;padding:1rem;color:#ff716c;">Erro ao carregar empréstimos.</td></tr>';
+    }
+  }
+
+  // ── Carregar histórico do banco ──────────────────────
+  async function carregarHistorico() {
+    try {
+      const resp = await fetch(`${API_EMP}?usuario_id=${id}`);
+      const lista = await resp.json();
+      const devolvidos = Array.isArray(lista) ? lista.filter(e => e.data_devolucao_real) : [];
+
+      document.getElementById('stat-historico').textContent = devolvidos.length;
+
+      const tb = document.getElementById('tbody-hist');
+      if (!devolvidos.length) {
+        tb.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:1.5rem;color:var(--on-surface-variant);">Nenhum histórico ainda.</td></tr>';
+      } else {
+        tb.innerHTML = devolvidos.slice(0, 10).map(e => `
+          <tr>
+            <td><div class="livro"><div><strong>${e.titulo}</strong><small>${e.autor}</small></div></div></td>
+            <td>${fmt(e.data_emprestimo)}</td>
+            <td class="status-ok">${fmt(e.data_devolucao_real)}</td>
+          </tr>`).join('');
+      }
+    } catch {}
+  }
+
+  carregarAtivos();
+  carregarHistorico();
+
+  // ── Editar perfil (PUT) ──────────────────────────────
+  function abrirModalEditar() {
+    document.getElementById('edit-nome').value  = localStorage.getItem('usuario_nome')  || '';
+    document.getElementById('edit-email').value = localStorage.getItem('usuario_email') || '';
+    document.getElementById('edit-senha').value = '';
+    document.getElementById('modal-editar').style.display = 'flex';
+  }
+  function fecharModalEditar() {
+    document.getElementById('modal-editar').style.display = 'none';
+  }
+  async function salvarPerfil() {
+    const novoNome  = document.getElementById('edit-nome').value.trim();
+    const novoEmail = document.getElementById('edit-email').value.trim();
+    const novaSenha = document.getElementById('edit-senha').value;
+
+    if (!novoNome || !novoEmail) { toast('Preencha nome e e-mail.', 'erro'); return; }
+
+    const btn = document.getElementById('btn-salvar-perfil');
+    btn.disabled = true; btn.textContent = 'Salvando...';
+
+    const payload = { nome: novoNome, email: novoEmail };
+    if (novaSenha) payload.senha = novaSenha;
+
+    try {
+      const resp = await fetch(`${API}?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const dados = await resp.json();
+      if (!resp.ok) { toast(dados.erro || 'Erro ao salvar.', 'erro'); return; }
+
+      localStorage.setItem('usuario_nome', novoNome);
+      localStorage.setItem('usuario_email', novoEmail);
+      document.getElementById('perfil-nome').textContent    = novoNome;
+      document.getElementById('perfil-email').textContent   = novoEmail;
+      document.getElementById('avatar-inicial').textContent = novoNome.charAt(0).toUpperCase();
+
+      fecharModalEditar();
+      toast('Perfil atualizado com sucesso!');
+    } catch { toast('Erro de conexão.', 'erro'); }
+    finally { btn.disabled = false; btn.textContent = 'Salvar'; }
+  }
+
+  // ── Excluir conta ────────────────────────────────────
+  function abrirModalExcluir() {
+    document.getElementById('modal-excluir').style.display = 'flex';
+    setTimeout(() => document.getElementById('senha-excluir')?.focus(), 100);
+  }
+  function fecharModalExcluir() {
+    document.getElementById('modal-excluir').style.display = 'none';
+  }
+  async function confirmarExcluir() {
+    const senha = document.getElementById('senha-excluir').value;
+    if (!senha) { toast('Digite sua senha para confirmar.', 'erro'); return; }
+    try {
+      const resp = await fetch(`${API}?id=${id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ senha }),
+      });
+      const dados = await resp.json();
+      if (!resp.ok) { toast(dados.erro || 'Erro ao excluir.', 'erro'); return; }
+      logout();
+    } catch { toast('Erro de conexão.', 'erro'); }
+  }
+
+  // ── Logout ───────────────────────────────────────────
+  async function logout() {
+    try {
+      await fetch('http://localhost:9999/Estacao-refatorado/php/logout.php', { method: 'POST' });
+    } catch {}
+    ['logado','usuario_id','usuario_nome','usuario_email','biblioteca_loans','biblioteca_history']
+      .forEach(k => localStorage.removeItem(k));
+    window.location.href = 'Entrada.html';
+  }
+
+  // Fechar modal ao clicar fora
+  document.getElementById('modal-editar').addEventListener('click', e => {
+    if (e.target === document.getElementById('modal-editar')) fecharModalEditar();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { fecharModalEditar(); fecharModalExcluir(); }
+    if (e.key === 'Enter') confirmarExcluir();
+  });
+</script>
+<script src="busca-global.js"></script>
+</body>
+</html>
