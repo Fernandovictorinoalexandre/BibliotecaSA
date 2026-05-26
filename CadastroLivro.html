@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estação Literária - Cadastro de Livro</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="auth.css">
+</head>
+<body class="page-auth">
+  <div class="nebula-bg"></div>
+  <div class="overlay"></div>
+
+  <main>
+    <div>
+      <div class="logo-circle">
+        <img src="Biblioteca2.png" width="150px" height="100px">
+      </div>
+
+      <div class="card">
+        <h1 class="title-auth">Estação Literária</h1>
+        <h2>Cadastrar Livro</h2>
+
+        <form id="formLivro" novalidate>
+
+          <div class="input-group">
+            <label>Título
+              <input type="text" id="titulo" name="titulo">
+            </label>
+            <span class="msg-campo" id="err-titulo">Título obrigatório.</span>
+          </div>
+
+          <div class="input-group">
+            <label>Autor
+              <input type="text" id="autor" name="autor">
+            </label>
+            <span class="msg-campo" id="err-autor">Autor obrigatório.</span>
+          </div>
+
+          <div class="input-group">
+            <label>ISBN (10 ou 13 dígitos)
+              <input type="text" id="isbn" name="isbn" maxlength="17"
+                     inputmode="numeric" placeholder="Ex: 978-3-16-148410-0">
+            </label>
+            <span class="msg-campo" id="err-isbn">ISBN deve ter 10 ou 13 dígitos.</span>
+          </div>
+
+          <div class="input-group">
+            <label>Editora
+              <input type="text" id="editora" name="editora">
+            </label>
+          </div>
+
+          <div class="input-group">
+            <label>Data de Publicação
+              <input type="date" id="data_publicacao" name="data_publicacao">
+            </label>
+          </div>
+
+          <div class="input-group">
+            <label>Quantidade
+              <input type="number" id="quantidade" name="quantidade"
+                     min="0" value="1">
+            </label>
+          </div>
+
+          <div class="input-group">
+            <label>Categoria
+              <select id="categoria" name="categoria">
+                <option value="Geral">Geral</option>
+                <option value="Fantasia">Fantasia</option>
+                <option value="Ficção Científica">Ficção Científica</option>
+                <option value="Romance">Romance</option>
+                <option value="Terror">Terror</option>
+                <option value="Aventura">Aventura</option>
+                <option value="Mistério">Mistério</option>
+                <option value="História">História</option>
+                <option value="Biografia">Biografia</option>
+                <option value="Autoajuda">Autoajuda</option>
+                <option value="Infantil">Infantil</option>
+                <option value="Clássico">Clássico</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="input-group">
+            <label>URL da Capa (imagem)
+              <input type="url" id="capa" name="capa" placeholder="https://...">
+            </label>
+          </div>
+
+          <div class="input-group">
+            <label>Descrição
+              <textarea id="descricao" name="descricao" rows="4"
+                        placeholder="Sinopse ou descrição do livro..."></textarea>
+            </label>
+          </div>
+
+          <button type="submit" class="btn-primary" id="btnCadastrar">Cadastrar Livro</button>
+
+        </form>
+
+        <div class="footer">
+          <a href="FuncionarioLivro.html">← Voltar ao acervo</a>
+        </div>
+      </div><!-- /card -->
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    if (localStorage.getItem('func_logado') !== 'true') window.location.href = 'LoginFuncionario.html';
+
+    const API = 'http://localhost:9999/Estacao-refatorado/php/livros.php';
+
+    // ── Toast ────────────────────────────────────────────
+    function toast(msg, tipo = 'sucesso') {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = `toast ${tipo} show`;
+      setTimeout(() => el.classList.remove('show'), 3500);
+    }
+
+    // ── Validação inline ─────────────────────────────────
+    function mostrarErro(id, visivel) {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('visivel', visivel);
+    }
+    function marcarCampo(inputId, invalido) {
+      const el = document.getElementById(inputId);
+      if (el) el.classList.toggle('campo-erro', invalido);
+    }
+    function limparIsbn(v) {
+      return v.replace(/\D/g, '');
+    }
+
+    // ── Submit ───────────────────────────────────────────
+    document.getElementById('formLivro').addEventListener('submit', async e => {
+      e.preventDefault();
+
+      const titulo          = document.getElementById('titulo').value.trim();
+      const autor           = document.getElementById('autor').value.trim();
+      const isbnRaw         = document.getElementById('isbn').value;
+      const editora         = document.getElementById('editora').value.trim();
+      const data_publicacao = document.getElementById('data_publicacao').value;
+      const quantidade      = parseInt(document.getElementById('quantidade').value) || 1;
+      const capa            = document.getElementById('capa').value.trim();
+      const descricao       = document.getElementById('descricao').value.trim();
+      const categoria       = document.getElementById('categoria').value;
+      const isbn            = limparIsbn(isbnRaw);
+
+      // Validação local
+      let valido = true;
+
+      const tituloOk = titulo.length >= 1;
+      marcarCampo('titulo', !tituloOk); mostrarErro('err-titulo', !tituloOk);
+      if (!tituloOk) valido = false;
+
+      const autorOk = autor.length >= 2;
+      marcarCampo('autor', !autorOk); mostrarErro('err-autor', !autorOk);
+      if (!autorOk) valido = false;
+
+      const isbnOk = isbn.length === 10 || isbn.length === 13;
+      marcarCampo('isbn', !isbnOk); mostrarErro('err-isbn', !isbnOk);
+      if (!isbnOk) valido = false;
+
+      if (!valido) return;
+
+      // Envio para API
+      const btn = document.getElementById('btnCadastrar');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Cadastrando...';
+
+      try {
+        const resp = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            titulo, autor, isbn,
+            editora:         editora         || null,
+            data_publicacao: data_publicacao || null,
+            quantidade,
+            capa:            capa            || null,
+            descricao:       descricao       || null,
+            categoria:       categoria       || 'Geral',
+          }),
+        });
+        const dados = await resp.json();
+
+        if (resp.ok) {
+          toast('Livro cadastrado com sucesso!', 'sucesso');
+          setTimeout(() => {
+            window.location.href = 'FuncionarioLivro.html';
+          }, 1500);
+        } else {
+          toast(dados.erro || 'Erro ao cadastrar livro.', 'erro');
+        }
+      } catch {
+        toast('Erro de conexão com o servidor.', 'erro');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Cadastrar Livro';
+      }
+    });
+  </script>
+</body>
+</html>
