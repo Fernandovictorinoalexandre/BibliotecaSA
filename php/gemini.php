@@ -2,7 +2,7 @@
 
 header("Content-Type: application/json");
 
-$API_KEY = "";
+$API_KEY = "AIzaSyBGm8dN7uTSzZHs_VISuaQJPK_mEZq1e1I";
 
 $dados = json_decode(file_get_contents("php://input"), true);
 
