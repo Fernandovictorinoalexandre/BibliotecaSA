@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estação Literária - Cadastro de Usuário</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="auth.css">
+</head>
+<body class="page-auth">
+  <div class="nebula-bg"></div>
+  <div class="overlay"></div>
+
+  <main>
+    <div>
+      <div class="logo-circle">
+        <img src="Biblioteca2.png" width="150px" height="100px">
+      </div>
+
+      <div class="card">
+        <h1 class="title-auth">Estação Literária</h1>
+        <h2>Criar Conta</h2>
+
+        <form id="formUsuario" novalidate>
+
+          <div class="input-group">
+            <label>Nome completo
+              <input type="text" id="nome" name="nome" autocomplete="name">
+            </label>
+            <span class="msg-campo" id="err-nome">Nome obrigatório.</span>
+          </div>
+
+          <div class="input-group">
+            <label>Data de Nascimento
+              <input type="date" id="data_nasc" name="data_nasc">
+            </label>
+          </div>
+
+          <div class="input-group">
+            <label>E-Mail
+              <input type="email" id="email" name="email" autocomplete="email">
+            </label>
+            <span class="msg-campo" id="err-email">E-mail inválido.</span>
+          </div>
+
+          <div class="input-group">
+            <label>Senha
+              <input type="password" id="senha" name="senha" maxlength="50">
+            </label>
+            <span class="msg-campo" id="err-senha">Mínimo 6 caracteres.</span>
+          </div>
+
+          <div class="input-group">
+            <label>Confirmar Senha
+              <input type="password" id="confirmar" name="confirmar" maxlength="50">
+            </label>
+            <span class="msg-campo" id="err-confirmar">As senhas não coincidem.</span>
+          </div>
+
+          <button type="submit" class="btn-primary" id="btnCadastrar">Cadastrar</button>
+
+        </form>
+
+        <div class="footer">
+          <span>Já tem uma conta?</span>
+          <a href="LoginUsuario.html">Entrar</a>
+        </div>
+      </div><!-- /card -->
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API = 'http://localhost:9999/Estacao-refatorado/php/usuarios.php';
+
+    // ── Toast ────────────────────────────────────────────
+    function toast(msg, tipo = 'sucesso') {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = `toast ${tipo} show`;
+      setTimeout(() => el.classList.remove('show'), 3500);
+    }
+
+    // ── Validação inline ─────────────────────────────────
+    function mostrarErro(id, visivel) {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('visivel', visivel);
+    }
+    function marcarCampo(inputId, invalido) {
+      const el = document.getElementById(inputId);
+      if (el) el.classList.toggle('campo-erro', invalido);
+    }
+
+    // ── Submit ───────────────────────────────────────────
+    document.getElementById('formUsuario').addEventListener('submit', async e => {
+      e.preventDefault();
+
+      const nome      = document.getElementById('nome').value.trim();
+      const email     = document.getElementById('email').value.trim();
+      const senha     = document.getElementById('senha').value;
+      const confirmar = document.getElementById('confirmar').value;
+      const data_nasc = document.getElementById('data_nasc').value;
+
+      // Validação local
+      let valido = true;
+
+      const nomeOk = nome.length >= 2;
+      marcarCampo('nome', !nomeOk); mostrarErro('err-nome', !nomeOk);
+      if (!nomeOk) valido = false;
+
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      marcarCampo('email', !emailOk); mostrarErro('err-email', !emailOk);
+      if (!emailOk) valido = false;
+
+      const senhaOk = senha.length >= 6;
+      marcarCampo('senha', !senhaOk); mostrarErro('err-senha', !senhaOk);
+      if (!senhaOk) valido = false;
+
+      const confirmOk = senha === confirmar;
+      marcarCampo('confirmar', !confirmOk); mostrarErro('err-confirmar', !confirmOk);
+      if (!confirmOk) valido = false;
+
+      if (!valido) return;
+
+      // Envio para API
+      const btn = document.getElementById('btnCadastrar');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Cadastrando...';
+
+      try {
+        const resp = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nome, email, senha, data_nasc: data_nasc || null }),
+        });
+        const dados = await resp.json();
+
+        if (resp.ok) {
+          toast('Usuário cadastrado com sucesso!', 'sucesso');
+          document.getElementById('formUsuario').reset();
+          setTimeout(() => window.location.href = 'LoginUsuario.html', 2000);
+        } else {
+          toast(dados.erro || 'Erro ao cadastrar.', 'erro');
+        }
+      } catch {
+        toast('Erro de conexão com o servidor.', 'erro');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Cadastrar';
+      }
+    });
+  </script>
+</body>
+</html>
