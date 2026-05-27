@@ -239,8 +239,16 @@
     </div>
   </div>
 
+  <script src="utils.js"></script>
+  <script src="pagamento-modal.js"></script>
   <script>
     if (!localStorage.getItem('logado')) window.location.href = 'LoginUsuario.html';
+
+    // ══════════════════════════════════════
+    // VARIÁVEL GLOBAL DO LIVRO ATUAL
+    // (usada pelo botão: onclick="PG.abrir(livro)")
+    // ══════════════════════════════════════
+    let livro = null;
 
     // ══════════════════════════════════════
     // METADADOS EXTRAS POR LIVRO
@@ -259,8 +267,11 @@
     // ══════════════════════════════════════
     // CARREGAR LIVRO — API primeiro, localStorage como fallback
     // ══════════════════════════════════════
-    function preencherLivro(livro) {
-      if (!livro) { window.location.href = 'CatalogoLivros.html'; return; }
+    function preencherLivro(dadosLivro) {
+      if (!dadosLivro) { window.location.href = 'CatalogoLivros.html'; return; }
+
+      // Atribui à variável global para o botão de empréstimo acessar
+      livro = dadosLivro;
 
       document.title = `${livro.titulo} - Estação Literária`;
 
@@ -363,7 +374,6 @@
   </script>
 
 <!-- Modal de Pagamento -->
-<script src="pagamento-modal.js"></script>
 <script src="busca-global.js"></script>
 </body>
 </html>
