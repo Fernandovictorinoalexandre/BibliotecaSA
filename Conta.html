@@ -59,7 +59,8 @@
 
       <button class="btn btn-primary" onclick="abrirModalEditar()">Editar Perfil</button>
       <button class="btn btn-primary" onclick="logout()">Sair da Conta</button>
-      <button class="btn btn-excluir" onclick="abrirModalExcluir()">Excluir Conta</button>
+      <!-- ✅ ALTERADO: era "Excluir Conta" -->
+      <button class="btn btn-excluir" onclick="abrirModalExcluir()">Desativar Conta</button>
     </div>
 
     <div class="card">
@@ -145,27 +146,27 @@
   </div>
 </div>
 
-<!-- MODAL EXCLUIR CONTA -->
+<!-- ✅ MODAL DESATIVAR CONTA (era "EXCLUIR CONTA") -->
 <div id="modal-excluir" style="
   display:none; position:fixed; inset:0; z-index:9999;
   background:rgba(0,0,0,.7); backdrop-filter:blur(4px);
   align-items:center; justify-content:center;">
 
   <div style="
-    background:var(--surface); border:1px solid rgba(255,113,108,.25);
+    background:var(--surface); border:1px solid rgba(255,165,0,.25);
     border-radius:16px; padding:2rem; width:100%; max-width:400px; margin:1rem;
-    box-shadow:0 0 40px rgba(255,113,108,.15);">
+    box-shadow:0 0 40px rgba(255,165,0,.15);">
 
     <div style="text-align:center; margin-bottom:1.25rem;">
       <div style="
         width:56px; height:56px; border-radius:50%; margin:0 auto .75rem;
-        background:rgba(255,113,108,.12); border:2px solid rgba(255,113,108,.3);
+        background:rgba(255,165,0,.12); border:2px solid rgba(255,165,0,.3);
         display:flex; align-items:center; justify-content:center;
-        font-size:1.5rem;">⚠️</div>
-      <h3 style="margin:0 0 .4rem; color:#ff716c;">Excluir Conta</h3>
+        font-size:1.5rem;">🔒</div>
+      <h3 style="margin:0 0 .4rem; color:#ffa500;">Desativar Conta</h3>
       <p style="margin:0; font-size:.875rem; color:var(--on-surface-variant); line-height:1.5;">
-        Esta ação é <strong style="color:#ff716c;">permanente e irreversível</strong>.<br>
-        Todos os seus dados serão removidos.
+        Sua conta será <strong style="color:#ffa500;">desativada</strong> e você não poderá mais acessar o sistema.<br>
+        Entre em contato com a biblioteca para reativá-la.
       </p>
     </div>
 
@@ -181,7 +182,7 @@
           font-size:.9rem; outline:none; transition:border .2s;"
         oninput="document.getElementById('err-excluir').style.display='none'">
       <span id="err-excluir" style="
-        color:#ff716c; font-size:.78rem; margin-top:.35rem;
+        color:#ffa500; font-size:.78rem; margin-top:.35rem;
         display:none; padding-left:.25rem;"></span>
     </div>
 
@@ -194,9 +195,9 @@
       </button>
       <button id="btn-confirmar-excluir" onclick="confirmarExcluir()" style="
         flex:1; padding:.75rem; border-radius:10px; border:none;
-        background:#ff716c; color:#fff; font-size:.9rem;
+        background:#ffa500; color:#fff; font-size:.9rem;
         font-weight:700; cursor:pointer;">
-        Excluir Conta
+        Desativar Conta
       </button>
     </div>
   </div>
@@ -349,7 +350,7 @@
     finally { btn.disabled = false; btn.textContent = 'Salvar'; }
   }
 
-  // ── Excluir conta ────────────────────────────────────
+  // ✅ ALTERADO: era "Excluir conta" — agora Desativar conta
   function abrirModalExcluir() {
     document.getElementById('modal-excluir').style.display = 'flex';
     setTimeout(() => document.getElementById('senha-excluir')?.focus(), 100);
@@ -361,14 +362,15 @@
     const senha = document.getElementById('senha-excluir').value;
     if (!senha) { toast('Digite sua senha para confirmar.', 'erro'); return; }
     try {
-      const resp = await fetch(`${API}?id=${id}`, {
+      const resp = await fetch(`${API}?id=${id}&acao=desativar`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ senha }),
       });
       const dados = await resp.json();
-      if (!resp.ok) { toast(dados.erro || 'Erro ao excluir.', 'erro'); return; }
-      logout();
+      if (!resp.ok) { toast(dados.erro || 'Erro ao desativar.', 'erro'); return; }
+      toast('Conta desativada com sucesso.', 'sucesso');
+      setTimeout(() => logout(), 1500);
     } catch { toast('Erro de conexão.', 'erro'); }
   }
 

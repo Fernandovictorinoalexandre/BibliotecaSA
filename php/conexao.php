@@ -7,7 +7,7 @@ define('DB_HOST', 'localhost');
 define('DB_USER', 'root');       // altere para seu usuário MySQL
 define('DB_PASS', '');           // altere para sua senha MySQL
 define('DB_NAME', 'estacao_literaria');
-define('DB_PORT', 3306);
+define('DB_PORT', 3406);
 
 function getConexao(): PDO {
     static $pdo = null;
