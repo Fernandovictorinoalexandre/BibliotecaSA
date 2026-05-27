@@ -140,22 +140,26 @@ if ($metodo === 'PUT') {
     responder(200, ['mensagem' => 'Usuário atualizado com sucesso.']);
 }
 
-// ── DELETE ───────────────────────────────────────────────
+// ✅ ALTERADO: DELETE agora DESATIVA ao invés de excluir ──
 
 if ($metodo === 'DELETE') {
-    if (!$id) responder(400, ['erro' => 'ID obrigatório para exclusão.']);
+    if (!$id) responder(400, ['erro' => 'ID obrigatório para desativação.']);
 
     $d     = bodyJson();
     $senha = $d['senha'] ?? '';
 
-    if (empty($senha)) responder(422, ['erro' => 'Senha obrigatória para excluir a conta.']);
+    if (empty($senha)) responder(422, ['erro' => 'Senha obrigatória para desativar a conta.']);
 
     // Verifica senha
-    $chk = $pdo->prepare('SELECT senha FROM usuarios WHERE id = ?');
+    $chk = $pdo->prepare('SELECT id, nome, email, senha, data_nasc, status, criado_em FROM usuarios WHERE id = ?');
     $chk->execute([$id]);
     $usuario = $chk->fetch();
 
     if (!$usuario) responder(404, ['erro' => 'Usuário não encontrado.']);
+
+    if ($usuario['status'] === 'inativo') {
+        responder(409, ['erro' => 'Esta conta já está desativada.']);
+    }
 
     if (!password_verify($senha, $usuario['senha'])) {
         responder(401, ['erro' => 'Senha incorreta. Tente novamente.']);
@@ -165,15 +169,37 @@ if ($metodo === 'DELETE') {
     $emp = $pdo->prepare("SELECT COUNT(*) FROM emprestimos WHERE usuario_id = ? AND status IN ('ativo','atrasado') AND data_devolucao_real IS NULL");
     $emp->execute([$id]);
     if ($emp->fetchColumn() > 0) {
-        responder(409, ['erro' => 'Você possui livros em aberto. Devolva-os antes de excluir a conta.']);
+        responder(409, ['erro' => 'Você possui livros em aberto. Devolva-os antes de desativar a conta.']);
     }
 
-    $stmt = $pdo->prepare('DELETE FROM usuarios WHERE id = ?');
-    $stmt->execute([$id]);
+    // Inicia transação: atualiza status e copia para usuarios_inativos
+    $pdo->beginTransaction();
+    try {
+        // 1. Marca como inativo na tabela principal
+        $upd = $pdo->prepare("UPDATE usuarios SET status = 'inativo' WHERE id = ?");
+        $upd->execute([$id]);
 
-    $stmt->rowCount()
-        ? responder(200, ['mensagem' => 'Conta excluída com sucesso.'])
-        : responder(404, ['erro' => 'Usuário não encontrado.']);
+        // 2. Copia para a tabela de inativos
+        $ins = $pdo->prepare(
+            'INSERT INTO usuarios_inativos (usuario_id, nome, email, senha, data_nasc, criado_em, desativado_em)
+             VALUES (:usuario_id, :nome, :email, :senha, :data_nasc, :criado_em, NOW())
+             ON DUPLICATE KEY UPDATE desativado_em = NOW()'
+        );
+        $ins->execute([
+            ':usuario_id' => $usuario['id'],
+            ':nome'       => $usuario['nome'],
+            ':email'      => $usuario['email'],
+            ':senha'      => $usuario['senha'],
+            ':data_nasc'  => $usuario['data_nasc'],
+            ':criado_em'  => $usuario['criado_em'],
+        ]);
+
+        $pdo->commit();
+        responder(200, ['mensagem' => 'Conta desativada com sucesso. Entre em contato com a biblioteca para reativá-la.']);
+    } catch (\Throwable $e) {
+        $pdo->rollBack();
+        responder(500, ['erro' => 'Erro interno ao desativar a conta. Tente novamente.']);
+    }
 }
 
 responder(405, ['erro' => 'Método não permitido.']);
