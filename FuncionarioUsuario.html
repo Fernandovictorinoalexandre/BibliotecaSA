@@ -17,13 +17,15 @@
     <h1>BIBLIOTECA</h1>
   </div>
   <nav class="menu">
-    <a href="PainelFuncionario.html">Painel Principal</a>
+    <a href="PainelFuncionario.html">Dashboard</a>
   </nav>
   <div class="right-area">
     <input type="text" id="campoBusca" placeholder="Pesquisar usuário..." class="search">
-    <span id="func-nome-nav" style="font-size:.82rem;color:var(--on-surface-variant);white-space:nowrap;"></span>
-    <div class="user-avatar" id="user-avatar-nav">
-      <span class="material-symbols-outlined">person</span>
+    <div style="display:flex;align-items:center;gap:.5rem;">
+      <span id="func-nome-nav" style="font-size:.82rem;color:var(--on-surface-variant);white-space:nowrap;font-weight:500;"></span>
+      <div class="user-avatar" id="user-avatar-nav" style="flex-shrink:0;">
+        <span class="material-symbols-outlined">person</span>
+      </div>
     </div>
   </div>
 </header>
@@ -43,9 +45,6 @@
     </a>
     <a href="GestaoFuncionario.html" class="nav-item">
       <span class="material-symbols-outlined">badge</span>Funcionários
-    </a>
-    <a href="AuditoriaFuncionario.html" class="nav-item">
-      <span class="material-symbols-outlined">manage_search</span>Auditoria
     </a>
   </nav>
   <div style="margin-top:auto;padding:20px 12px;">

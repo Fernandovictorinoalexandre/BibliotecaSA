@@ -65,7 +65,12 @@
           </div>
 
           <div class="input-group">
-            <label>Categoria
+            <label>Número de Páginas
+              <input type="number" id="paginas" name="paginas" min="1" placeholder="ex: 320">
+            </label>
+          </div>
+
+          <div class="input-group">
               <select id="categoria" name="categoria">
                 <option value="Geral">Geral</option>
                 <option value="Fantasia">Fantasia</option>
@@ -84,9 +89,41 @@
           </div>
 
           <div class="input-group">
-            <label>URL da Capa (imagem)
-              <input type="url" id="capa" name="capa" placeholder="https://...">
-            </label>
+            <label>Capa do Livro</label>
+            <div id="capa-upload-area" onclick="document.getElementById('capa-file').click()" style="
+              border: 2px dashed rgba(0,245,212,.35);
+              border-radius: 12px;
+              padding: 1.2rem;
+              text-align: center;
+              cursor: pointer;
+              transition: border-color .2s, background .2s;
+              background: rgba(0,245,212,.04);
+              margin-top: .35rem;
+            "
+            onmouseenter="this.style.borderColor='rgba(0,245,212,.7)'; this.style.background='rgba(0,245,212,.08)'"
+            onmouseleave="this.style.borderColor='rgba(0,245,212,.35)'; this.style.background='rgba(0,245,212,.04)'">
+              <div id="capa-preview-wrap" style="display:none; margin-bottom:.75rem;">
+                <img id="capa-preview-img" src="" alt="Preview da capa" style="
+                  max-height: 180px;
+                  max-width: 100%;
+                  border-radius: 8px;
+                  box-shadow: 0 4px 16px rgba(0,0,0,.4);
+                  object-fit: cover;
+                ">
+              </div>
+              <div id="capa-placeholder">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(0,245,212,.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:.5rem;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <p style="margin:0; font-size:.85rem; color:rgba(0,245,212,.7); font-weight:600;">Clique para selecionar imagem</p>
+                <p style="margin:.25rem 0 0; font-size:.75rem; color:var(--on-surface-variant);">JPG, PNG, WEBP — máx. 2MB</p>
+              </div>
+              <div id="capa-nome-arquivo" style="display:none; font-size:.78rem; color:var(--on-surface-variant); margin-top:.5rem;"></div>
+            </div>
+            <input type="file" id="capa-file" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none;" onchange="handleCapaChange(event)">
+            <button type="button" id="capa-remover" onclick="removerCapa(event)" style="
+              display:none; margin-top:.5rem; padding:.3rem .8rem; border-radius:8px;
+              border:1px solid rgba(255,113,108,.4); background:transparent;
+              color:#ff716c; font-size:.78rem; cursor:pointer;
+            ">✕ Remover imagem</button>
           </div>
 
           <div class="input-group">
@@ -113,6 +150,42 @@
     if (localStorage.getItem('func_logado') !== 'true') window.location.href = 'LoginFuncionario.html';
 
     const API = 'http://localhost:9999/Estacao-refatorado/php/livros.php';
+
+    // ── Capa base64 ──────────────────────────────────────
+    let capaBase64 = null;
+
+    function handleCapaChange(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) {
+        toast('Imagem muito grande. Use até 2MB.', 'erro');
+        event.target.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        capaBase64 = e.target.result;
+        // Mostra preview
+        document.getElementById('capa-preview-img').src = capaBase64;
+        document.getElementById('capa-preview-wrap').style.display = 'block';
+        document.getElementById('capa-placeholder').style.display = 'none';
+        document.getElementById('capa-nome-arquivo').textContent = file.name;
+        document.getElementById('capa-nome-arquivo').style.display = 'block';
+        document.getElementById('capa-remover').style.display = 'inline-block';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removerCapa(event) {
+      event.stopPropagation();
+      capaBase64 = null;
+      document.getElementById('capa-file').value = '';
+      document.getElementById('capa-preview-img').src = '';
+      document.getElementById('capa-preview-wrap').style.display = 'none';
+      document.getElementById('capa-placeholder').style.display = 'block';
+      document.getElementById('capa-nome-arquivo').style.display = 'none';
+      document.getElementById('capa-remover').style.display = 'none';
+    }
 
     // ── Toast ────────────────────────────────────────────
     function toast(msg, tipo = 'sucesso') {
@@ -145,7 +218,8 @@
       const editora         = document.getElementById('editora').value.trim();
       const data_publicacao = document.getElementById('data_publicacao').value;
       const quantidade      = parseInt(document.getElementById('quantidade').value) || 1;
-      const capa            = document.getElementById('capa').value.trim();
+      const paginas         = parseInt(document.getElementById('paginas').value)    || null;
+      const capa            = capaBase64 || null;
       const descricao       = document.getElementById('descricao').value.trim();
       const categoria       = document.getElementById('categoria').value;
       const isbn            = limparIsbn(isbnRaw);
@@ -181,6 +255,7 @@
             editora:         editora         || null,
             data_publicacao: data_publicacao || null,
             quantidade,
+            paginas,
             capa:            capa            || null,
             descricao:       descricao       || null,
             categoria:       categoria       || 'Geral',

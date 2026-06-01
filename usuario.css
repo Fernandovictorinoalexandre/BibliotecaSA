@@ -515,3 +515,11 @@ tr:last-child td { border-bottom: none; }
       background: rgba(255,113,108,.1);
       border-color: #ff716c;
     }
+
+/* ── SECTION-HEADER (dentro de main, ex-class "header" das atividades em Conta.html) ── */
+.section-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: .75rem;
+  /* sem position, sem z-index, sem sticky */
+}
+.section-header h2 { font-size: 1.125rem; font-weight: 700; color: var(--on-background); }

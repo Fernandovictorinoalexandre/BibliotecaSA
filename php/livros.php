@@ -94,8 +94,8 @@ if ($metodo === 'POST') {
     if ($chk->fetch()) responder(409, ['erro' => 'ISBN já cadastrado.']);
 
     $stmt = $pdo->prepare(
-        'INSERT INTO livros (titulo, autor, isbn, editora, data_publicacao, quantidade, status, capa, descricao, categoria)
-         VALUES (:titulo, :autor, :isbn, :editora, :data_publicacao, :quantidade, :status, :capa, :descricao, :categoria)'
+        'INSERT INTO livros (titulo, autor, isbn, editora, data_publicacao, quantidade, status, capa, descricao, categoria, paginas)
+         VALUES (:titulo, :autor, :isbn, :editora, :data_publicacao, :quantidade, :status, :capa, :descricao, :categoria, :paginas)'
     );
     $stmt->execute([
         ':titulo'          => trim($d['titulo']),
@@ -108,6 +108,7 @@ if ($metodo === 'POST') {
         ':capa'            => isset($d['capa'])            ? trim($d['capa'])     : null,
         ':descricao'       => isset($d['descricao'])       ? trim($d['descricao']): null,
         ':categoria'       => isset($d['categoria'])       ? trim($d['categoria']): 'Geral',
+        ':paginas'         => isset($d['paginas'])         ? (int)$d['paginas']   : null,
     ]);
 
     responder(201, [
@@ -147,6 +148,7 @@ if ($metodo === 'PUT') {
     if (!empty($d['autor']))           { $campos[] = 'autor = ?';           $params[] = trim($d['autor']); }
     if (!empty($d['isbn']))            { $campos[] = 'isbn = ?';            $params[] = $d['isbn']; }
     if (isset($d['editora']))          { $campos[] = 'editora = ?';         $params[] = trim($d['editora']); }
+    if (isset($d['paginas']))          { $campos[] = 'paginas = ?';         $params[] = (int)$d['paginas']; }
     if (isset($d['data_publicacao']))  { $campos[] = 'data_publicacao = ?'; $params[] = $d['data_publicacao'] ?: null; }
     if (isset($d['quantidade']))       { $campos[] = 'quantidade = ?';      $params[] = (int)$d['quantidade']; }
     if (!empty($d['status']))          { $campos[] = 'status = ?';          $params[] = $d['status']; }
@@ -161,6 +163,42 @@ if ($metodo === 'PUT') {
     $stmt->execute($params);
 
     responder(200, ['mensagem' => 'Livro atualizado com sucesso.']);
+}
+
+// ── PATCH (INATIVAR EXEMPLARES) ──────────────────────────
+
+if ($metodo === 'PATCH') {
+    if (!$id) responder(400, ['erro' => 'ID obrigatório.']);
+
+    $d   = bodyJson();
+    $acao = $d['acao'] ?? '';
+
+    if ($acao !== 'inativar') responder(400, ['erro' => 'Ação inválida.']);
+
+    $qtd = isset($d['quantidade']) ? (int) $d['quantidade'] : 1;
+    if ($qtd < 1) responder(422, ['erro' => 'Quantidade deve ser pelo menos 1.']);
+
+    // Busca livro atual
+    $stmt = $pdo->prepare('SELECT quantidade FROM livros WHERE id = ?');
+    $stmt->execute([$id]);
+    $livro = $stmt->fetch();
+    if (!$livro) responder(404, ['erro' => 'Livro não encontrado.']);
+
+    $novaQtd = (int) $livro['quantidade'] - $qtd;
+    if ($novaQtd < 0) responder(422, ['erro' => "Quantidade a inativar ({$qtd}) maior que o total disponível ({$livro['quantidade']})."]);
+
+    // Define novo status automaticamente
+    $novoStatus = $novaQtd === 0 ? 'indisponivel' : 'disponivel';
+
+    $stmt = $pdo->prepare('UPDATE livros SET quantidade = ?, status = ? WHERE id = ?');
+    $stmt->execute([$novaQtd, $novoStatus, $id]);
+
+    $msg = $qtd === 1
+        ? "1 exemplar inativado."
+        : "{$qtd} exemplares inativados.";
+    if ($novaQtd === 0) $msg .= " Livro marcado como indisponível.";
+
+    responder(200, ['mensagem' => $msg, 'quantidade_restante' => $novaQtd, 'status' => $novoStatus]);
 }
 
 // ── DELETE ───────────────────────────────────────────────

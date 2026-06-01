@@ -1,12 +1,29 @@
 <?php
+// ═══════════════════════════════════════════════════════
+// php/gemini.php — Proxy para API do Gemini
+// A chave API é lida do arquivo .env (nunca exposta ao cliente)
+// ═══════════════════════════════════════════════════════
 
-header("Content-Type: application/json");
+require_once __DIR__ . '/env.php';
 
-$API_KEY = "";
+header('Content-Type: application/json');
 
-$dados = json_decode(file_get_contents("php://input"), true);
+$API_KEY = getEnv('GEMINI_API_KEY');
 
-$pergunta = $dados["pergunta"] ?? "";
+if (empty($API_KEY)) {
+    http_response_code(500);
+    echo json_encode(['erro' => 'Chave da API não configurada. Verifique o arquivo .env.']);
+    exit;
+}
+
+$dados    = json_decode(file_get_contents('php://input'), true);
+$pergunta = trim($dados['pergunta'] ?? '');
+
+if (empty($pergunta)) {
+    http_response_code(422);
+    echo json_encode(['erro' => 'Pergunta não informada.']);
+    exit;
+}
 
 $contexto = "
 Você é o Arquivista da Estação Literária, assistente de suporte de uma biblioteca online.
@@ -37,41 +54,36 @@ OUTROS:
 - Atendimento humano: segunda a sexta, 9h às 18h
 ";
 
-$url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=".$API_KEY;
-
+$url  = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . $API_KEY;
 $body = [
-  "contents" => [
-    [
-      "parts" => [
-        [
-          "text" => $contexto . "\n\nUsuário: " . $pergunta
-        ]
-      ]
-    ]
-  ]
+    'contents' => [[
+        'parts' => [[
+            'text' => $contexto . "\n\nUsuário: " . $pergunta,
+        ]],
+    ]],
 ];
 
 $ch = curl_init($url);
-
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_POST, true);
-
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-  "Content-Type: application/json"
+curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_POST           => true,
+    CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+    CURLOPT_POSTFIELDS     => json_encode($body),
+    CURLOPT_TIMEOUT        => 20,
 ]);
-
-curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
 
 $response = curl_exec($ch);
-
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
+if (!$response) {
+    http_response_code(502);
+    echo json_encode(['erro' => 'Não foi possível conectar ao serviço de IA.']);
+    exit;
+}
+
 $resultado = json_decode($response, true);
+$resposta  = $resultado['candidates'][0]['content']['parts'][0]['text']
+             ?? 'Não consegui acessar os arquivos da estação.';
 
-$resposta =
-$resultado["candidates"][0]["content"]["parts"][0]["text"]
-?? "Não consegui acessar os arquivos da estação.";
-
-echo json_encode([
-  "resposta" => $resposta
-]);
+echo json_encode(['resposta' => $resposta]);
