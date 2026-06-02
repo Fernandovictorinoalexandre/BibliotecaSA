@@ -50,6 +50,11 @@
         color:#ff716c;border-radius:8px;padding:.7rem 1rem;
         font-size:.875rem;text-align:center;display:none;margin-bottom:.75rem;">
       </div>
+      <div id="aviso-tentativas" style="
+        background:rgba(244,228,138,.08);border:1px solid rgba(244,228,138,.3);
+        color:#f4e48a;border-radius:8px;padding:.5rem 1rem;
+        font-size:.8rem;text-align:center;display:none;margin-bottom:.75rem;">
+      </div>
 
       <button class="btn btn-primary" type="submit" id="btnEntrar">Entrar</button>
 
@@ -115,27 +120,74 @@
 
       if (resp.ok) {
         // Chaves padronizadas com o restante do sistema
-        localStorage.setItem('logado',       'true');
-        localStorage.setItem('usuario_id',   dados.usuario.id);
-        localStorage.setItem('usuario_nome', dados.usuario.nome);
-        localStorage.setItem('usuario_email',dados.usuario.email);
-        window.location.href = 'PainelUsuario.html';
+        localStorage.setItem('logado',            'true');
+        localStorage.setItem('usuario_id',        dados.usuario.id);
+        localStorage.setItem('usuario_nome',      dados.usuario.nome);
+        localStorage.setItem('usuario_email',     dados.usuario.email);
+        localStorage.setItem('usuario_foto',      dados.usuario.foto_perfil || '');
+        localStorage.setItem('usuario_status',    dados.usuario.status || 'ativo');
+        // Conta inativa → redireciona para página de Conta para reativar
+        if (dados.usuario.status === 'inativo') {
+          window.location.href = 'Conta.html';
+        } else {
+          window.location.href = 'PainelUsuario.html';
+        }
       } else {
-        const el = document.getElementById('erro-servidor');
+        const el     = document.getElementById('erro-servidor');
+        const aviso  = document.getElementById('aviso-tentativas');
         el.textContent = dados.erro || 'Erro ao fazer login.';
         el.style.display = 'block';
+        aviso.style.display = 'none';
+
+        if (dados.bloqueado) {
+          // Bloqueia o botão e inicia countdown
+          iniciarCountdown(dados.minutos_restantes || 15);
+        } else if (dados.tentativas && dados.max) {
+          aviso.textContent = `Tentativa ${dados.tentativas} de ${dados.max}.`;
+          aviso.style.display = 'block';
+        }
       }
     } catch {
       const el = document.getElementById('erro-servidor');
       el.textContent = 'Não foi possível conectar ao servidor.';
       el.style.display = 'block';
     } finally {
-      btn.disabled = false; btn.textContent = 'Entrar';
+      if (!document.getElementById('btnEntrar').dataset.bloqueado) {
+        btn.disabled = false; btn.textContent = 'Entrar';
+      }
     }
   });
 
   document.getElementById('email').addEventListener('input', limparErroServidor);
   document.getElementById('senha').addEventListener('input', limparErroServidor);
+
+  // ── Countdown de bloqueio ──────────────────────────────
+  let _countdownTimer = null;
+  function iniciarCountdown(minutos) {
+    const btn   = document.getElementById('btnEntrar');
+    const el    = document.getElementById('erro-servidor');
+    btn.dataset.bloqueado = 'true';
+    let segundos = minutos * 60;
+    if (_countdownTimer) clearInterval(_countdownTimer);
+
+    function atualizar() {
+      const m = Math.floor(segundos / 60);
+      const s = String(segundos % 60).padStart(2, '0');
+      btn.disabled  = true;
+      btn.textContent = `Bloqueado — aguarde ${m}:${s}`;
+      if (segundos <= 0) {
+        clearInterval(_countdownTimer);
+        btn.disabled   = false;
+        btn.textContent = 'Entrar';
+        delete btn.dataset.bloqueado;
+        el.style.display = 'none';
+        document.getElementById('aviso-tentativas').style.display = 'none';
+      }
+      segundos--;
+    }
+    atualizar();
+    _countdownTimer = setInterval(atualizar, 1000);
+  }
 </script>
 
 </body>

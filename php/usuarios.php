@@ -36,7 +36,7 @@ function validarUsuario(array $d, bool $novo = true): ?string {
 if ($metodo === 'GET') {
     if ($id) {
         $stmt = $pdo->prepare(
-            'SELECT id, nome, email, data_nasc, status, criado_em, atualizado_em
+            'SELECT id, nome, email, data_nasc, status, foto_perfil, criado_em, atualizado_em
              FROM usuarios WHERE id = ?'
         );
         $stmt->execute([$id]);
@@ -125,11 +125,12 @@ if ($metodo === 'PUT') {
     $campos = [];
     $params = [];
 
-    if (!empty($d['nome']))      { $campos[] = 'nome = ?';      $params[] = trim($d['nome']); }
-    if (!empty($d['email']))     { $campos[] = 'email = ?';     $params[] = strtolower(trim($d['email'])); }
-    if (!empty($d['senha']))     { $campos[] = 'senha = ?';     $params[] = password_hash($d['senha'], PASSWORD_BCRYPT); }
-    if (isset($d['data_nasc']))  { $campos[] = 'data_nasc = ?'; $params[] = $d['data_nasc'] ?: null; }
-    if (!empty($d['status']))    { $campos[] = 'status = ?';    $params[] = $d['status']; }
+    if (!empty($d['nome']))      { $campos[] = 'nome = ?';        $params[] = trim($d['nome']); }
+    if (!empty($d['email']))     { $campos[] = 'email = ?';       $params[] = strtolower(trim($d['email'])); }
+    if (!empty($d['senha']))     { $campos[] = 'senha = ?';       $params[] = password_hash($d['senha'], PASSWORD_BCRYPT); }
+    if (isset($d['data_nasc']))  { $campos[] = 'data_nasc = ?';   $params[] = $d['data_nasc'] ?: null; }
+    if (!empty($d['status']))    { $campos[] = 'status = ?';      $params[] = $d['status']; }
+    if (array_key_exists('foto_perfil', $d)) { $campos[] = 'foto_perfil = ?'; $params[] = $d['foto_perfil'] ?: null; }
 
     if (empty($campos)) responder(400, ['erro' => 'Nenhum campo para atualizar.']);
 
@@ -140,7 +141,7 @@ if ($metodo === 'PUT') {
     responder(200, ['mensagem' => 'Usuário atualizado com sucesso.']);
 }
 
-// ✅ ALTERADO: DELETE agora DESATIVA ao invés de excluir ──
+// ── DELETE (DESATIVAR CONTA) ──────────────────────────────
 
 if ($metodo === 'DELETE') {
     if (!$id) responder(400, ['erro' => 'ID obrigatório para desativação.']);
@@ -150,7 +151,7 @@ if ($metodo === 'DELETE') {
 
     if (empty($senha)) responder(422, ['erro' => 'Senha obrigatória para desativar a conta.']);
 
-    // Verifica senha
+    // Busca usuário
     $chk = $pdo->prepare('SELECT id, nome, email, senha, data_nasc, status, criado_em FROM usuarios WHERE id = ?');
     $chk->execute([$id]);
     $usuario = $chk->fetch();
@@ -169,30 +170,53 @@ if ($metodo === 'DELETE') {
     $emp = $pdo->prepare("SELECT COUNT(*) FROM emprestimos WHERE usuario_id = ? AND status IN ('ativo','atrasado') AND data_devolucao_real IS NULL");
     $emp->execute([$id]);
     if ($emp->fetchColumn() > 0) {
-        responder(409, ['erro' => 'Você possui livros em aberto. Devolva-os antes de desativar a conta.']);
+        responder(409, ['erro' => 'Você possui livros em aberto. Devolva todos os livros antes de desativar a conta.']);
     }
 
-    // Inicia transação: atualiza status e copia para usuarios_inativos
+    // Bloqueia se devolveu livro há menos de 1 dia (24 horas)
+    $recente = $pdo->prepare("
+        SELECT data_devolucao_real FROM emprestimos
+        WHERE usuario_id = ? AND data_devolucao_real IS NOT NULL
+        ORDER BY data_devolucao_real DESC
+        LIMIT 1
+    ");
+    $recente->execute([$id]);
+    $ultimaDevolucao = $recente->fetchColumn();
+    if ($ultimaDevolucao) {
+        $diffHoras = (time() - strtotime($ultimaDevolucao)) / 3600;
+        if ($diffHoras < 24) {
+            $horasRestantes = ceil(24 - $diffHoras);
+            responder(409, [
+                'erro' => "Você devolveu um livro recentemente. Aguarde {$horasRestantes} hora(s) para poder desativar a conta.",
+                'horas_restantes' => $horasRestantes
+            ]);
+        }
+    }
+
+    // Desativa o usuário
     $pdo->beginTransaction();
     try {
-        // 1. Marca como inativo na tabela principal
         $upd = $pdo->prepare("UPDATE usuarios SET status = 'inativo' WHERE id = ?");
         $upd->execute([$id]);
 
-        // 2. Copia para a tabela de inativos
-        $ins = $pdo->prepare(
-            'INSERT INTO usuarios_inativos (usuario_id, nome, email, senha, data_nasc, criado_em, desativado_em)
-             VALUES (:usuario_id, :nome, :email, :senha, :data_nasc, :criado_em, NOW())
-             ON DUPLICATE KEY UPDATE desativado_em = NOW()'
-        );
-        $ins->execute([
-            ':usuario_id' => $usuario['id'],
-            ':nome'       => $usuario['nome'],
-            ':email'      => $usuario['email'],
-            ':senha'      => $usuario['senha'],
-            ':data_nasc'  => $usuario['data_nasc'],
-            ':criado_em'  => $usuario['criado_em'],
-        ]);
+        // Registra na tabela de inativos (se existir)
+        try {
+            $ins = $pdo->prepare(
+                'INSERT INTO usuarios_inativos (usuario_id, nome, email, senha, data_nasc, criado_em, desativado_em)
+                 VALUES (:usuario_id, :nome, :email, :senha, :data_nasc, :criado_em, NOW())
+                 ON DUPLICATE KEY UPDATE desativado_em = NOW()'
+            );
+            $ins->execute([
+                ':usuario_id' => $usuario['id'],
+                ':nome'       => $usuario['nome'],
+                ':email'      => $usuario['email'],
+                ':senha'      => $usuario['senha'],
+                ':data_nasc'  => $usuario['data_nasc'],
+                ':criado_em'  => $usuario['criado_em'],
+            ]);
+        } catch (\Throwable $ignored) {
+            // tabela opcional — ignora se não existir
+        }
 
         $pdo->commit();
         responder(200, ['mensagem' => 'Conta desativada com sucesso. Entre em contato com a biblioteca para reativá-la.']);

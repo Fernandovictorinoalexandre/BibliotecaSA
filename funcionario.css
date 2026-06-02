@@ -623,3 +623,117 @@ body:not(:has(.layout)) .main {
   .toast.erro { background:#ff716c;color:#fff; }
   .toast.out  { opacity:0;transition:opacity .35s; }
   @keyframes toastIn { from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);} }
+
+/* ══════════════════════════════════════════════════════
+   TABELAS FUNCIONÁRIO — visual limpo igual portal usuário
+   ══════════════════════════════════════════════════════ */
+
+/* Wrapper da tabela: borda, sombra, raio */
+#tabelaWrap,
+.table-wrap {
+  background: var(--surface-container, rgba(25,36,71,.6));
+  border: 1px solid rgba(255,255,255,.07);
+  border-top: 1px solid rgba(115,255,227,.2);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  backdrop-filter: blur(12px);
+}
+
+/* Cabeçalho de tabela */
+#tabelaWrap thead,
+.table-wrap thead {
+  background: rgba(9,18,44,.5);
+}
+#tabelaWrap th,
+.table-wrap th {
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: #a3aac9;
+  padding: .875rem 1.25rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  cursor: default;
+}
+#tabelaWrap th:hover,
+.table-wrap th:hover { color: #73ffe3; }
+
+/* Células */
+#tabelaWrap td,
+.table-wrap td {
+  padding: .875rem 1.25rem;
+  font-size: .875rem;
+  color: #dfe4ff;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+}
+#tabelaWrap tbody tr:last-child td,
+.table-wrap tbody tr:last-child td { border-bottom: none; }
+#tabelaWrap tbody tr,
+.table-wrap tbody tr { transition: background .2s; }
+#tabelaWrap tbody tr:hover,
+.table-wrap tbody tr:hover { background: rgba(255,255,255,.025); }
+
+/* Badges de status dentro das tabelas funcionário */
+#tabelaWrap .badge.ativo,
+.table-wrap   .badge.ativo  { background: rgba(0,245,212,.12); color: #00f5d4; border: 1px solid rgba(0,245,212,.2); }
+#tabelaWrap .badge.inativo,
+.table-wrap   .badge.inativo{ background: rgba(255,113,108,.12); color: #ff716c; border: 1px solid rgba(255,113,108,.2); }
+#tabelaWrap .badge.suspenso,
+.table-wrap   .badge.suspenso{ background: rgba(244,228,138,.12); color: #f4e48a; border: 1px solid rgba(244,228,138,.2); }
+#tabelaWrap .badge.disponivel,
+.table-wrap   .badge.disponivel { background: rgba(0,245,212,.12); color: #00f5d4; border: 1px solid rgba(0,245,212,.2); }
+#tabelaWrap .badge.emprestado,
+.table-wrap   .badge.emprestado { background: rgba(244,228,138,.12); color: #f4e48a; border: 1px solid rgba(244,228,138,.2); }
+#tabelaWrap .badge.indisponivel,
+.table-wrap   .badge.indisponivel { background: rgba(255,113,108,.12); color: #ff716c; border: 1px solid rgba(255,113,108,.2); }
+
+/* Table-section título */
+.table-section > .table-header h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* EmprestimoFuncionario usa div.table-section sem #tabelaWrap — aplicar ao table direto */
+.table-section table {
+  background: transparent;
+}
+
+/* .table-container (FuncionarioLivro, GestaoFuncionario, EmprestimoFuncionario)
+   mesmo visual do #tabelaWrap */
+.table-container {
+  background: rgba(25,36,71,.6) !important;
+  border: 1px solid rgba(255,255,255,.07) !important;
+  border-top: 1px solid rgba(115,255,227,.2) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,.35) !important;
+  backdrop-filter: blur(12px) !important;
+}
+.table-container thead { background: rgba(9,18,44,.5); }
+.table-container .table-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.table-container .table-header h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.1rem; font-weight: 700; color: #fff;
+  margin: 0;
+}
+.table-container th {
+  font-size: .72rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em;
+  color: #a3aac9; padding: .875rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.table-container td {
+  padding: .875rem 1.25rem; font-size: .875rem;
+  color: #dfe4ff; border-bottom: 1px solid rgba(255,255,255,.04);
+}
+.table-container tbody tr:last-child td { border-bottom: none; }
+.table-container tbody tr { transition: background .2s; }
+.table-container tbody tr:hover { background: rgba(255,255,255,.025); }

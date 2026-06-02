@@ -17,13 +17,15 @@
     <h1>BIBLIOTECA</h1>
   </div>
   <nav class="menu">
-    <a href="PainelFuncionario.html">Painel Principal</a>
+    <a href="PainelFuncionario.html">Dashboard</a>
   </nav>
   <div class="right-area">
     <input type="text" id="campoBusca" placeholder="Título, autor ou ISBN..." class="search">
-    <span id="func-nome-nav" style="font-size:.82rem;color:var(--on-surface-variant);white-space:nowrap;"></span>
-    <div class="user-avatar" id="user-avatar-nav">
-      <span class="material-symbols-outlined">person</span>
+    <div style="display:flex;align-items:center;gap:.5rem;">
+      <span id="func-nome-nav" style="font-size:.82rem;color:var(--on-surface-variant);white-space:nowrap;font-weight:500;"></span>
+      <div class="user-avatar" id="user-avatar-nav" style="flex-shrink:0;">
+        <span class="material-symbols-outlined">person</span>
+      </div>
     </div>
   </div>
 </header>
@@ -43,9 +45,6 @@
     </a>
     <a href="GestaoFuncionario.html" class="nav-item">
       <span class="material-symbols-outlined">badge</span>Funcionários
-    </a>
-    <a href="AuditoriaFuncionario.html" class="nav-item">
-      <span class="material-symbols-outlined">manage_search</span>Auditoria
     </a>
   </nav>
   <div style="margin-top:auto;padding:20px 12px;">
@@ -157,14 +156,24 @@
   </div>
 </div>
 
-<!-- MODAL EXCLUSÃO -->
-<div class="modal-overlay" id="modalExclusao">
+<!-- MODAL INATIVAR -->
+<div class="modal-overlay" id="modalInativar">
   <div class="modal modal-confirm">
-    <h3>Confirmar Exclusão</h3>
-    <p id="msgExclusao"></p>
-    <div class="modal-acoes">
-      <button class="btn-modal-cancel" onclick="fecharModal('modalExclusao')">Cancelar</button>
-      <button class="btn-modal-del" id="btnConfirmarDel" onclick="confirmarExclusao()">Excluir</button>
+    <h3>Inativar Exemplares</h3>
+    <p id="msgInativar" style="margin-bottom:1rem;"></p>
+    <div class="input-group">
+      <label>Quantos exemplares inativar?</label>
+      <div style="display:flex;align-items:center;gap:.75rem;margin-top:.4rem;">
+        <button type="button" onclick="ajustarQtdInativar(-1)" style="width:36px;height:36px;border-radius:8px;border:1px solid var(--outline);background:var(--surface-container);color:var(--on-surface);font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+        <input type="number" id="qtdInativar" min="1" value="1"
+          style="width:70px;text-align:center;padding:.45rem;border-radius:8px;border:1px solid var(--outline);background:var(--surface-container);color:var(--on-surface);font-size:1rem;font-family:inherit;">
+        <button type="button" onclick="ajustarQtdInativar(1)" style="width:36px;height:36px;border-radius:8px;border:1px solid var(--outline);background:var(--surface-container);color:var(--on-surface);font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+        <span id="inativarMax" style="font-size:.8rem;color:var(--on-surface-variant);"></span>
+      </div>
+    </div>
+    <div class="modal-acoes" style="margin-top:1.25rem;">
+      <button class="btn-modal-cancel" onclick="fecharModal('modalInativar')">Cancelar</button>
+      <button class="btn-modal-del" id="btnConfirmarInativar" onclick="confirmarInativar()">Inativar</button>
     </div>
   </div>
 </div>
@@ -216,7 +225,7 @@
         </td>
         <td>
           <button class="btn-acao btn-editar"  onclick="abrirEdicao(${l.id})">Editar</button>
-          <button class="btn-acao btn-excluir" onclick="abrirExclusao(${l.id}, '${l.titulo.replace(/'/g,"\\'")}')">Excluir</button>
+          <button class="btn-acao btn-excluir" onclick="abrirInativar(${l.id}, '${l.titulo.replace(/'/g, String.fromCharCode(39))}', ${l.quantidade}, ${l.quantidade_disponivel ?? 0})">Inativar</button>
         </td>
       </tr>
     `).join('');
@@ -230,10 +239,18 @@
 
       renderizarTabela(dados);
 
-      document.getElementById('statTotal').textContent  = dados.length;
-      document.getElementById('statDisp').textContent   = dados.filter(l => l.status === 'disponivel').length;
-      document.getElementById('statEmp').textContent    = dados.filter(l => l.status === 'emprestado').length;
-      document.getElementById('statIndisp').textContent = dados.filter(l => l.status === 'indisponivel').length;
+      const totalExemplares    = dados.reduce((t, l) => t + Number(l.quantidade || 0), 0);
+      const totalDisponiveis   = dados.reduce((t, l) => t + Number(l.quantidade_disponivel ?? 0), 0);
+      const totalEmprestados   = totalExemplares - totalDisponiveis;
+      const totalIndisponiveis = dados
+        .filter(l => l.status === 'indisponivel')
+        .reduce((t, l) => t + Number(l.quantidade || 0), 0);
+
+      document.getElementById('statTotal').textContent    = totalExemplares;
+      document.getElementById('statDisp').textContent     = totalDisponiveis;
+      document.getElementById('statEmp').textContent      = totalEmprestados;
+      document.getElementById('statIndisp').textContent   = totalIndisponiveis;
+      
 
     } catch {
       document.getElementById('corpoTabela').innerHTML =
@@ -297,31 +314,57 @@
     }
   }
 
-  function abrirExclusao(id, titulo) {
-    idParaDeletar = id;
-    document.getElementById('msgExclusao').textContent =
-      `Deseja excluir permanentemente "${titulo}"?`;
-    abrirModal('modalExclusao');
+  let inativarMaxDisp = 0;
+  let inativarMaxTotal = 0;
+
+  function ajustarQtdInativar(delta) {
+    const inp = document.getElementById('qtdInativar');
+    const val = Math.min(inativarMaxTotal, Math.max(1, (parseInt(inp.value) || 1) + delta));
+    inp.value = val;
   }
 
-  async function confirmarExclusao() {
-    const btn = document.getElementById('btnConfirmarDel');
+  function abrirInativar(id, titulo, total, disponivel) {
+    idParaDeletar = id;
+    inativarMaxTotal = total;
+    inativarMaxDisp  = disponivel;
+    const inp = document.getElementById('qtdInativar');
+    inp.value = 1;
+    inp.max   = total;
+    document.getElementById('inativarMax').textContent = `máx: ${total} (${disponivel} disponível)`;
+    document.getElementById('msgInativar').textContent =
+      `Escolha quantos exemplares de "${titulo}" deseja inativar.`;
+    abrirModal('modalInativar');
+  }
+
+  async function confirmarInativar() {
+    const btn = document.getElementById('btnConfirmarInativar');
+    const qtd = parseInt(document.getElementById('qtdInativar').value) || 1;
+
+    if (qtd < 1 || qtd > inativarMaxTotal) {
+      toast(`Quantidade inválida. Máximo: ${inativarMaxTotal}.`, 'erro');
+      return;
+    }
+
     btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
 
     try {
-      const resp = await fetch(`${API}?id=${idParaDeletar}`, { method: 'DELETE' });
+      const resp = await fetch(`${API}?id=${idParaDeletar}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ acao: 'inativar', quantidade: qtd }),
+      });
       const dados = await resp.json();
       if (resp.ok) {
-        toast('Livro removido.', 'sucesso');
-        fecharModal('modalExclusao');
+        toast(dados.mensagem || 'Exemplares inativados.', 'sucesso');
+        fecharModal('modalInativar');
         carregarLivros();
       } else {
-        toast(dados.erro || 'Erro ao remover.', 'erro');
+        toast(dados.erro || 'Erro ao inativar.', 'erro');
       }
     } catch {
       toast('Erro de conexão.', 'erro');
     } finally {
-      btn.disabled = false; btn.innerHTML = 'Excluir';
+      btn.disabled = false; btn.innerHTML = 'Inativar';
     }
   }
 

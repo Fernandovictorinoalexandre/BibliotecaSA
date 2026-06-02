@@ -18,14 +18,17 @@
     <span class="logo-wordmark">Biblioteca</span>
   </div>
   <div class="menu">
-    <a href="PainelFuncionario.html">Painel Principal</a>
+    <a href="PainelFuncionario.html">Dashboard</a>
   </div>
   <div class="right-area">
     <div class="search-wrap">
       <input class="search" type="text" id="campoBusca" placeholder="Pesquisar usuário ou livro..."/>
     </div>
-    <div class="user-avatar" id="user-avatar-nav">
-      <span class="material-symbols-outlined">person</span>
+    <div style="display:flex;align-items:center;gap:.5rem;">
+      <span id="func-nome-nav" style="font-size:.82rem;color:var(--on-surface-variant);white-space:nowrap;font-weight:500;"></span>
+      <div class="user-avatar" id="user-avatar-nav" style="flex-shrink:0;">
+        <span class="material-symbols-outlined">person</span>
+      </div>
     </div>
   </div>
 </nav>
@@ -46,9 +49,6 @@
       <a href="GestaoFuncionario.html" class="nav-item">
         <span class="material-symbols-outlined">badge</span>Funcionários
       </a>
-    <a href="AuditoriaFuncionario.html" class="nav-item">
-      <span class="material-symbols-outlined">manage_search</span>Auditoria
-    </a>
     </nav>
     <div style="margin-top:auto;padding:20px 12px;">
     <button onclick="logout()" style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,113,108,.25);background:rgba(255,113,108,.08);color:#ff716c;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background .2s;" onmouseover="this.style.background='rgba(255,113,108,.18)'" onmouseout="this.style.background='rgba(255,113,108,.08)'">
