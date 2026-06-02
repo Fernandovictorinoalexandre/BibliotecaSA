@@ -29,9 +29,14 @@
     <a href="Conta.html">Conta</a>
   </nav>
   <div class="right-area">
-    <input class="search" type="text" placeholder="Pesquisar..." id="campoBuscaHeader">
-    <div class="avatar">
-      <span class="material-symbols-outlined">person</span>
+    <div style="position:relative;display:flex;align-items:center;">
+      <input class="search" type="text" placeholder="Pesquisar..." id="campoBuscaHeader">
+    </div>
+    <div style="display:flex;align-items:center;gap:.5rem;">
+      <span id="nav-nome-usuario" style="font-size:.82rem;color:var(--on-surface-variant);white-space:nowrap;"></span>
+      <div class="user-avatar" id="nav-avatar-usuario" style="width:36px;height:36px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(0,245,212,.15);border:2px solid rgba(0,245,212,.3);">
+        <span class="material-symbols-outlined" style="font-size:1.2rem;color:var(--primary);">person</span>
+      </div>
     </div>
   </div>
 </header>
@@ -47,7 +52,7 @@
         <span class="material-symbols-outlined">book</span>
         <span>Empréstimo</span>
       </a>
-      <a href="DevoluçãoMuta.html">
+      <a href="DevolucaoMuta.html">
         <span class="material-symbols-outlined">assignment_return</span>
         <span>Devolução</span>
       </a>
@@ -212,46 +217,87 @@
 <script>
   if (!localStorage.getItem('logado')) window.location.href = 'LoginUsuario.html';
 
+  // Conta inativa não pode pegar livros — redireciona para reativar
+  if (localStorage.getItem('usuario_status') === 'inativo') {
+    document.addEventListener('DOMContentLoaded', () => {
+      const main = document.querySelector('.main');
+      if (main) {
+        main.innerHTML = `
+          <div style="text-align:center;padding:3rem 1rem;">
+            <div style="font-size:3rem;margin-bottom:1rem;">🔒</div>
+            <h2 style="color:#ffa500;margin-bottom:.5rem;">Conta desativada</h2>
+            <p style="color:var(--on-surface-variant);margin-bottom:1.5rem;">Sua conta está inativa. Reative-a para poder pegar livros emprestados.</p>
+            <a href="Conta.html" style="padding:.75rem 1.5rem;border-radius:10px;background:#ffa500;color:#fff;font-weight:700;text-decoration:none;">Ir para Minha Conta</a>
+          </div>`;
+      }
+    });
+  }
+
   /* ══════════════════════════════════════════
      CONSTANTES
   ══════════════════════════════════════════ */
   const MAX_LOANS    = 5;
   const MAX_RENEWALS = 2;
-  const STORAGE_KEY  = 'biblioteca_loans';
-  const HISTORY_KEY  = 'biblioteca_history';
-
   /* ══════════════════════════════════════════
-     PERSISTÊNCIA
+     API + ESTADO — banco é a fonte verdadeira
   ══════════════════════════════════════════ */
-  function loadLoans()   { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? []; } catch { return []; } }
-  function saveLoans()   { localStorage.setItem(STORAGE_KEY, JSON.stringify(loans)); }
-  function loadHistory() { try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) ?? defaultHistory(); } catch { return defaultHistory(); } }
-  function saveHistory() { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); }
+  const API_EMP = 'http://localhost:9999/Estacao-refatorado/php/emprestimos.php';
 
-  function defaultHistory() {
-    return []; // histórico real vem do banco via Conta.html
-  }
-
-  /* ══════════════════════════════════════════
-     ESTADO
-  ══════════════════════════════════════════ */
-  let loans         = loadLoans();
-  let history       = loadHistory();
+  let loans         = [];
+  let history       = [];
   let idParaRenovar = null;
   const usuarioLogado = {
     id:   localStorage.getItem('usuario_id')   || '001',
     nome: localStorage.getItem('usuario_nome') || 'Leitor',
   };
 
-  // Recalcula atraso
-  (function recalcLate() {
+  /* ── Converte registro do banco → objeto local ── */
+  function dbToLoan(e) {
     const today = new Date(); today.setHours(0,0,0,0);
-    loans.forEach(l => {
-      const due = new Date(l.dueDate); due.setHours(0,0,0,0);
-      l.late = due < today;
-    });
-    saveLoans();
-  })();
+    const due   = new Date(e.data_devolucao_prevista); due.setHours(0,0,0,0);
+    return {
+      id:        String(e.livro_id),
+      empId:     String(e.id),
+      title:     e.titulo,
+      author:    e.autor,
+      borrowedAt: e.data_emprestimo ? e.data_emprestimo.split('T')[0] : '',
+      dueDate:   e.data_devolucao_prevista ? e.data_devolucao_prevista.split('T')[0] : '',
+      renewals:  e.renovacoes || 0,
+      late:      due < today,
+      status:    e.status,
+    };
+  }
+  function dbToHistory(e) {
+    return {
+      id:        String(e.livro_id),
+      empId:     String(e.id),
+      title:     e.titulo,
+      author:    e.autor,
+      borrowedAt: e.data_emprestimo ? e.data_emprestimo.split('T')[0] : '',
+      returnedAt: e.data_devolucao_real ? e.data_devolucao_real.split('T')[0] : '',
+      renewals:  e.renovacoes || 0,
+      status:    e.status,
+    };
+  }
+
+  /* ── Carrega tudo do banco (chamado ao abrir a página) ── */
+  async function carregarDobanco() {
+    const wrap = document.getElementById('loans-wrap');
+    if (wrap) wrap.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--on-surface-variant);opacity:.7;">Carregando...</div>';
+    try {
+      const resp = await fetch(API_EMP + '?usuario_id=' + usuarioLogado.id);
+      if (!resp.ok) throw new Error();
+      const lista = await resp.json();
+      if (!Array.isArray(lista)) throw new Error();
+      loans   = lista.filter(e => !e.data_devolucao_real).map(dbToLoan);
+      history = lista.filter(e =>  e.data_devolucao_real).map(dbToHistory);
+    } catch {
+      if (wrap) wrap.innerHTML = '<div style="text-align:center;padding:2rem;color:#ff716c;">Erro ao carregar empréstimos. Verifique a conexão.</div>';
+      return;
+    }
+    renderLoans();
+    renderHistorico(document.getElementById('campoBusca') ? document.getElementById('campoBusca').value : '');
+  }
 
   /* ══════════════════════════════════════════
      RENDER — LIVROS ATIVOS
@@ -391,35 +437,19 @@
     document.getElementById('tk-due').textContent       = fmt(toISO(due));
     document.getElementById('tk-ticketnum').textContent = genTicketNum();
 
-    // Adiciona ao array de empréstimos ativos
-    if (!loans.find(l => String(l.id) == String(livro.id))) {
-      loans.push({
-        id:         String(livro.id),
-        title:      livro.titulo || livro.title,
-        author:     livro.autor  || livro.author,
-        borrowedAt: toISO(today),
-        dueDate:    toISO(due),
-        renewals:   0,
-        late:       false,
-      });
-      saveLoans();
-      renderLoans();
-      renderHistorico(document.getElementById('campoBusca').value);
-
-      // Registra empréstimo no banco de dados
-      fetch('http://localhost:9999/Estacao-refatorado/php/emprestimos.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          usuario_id:              parseInt(usuarioLogado.id) || null,
-          livro_id:                parseInt(livro.id)         || null,
-          data_emprestimo:         toISO(today),
-          data_devolucao_prevista: toISO(due),
-          metodo_pagamento:        metodoPagamento || null,
-          valor_pago:              15.00,
-        }),
-      }).catch(() => { /* falha silenciosa */ });
-    }
+    // Registra empréstimo no banco e recarrega a lista
+    fetch(API_EMP, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        usuario_id:              parseInt(usuarioLogado.id) || null,
+        livro_id:                parseInt(livro.id)         || null,
+        data_emprestimo:         toISO(today),
+        data_devolucao_prevista: toISO(due),
+        metodo_pagamento:        metodoPagamento || null,
+        valor_pago:              15.00,
+      }),
+    }).then(() => carregarDobanco()).catch(() => {});
 
     document.getElementById('modalOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -457,30 +487,19 @@
     if (loan.renewals >= MAX_RENEWALS) { showToast('Limite de renovações atingido.','error'); fecharModal(); return; }
     if (loan.late)                     { showToast('Não renovável com atraso.','error'); fecharModal(); return; }
 
-    history.push({ id:String('h'+Date.now()), title:loan.title, author:loan.author, img:loan.img||'',
-      borrowedAt:loan.borrowedAt, returnedAt:toISO(new Date()), renewals:loan.renewals+1, status:'renovado' });
-
     const nd = new Date(loan.dueDate); nd.setDate(nd.getDate()+30);
-    loan.dueDate = toISO(nd); loan.renewals++; loan.late = false;
+    const novaDataStr = toISO(nd);
+    fecharModal();
+    showToast('"' + loan.title + '" renovado! Nova devolução: ' + fmt(novaDataStr), 'ok');
 
-    saveLoans(); saveHistory(); fecharModal();
-    renderLoans(); renderHistorico(document.getElementById('campoBusca').value);
-    showToast(`"${loan.title}" renovado! Nova devolução: ${fmt(loan.dueDate)}`, 'ok');
-
-    // Sincroniza renovação com o banco de dados
-    // loan.id aqui é o id do localStorage; tentamos renovar via API usando usuario_id + livro_id
-    fetch(`http://localhost:9999/Estacao-refatorado/php/emprestimos.php?usuario_id=${usuarioLogado.id}&livro_id=${loan.id}`)
-      .then(r => r.json())
-      .then(lista => {
-        const emp = Array.isArray(lista) ? lista.find(e => e.data_devolucao_real === null) : null;
-        if (emp) {
-          fetch(`http://localhost:9999/Estacao-refatorado/php/emprestimos.php?id=${emp.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ renovar: true }),
-          }).catch(() => {});
-        }
-      }).catch(() => {});
+    // Sincroniza renovação com o banco de dados usando empId direto
+    if (loan.empId) {
+      fetch(API_EMP + '?id=' + loan.empId, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ renovar: true }),
+      }).then(() => carregarDobanco()).catch(() => {});
+    }
   }
 
   /* ══════════════════════════════════════════
@@ -514,8 +533,27 @@
   /* ══════════════════════════════════════════
      INICIALIZAÇÃO
   ══════════════════════════════════════════ */
-  renderLoans();
-  renderHistorico();
+  carregarDobanco();
+</script>
+
+<script>
+// ── Avatar + nome do usuário na navbar ───────────────────
+(function() {
+  const nome = localStorage.getItem('usuario_nome') || '';
+  const foto  = localStorage.getItem('usuario_foto') || '';
+  const navNome   = document.getElementById('nav-nome-usuario');
+  const navAvatar = document.getElementById('nav-avatar-usuario');
+  if (navNome && nome)   navNome.textContent = nome.split(' ')[0];
+  if (navAvatar) {
+    if (foto) {
+      navAvatar.innerHTML = '<img src="' + foto + '" style="width:100%;height:100%;object-fit:cover;">';
+    } else if (nome) {
+      const inicial = nome.charAt(0).toUpperCase();
+      navAvatar.innerHTML = '<span style="font-size:.85rem;font-weight:700;color:#09122c;">' + inicial + '</span>';
+      navAvatar.style.background = '#73ffe3';
+    }
+  }
+})();
 </script>
 <script src="busca-global.js"></script>
 </body>

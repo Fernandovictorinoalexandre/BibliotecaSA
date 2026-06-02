@@ -8,20 +8,35 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 
   <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="usuario.css">
   <link rel="stylesheet" href="suporte.css">
-</head>
-<body class="page-suporte">
-<header class="navbar">
-  <div class="logo-area"><img src="Biblioteca2.png" width="60"><h1>BIBLIOTECA</h1></div>
-  <nav class="menu">
+
+<!-- ── HEADER ── -->
+<header class="header">
+  <div class="logo">
+    <img src="Biblioteca2.png" alt="Logo"
+         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+    <div class="logo-icon-fallback" style="display:none">
+      <span class="material-symbols-outlined">auto_stories</span>
+    </div>
+    <h1>Biblioteca</h1>
+  </div>
+  <nav class="nav-links">
     <a href="PainelUsuario.html">Início</a>
     <a href="CatalogoLivros.html">Catálogo</a>
     <a href="Suporte.html" class="active">Suporte</a>
     <a href="Conta.html">Conta</a>
   </nav>
   <div class="right-area">
-    <input type="text" placeholder="Pesquisar..." class="search">
-    <div class="user-avatar"><img src="https://static.wikia.nocookie.net/hoducks/images/5/56/Kevin_Kaslana.jpg/revision/latest/thumbnail/width/360/height/360?cb=20250121140658" alt="Usuário"></div>
+    <div style="position:relative;display:inline-flex;align-items:center;">
+      <input class="search" type="text" placeholder="Pesquisar..." id="campoBuscaHeader">
+    </div>
+    <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0;">
+      <span id="nav-nome-usuario" style="font-size:.82rem;color:var(--on-surface-variant);white-space:nowrap;"></span>
+      <div class="user-avatar" id="nav-avatar-usuario" style="width:36px;height:36px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(0,245,212,.15);border:2px solid rgba(0,245,212,.3);flex-shrink:0;position:relative;z-index:1;">
+        <span class="material-symbols-outlined" style="font-size:1.2rem;color:var(--primary);">person</span>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -51,11 +66,10 @@
 
     <!-- Chips de sugestão -->
     <div class="chat-page-chips" id="sugestoes">
-      <button class="chip" onclick="enviarChip(this)">📖 Emprestar livro</button>
-      <button class="chip" onclick="enviarChip(this)">🔄 Renovar prazo</button>
-      <button class="chip" onclick="enviarChip(this)">💳 Pagar multa</button>
-      <button class="chip" onclick="enviarChip(this)">🔑 Recuperar senha</button>
-      <button class="chip" onclick="enviarChip(this)">📋 Fazer reserva</button>
+      <button class="chip" onclick="enviarChip(this)">📖 Como Emprestar Livro</button>
+      <button class="chip" onclick="enviarChip(this)">🔄 Como Renovar e o Prazo</button>
+      <button class="chip" onclick="enviarChip(this)">💳 Como Funciona Muta</button>
+      <button class="chip" onclick="enviarChip(this)">🔑 Como Recuperar Senha</button>
       <button class="chip" onclick="enviarChip(this)">🕐 Horário de funcionamento</button>
     </div>
 
@@ -155,10 +169,7 @@ const BASE = [
     tags: ['offline','sem internet','desconectado','modo offline'],
     r: 'A Estação Literária opera **exclusivamente online** no momento. 🌐\n\nTodas as funções requerem conexão com a internet.\n\nEstamos avaliando um modo offline para versões futuras!'
   },
-  {
-    tags: ['reserva','reservar','disponivel','indisponivel','lista de espera','espera'],
-    r: 'Quando um livro está indisponível, você pode **reservá-lo** pelo Catálogo. 📋\n\nAo ser devolvido, você recebe uma notificação por e-mail. A reserva fica ativa por **48 horas**.\n\nVocê pode ter no máximo **2 reservas ativas** ao mesmo tempo.'
-  },
+  
   {
     tags: ['horario','funcionamento','aberto','fecha','quando','atendimento','expediente'],
     r: '🕐 **Horário de funcionamento:**\n\n- Segunda a sexta: **9h às 18h**\n- Sábado: **9h às 13h**\n- Domingos e feriados: fechado\n\nO Arquivista IA está disponível **24 horas**!'
@@ -342,5 +353,24 @@ function boasVindas() {
 window.addEventListener('DOMContentLoaded', boasVindas);
 </script>
 <script src="busca-global.js"></script>
+<script>
+(function() {
+  const nome = localStorage.getItem('usuario_nome') || '';
+  const foto  = localStorage.getItem('usuario_foto') || '';
+  const navNome   = document.getElementById('nav-nome-usuario');
+  const navAvatar = document.getElementById('nav-avatar-usuario');
+  if (navNome && nome) navNome.textContent = nome.split(' ')[0];
+  if (navAvatar) {
+    if (foto) {
+      navAvatar.innerHTML = '<img src="' + foto + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;display:block;">';
+      navAvatar.style.background = 'transparent';
+    } else if (nome) {
+      const inicial = nome.charAt(0).toUpperCase();
+      navAvatar.innerHTML = '<span style="font-size:.85rem;font-weight:700;color:#09122c;">' + inicial + '</span>';
+      navAvatar.style.background = '#73ffe3';
+    }
+  }
+})();
+</script>
 </body>
 </html>

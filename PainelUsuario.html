@@ -6,7 +6,6 @@
 
   <title>Estação Literária</title>
 
-
   <!-- Ícones -->
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 
@@ -19,7 +18,6 @@
 
 <body class="page-internal">
 
-
 <!-- ── HEADER ── -->
 <header class="header">
   <div class="logo">
@@ -31,15 +29,20 @@
     <h1>Biblioteca</h1>
   </div>
   <nav class="nav-links">
-    <a href="PainelUsuario.html">Início</a>
+    <a href="PainelUsuario.html" class="active">Início</a>
     <a href="CatalogoLivros.html">Catálogo</a>
     <a href="Suporte.html">Suporte</a>
     <a href="Conta.html">Conta</a>
   </nav>
   <div class="right-area">
-    <input class="search" type="text" placeholder="Pesquisar..." id="campoBuscaHeader">
-    <div class="avatar">
-      <span class="material-symbols-outlined">person</span>
+    <div style="position:relative;display:inline-flex;align-items:center;">
+      <input class="search" type="text" placeholder="Pesquisar..." id="campoBuscaHeader">
+    </div>
+    <div style="display:flex;align-items:center;gap:.5rem;">
+      <span id="nav-nome-usuario" style="font-size:.82rem;color:var(--on-surface-variant);white-space:nowrap;"></span>
+      <div class="user-avatar" id="nav-avatar-usuario" style="width:36px;height:36px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(0,245,212,.15);border:2px solid rgba(0,245,212,.3);flex-shrink:0;position:relative;">
+        <span class="material-symbols-outlined" style="font-size:1.2rem;color:var(--primary);">person</span>
+      </div>
     </div>
   </div>
 </header>
@@ -57,7 +60,7 @@
       <span>Empréstimo</span>
     </a>
 
-    <a href="DevoluçãoMuta.html">
+    <a href="DevolucaoMuta.html">
       <span class="material-symbols-outlined">assignment_return</span>
       <span>Devolução</span>
     </a>
@@ -143,7 +146,6 @@
 
   if (!localStorage.getItem('logado')) window.location.href = 'LoginUsuario.html';
 
-  // Saudação personalizada
   const nomeUsuario = localStorage.getItem('usuario_nome') || 'Leitor';
   const heroTitle = document.querySelector('.hero h2');
   if (heroTitle) heroTitle.textContent = `Bem-vindo, ${nomeUsuario.split(' ')[0]}!`;
@@ -170,14 +172,12 @@
     vistaAtual = vista;
   }
 
-  // Carregar livros mais recentes do banco
   async function carregarLivros() {
     const sec = document.getElementById('secLivros');
     try {
       const resp  = await fetch(API_LIVROS);
       const lista = await resp.json();
 
-      // Pega os 8 livros disponíveis mais recentes
       const disponiveis = lista
         .filter(l => l.status === 'disponivel')
         .slice(0, 8);
@@ -207,7 +207,6 @@
   }
 
   function verLivro(id) {
-    // Busca o livro e navega para o detalhe
     fetch(`${API_LIVROS}?id=${id}`)
       .then(r => r.json())
       .then(l => {
@@ -221,6 +220,27 @@
 
   mostrar('livros');
   carregarLivros();
+</script>
+
+<script>
+// ── Avatar + nome do usuário na navbar ───────────────────
+(function() {
+  const nome = localStorage.getItem('usuario_nome') || '';
+  const foto  = localStorage.getItem('usuario_foto') || '';
+  const navNome   = document.getElementById('nav-nome-usuario');
+  const navAvatar = document.getElementById('nav-avatar-usuario');
+  if (navNome && nome) navNome.textContent = nome.split(' ')[0];
+  if (navAvatar) {
+    if (foto) {
+      navAvatar.innerHTML = '<img src="' + foto + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;display:block;">';
+      navAvatar.style.background = 'transparent';
+    } else if (nome) {
+      const inicial = nome.charAt(0).toUpperCase();
+      navAvatar.innerHTML = '<span style="font-size:.85rem;font-weight:700;color:#09122c;">' + inicial + '</span>';
+      navAvatar.style.background = '#73ffe3';
+    }
+  }
+})();
 </script>
 <script src="busca-global.js"></script>
 </body>

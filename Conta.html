@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Minha Conta — Estação Literária</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="usuario.css">
 </head>
@@ -22,10 +23,15 @@
     <a href="Suporte.html">Suporte</a>
     <a href="Conta.html" class="active">Conta</a>
   </nav>
-  <div class="right-area">
-    <input type="text" placeholder="Pesquisar..." class="search">
-    <div class="user-avatar">
-      <span class="material-symbols-outlined">person</span>
+  <div class="right-area" style="display:flex;align-items:center;gap:1rem;flex-shrink:0;">
+    <div style="position:relative;display:flex;align-items:center;flex-shrink:1;min-width:0;">
+      <input type="text" placeholder="Pesquisar..." class="search" style="flex-shrink:1;min-width:0;">
+    </div>
+    <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0;">
+      <span id="nav-nome-usuario" style="font-size:.82rem;color:var(--on-surface-variant);white-space:nowrap;"></span>
+      <div class="user-avatar" id="nav-avatar-usuario" style="width:36px;height:36px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(0,245,212,.15);border:2px solid rgba(0,245,212,.3);flex-shrink:0;position:relative;">
+        <span class="material-symbols-outlined" style="font-size:1.2rem;color:var(--primary);">person</span>
+      </div>
     </div>
   </div>
 </header>
@@ -33,11 +39,29 @@
 <!-- CONTEÚDO -->
 <main class="container-conta">
 
+  <!-- BANNER CONTA INATIVA -->
+  <div id="banner-inativo" style="display:none; background:rgba(255,165,0,.12); border:1.5px solid rgba(255,165,0,.4); border-radius:14px; padding:1rem 1.25rem; margin-bottom:1.5rem; align-items:center; gap:1rem; flex-wrap:wrap;">
+    <div style="font-size:1.8rem;">🔒</div>
+    <div style="flex:1; min-width:200px;">
+      <strong style="color:#ffa500; display:block; margin-bottom:.2rem;">Conta desativada</strong>
+      <span style="font-size:.875rem; color:var(--on-surface-variant);">Sua conta está inativa. Você não pode pegar livros emprestados. Clique em <strong style="color:#ffa500;">Reativar Conta</strong> para recuperar o acesso completo.</span>
+    </div>
+    <button onclick="reativarConta()" style="padding:.65rem 1.3rem; border-radius:10px; border:none; background:#ffa500; color:#fff; font-size:.875rem; font-weight:700; cursor:pointer; white-space:nowrap;">
+      Reativar Conta
+    </button>
+  </div>
+
   <!-- PERFIL -->
   <section class="perfil">
     <div class="card perfil-card">
-      <div class="user-avatar" style="width:80px;height:80px;margin:0 auto 1rem;font-size:2rem;border-radius:50%;background:rgba(0,245,212,.1);border:2px solid rgba(0,245,212,.2);display:flex;align-items:center;justify-content:center;color:var(--primary);">
-        <span id="avatar-inicial" style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.8rem;">?</span>
+      <div style="position:relative;width:80px;height:80px;margin:0 auto 1rem;cursor:pointer;" onclick="document.getElementById('input-foto').click()" title="Clique para alterar foto">
+        <div id="avatar-perfil" style="width:80px;height:80px;border-radius:50%;overflow:hidden;background:rgba(0,245,212,.1);border:2px solid rgba(0,245,212,.2);display:flex;align-items:center;justify-content:center;color:var(--primary);">
+          <span id="avatar-inicial" style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.8rem;">?</span>
+        </div>
+        <div style="position:absolute;bottom:0;right:0;width:24px;height:24px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;border:2px solid var(--surface-container);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#09122c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </div>
+        <input type="file" id="input-foto" accept="image/*" style="display:none;" onchange="handleFotoChange(event)">
       </div>
       <h1 id="perfil-nome">Carregando...</h1>
       <p id="perfil-email" style="color:var(--on-surface-variant);font-size:.875rem;"></p>
@@ -84,7 +108,7 @@
 
   <!-- ATIVIDADES -->
   <section class="atividades">
-    <div class="header">
+    <div class="section-header">
       <h2>Livros em mãos</h2>
       <a href="Emprestimo.html" class="ver">Ver empréstimos →</a>
     </div>
@@ -102,7 +126,7 @@
       </table>
     </div>
 
-    <div class="header" style="margin-top:1.5rem;">
+    <div class="section-header" style="margin-top:1.5rem;">
       <h2>Histórico de Leituras</h2>
       <a href="Emprestimo.html" class="ver">Ver tudo →</a>
     </div>
@@ -218,11 +242,144 @@
   const id    = localStorage.getItem('usuario_id')    || '';
   const nome  = localStorage.getItem('usuario_nome')  || 'Usuário';
   const email = localStorage.getItem('usuario_email') || '';
+  let   foto  = localStorage.getItem('usuario_foto')  || '';
+  const statusLocal = localStorage.getItem('usuario_status') || 'ativo';
 
-  document.getElementById('perfil-nome').textContent    = nome;
-  document.getElementById('perfil-email').textContent   = email;
-  document.getElementById('perfil-id').textContent      = '#' + id;
-  document.getElementById('avatar-inicial').textContent = nome.charAt(0).toUpperCase();
+  // Exibe banner se conta estiver inativa
+  if (statusLocal === 'inativo') {
+    const banner = document.getElementById('banner-inativo');
+    if (banner) { banner.style.display = 'flex'; }
+    // Oculta botão de desativar pois já está inativa
+    const btnDesativar = document.querySelector('.btn-excluir');
+    if (btnDesativar) btnDesativar.style.display = 'none';
+    // Atualiza badge de status
+    const statusBadge = document.getElementById('status-conta');
+    if (statusBadge) {
+      statusBadge.textContent = 'Inativa';
+      statusBadge.style.background = 'rgba(255,165,0,.12)';
+      statusBadge.style.color = '#ffa500';
+    }
+  }
+
+  // Reativar conta via PUT status=ativo
+  async function reativarConta() {
+    const senha = prompt('Digite sua senha para reativar a conta:');
+    if (!senha) return;
+    try {
+      // Verifica senha via login
+      const respLogin = await fetch('http://localhost:9999/Estacao-refatorado/php/login_usuario.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, senha }),
+      });
+      if (!respLogin.ok) { toast('Senha incorreta. Tente novamente.', 'erro'); return; }
+      // Reativa
+      const resp = await fetch(`${API}?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'ativo' }),
+      });
+      if (!resp.ok) { toast('Erro ao reativar conta.', 'erro'); return; }
+      localStorage.setItem('usuario_status', 'ativo');
+      toast('Conta reativada! Bem-vindo(a) de volta.', 'sucesso');
+      setTimeout(() => window.location.reload(), 1500);
+    } catch {
+      toast('Erro de conexão. Tente novamente.', 'erro');
+    }
+  }
+
+  document.getElementById('perfil-nome').textContent  = nome;
+  document.getElementById('perfil-email').textContent = email;
+  document.getElementById('perfil-id').textContent    = '#' + id;
+
+  // ── Inicializa avatares (navbar + perfil card) ───────
+  function renderAvatares(fotoBase64, nomeExibido) {
+    const inicial = nomeExibido.charAt(0).toUpperCase();
+
+    // Navbar: primeiro nome + avatar
+    const navNome   = document.getElementById('nav-nome-usuario');
+    const navAvatar = document.getElementById('nav-avatar-usuario');
+    if (navNome)   navNome.textContent = nomeExibido.split(' ')[0];
+    if (navAvatar) {
+      if (fotoBase64) {
+        navAvatar.innerHTML = '<img src="' + fotoBase64 + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;display:block;">';
+        navAvatar.style.background = 'transparent';
+      } else {
+        navAvatar.innerHTML = '<span style="font-size:.85rem;font-weight:700;color:#09122c;">' + inicial + '</span>';
+        navAvatar.style.background = '#73ffe3';
+      }
+    }
+
+    // Avatar do perfil card
+    const avatarPerfil  = document.getElementById('avatar-perfil');
+    const avatarInicial = document.getElementById('avatar-inicial');
+    if (fotoBase64 && avatarPerfil) {
+      avatarPerfil.innerHTML = '<img src="' + fotoBase64 + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+    } else if (avatarInicial) {
+      avatarInicial.textContent = inicial;
+    }
+  }
+
+  renderAvatares(foto, nome);
+
+  // ── Upload de foto ───────────────────────────────────
+  function comprimirImagem(file, maxSize, qualidade) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        let { width, height } = img;
+        // Reduz para no máximo maxSize px no maior lado
+        if (width > maxSize || height > maxSize) {
+          if (width > height) { height = Math.round(height * maxSize / width); width = maxSize; }
+          else { width = Math.round(width * maxSize / height); height = maxSize; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', qualidade));
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
+
+  async function handleFotoChange(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast('Imagem muito grande. Use até 5MB.', 'erro'); return; }
+
+    // Limpa o input para permitir reselecionar o mesmo arquivo
+    event.target.value = '';
+
+    toast('Processando imagem...', 'sucesso');
+
+    try {
+      // Comprime para máx 400px e qualidade 0.75 (resultado ~30–60KB)
+      const base64 = await comprimirImagem(file, 400, 0.75);
+
+      const resp = await fetch(API + '?id=' + id, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ foto_perfil: base64 }),
+      });
+
+      let dados = {};
+      try { dados = await resp.json(); } catch {}
+
+      if (!resp.ok) { toast(dados.erro || 'Erro ao salvar foto.', 'erro'); return; }
+
+      foto = base64;
+      localStorage.setItem('usuario_foto', base64);
+      renderAvatares(foto, localStorage.getItem('usuario_nome') || nome);
+      toast('Foto atualizada com sucesso!');
+    } catch (err) {
+      console.error('Erro upload foto:', err);
+      toast('Erro ao processar a imagem. Tente outra foto.', 'erro');
+    }
+  }
 
   // ── Utilitários ─────────────────────────────────────
   function fmt(iso) {
@@ -243,29 +400,42 @@
     setTimeout(() => el.classList.remove('show'), 3500);
   }
 
-  // ── Carregar empréstimos ativos do banco ─────────────
-  async function carregarAtivos() {
+  // ── Carrega ativos + histórico do banco em uma única chamada ──
+  async function carregarEmprestimos() {
+    const tbAtivos = document.getElementById('tbody-ativos');
+    const tbHist   = document.getElementById('tbody-hist');
+    if (tbAtivos) tbAtivos.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:1rem;color:var(--on-surface-variant);opacity:.7;">Carregando...</td></tr>';
     try {
-      const resp = await fetch(`${API_EMP}?usuario_id=${id}`);
+      const resp = await fetch(`${API_EMP}?usuario_id=${id}&_t=${Date.now()}`);
+      if (!resp.ok) throw new Error();
       const lista = await resp.json();
-      const ativos = Array.isArray(lista) ? lista.filter(e => !e.data_devolucao_real) : [];
+      if (!Array.isArray(lista)) throw new Error();
 
-      document.getElementById('stat-ativos').textContent = ativos.length;
+      const ativos    = lista.filter(e => !e.data_devolucao_real);
+      const devolvidos = lista.filter(e =>  e.data_devolucao_real);
 
+      // Stats
+      document.getElementById('stat-ativos').textContent   = ativos.length;
+      document.getElementById('stat-historico').textContent = devolvidos.length;
+      document.getElementById('livros-ativos-label').textContent = ativos.length + ' / 5';
+
+      // Multa
       let multa = 0;
-      ativos.forEach(e => { if (isLate(e.data_devolucao_prevista)) {
-        const dias = Math.floor((Date.now() - new Date(e.data_devolucao_prevista)) / 86400000);
-        multa += dias;
-      }});
+      ativos.forEach(e => {
+        if (isLate(e.data_devolucao_prevista)) {
+          const dias = Math.floor((Date.now() - new Date(e.data_devolucao_prevista)) / 86400000);
+          multa += dias;
+        }
+      });
       const multaEl = document.getElementById('stat-multa');
       multaEl.textContent = 'R$ ' + multa.toFixed(2).replace('.', ',');
-      if (multa > 0) multaEl.style.color = '#ff716c';
+      multaEl.style.color = multa > 0 ? '#ff716c' : '';
 
-      const tb = document.getElementById('tbody-ativos');
+      // Tabela ativos
       if (!ativos.length) {
-        tb.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:1.5rem;color:var(--on-surface-variant);">Nenhum livro emprestado no momento.</td></tr>';
+        tbAtivos.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:1.5rem;color:var(--on-surface-variant);">Nenhum livro emprestado no momento.</td></tr>';
       } else {
-        tb.innerHTML = ativos.map(e => {
+        tbAtivos.innerHTML = ativos.map(e => {
           const late = isLate(e.data_devolucao_prevista);
           return `<tr>
             <td><div class="livro"><div><strong>${e.titulo}</strong><small>${e.autor}</small></div></div></td>
@@ -274,37 +444,25 @@
           </tr>`;
         }).join('');
       }
-    } catch {
-      document.getElementById('tbody-ativos').innerHTML =
-        '<tr><td colspan="3" style="text-align:center;padding:1rem;color:#ff716c;">Erro ao carregar empréstimos.</td></tr>';
-    }
-  }
 
-  // ── Carregar histórico do banco ──────────────────────
-  async function carregarHistorico() {
-    try {
-      const resp = await fetch(`${API_EMP}?usuario_id=${id}`);
-      const lista = await resp.json();
-      const devolvidos = Array.isArray(lista) ? lista.filter(e => e.data_devolucao_real) : [];
-
-      document.getElementById('stat-historico').textContent = devolvidos.length;
-
-      const tb = document.getElementById('tbody-hist');
+      // Tabela histórico
       if (!devolvidos.length) {
-        tb.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:1.5rem;color:var(--on-surface-variant);">Nenhum histórico ainda.</td></tr>';
+        tbHist.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:1.5rem;color:var(--on-surface-variant);">Nenhum histórico ainda.</td></tr>';
       } else {
-        tb.innerHTML = devolvidos.slice(0, 10).map(e => `
+        tbHist.innerHTML = devolvidos.slice(0, 10).map(e => `
           <tr>
             <td><div class="livro"><div><strong>${e.titulo}</strong><small>${e.autor}</small></div></div></td>
             <td>${fmt(e.data_emprestimo)}</td>
             <td class="status-ok">${fmt(e.data_devolucao_real)}</td>
           </tr>`).join('');
       }
-    } catch {}
+    } catch {
+      if (tbAtivos) tbAtivos.innerHTML =
+        '<tr><td colspan="3" style="text-align:center;padding:1rem;color:#ff716c;">Erro ao carregar empréstimos.</td></tr>';
+    }
   }
 
-  carregarAtivos();
-  carregarHistorico();
+  carregarEmprestimos();
 
   // ── Editar perfil (PUT) ──────────────────────────────
   function abrirModalEditar() {
@@ -340,9 +498,9 @@
 
       localStorage.setItem('usuario_nome', novoNome);
       localStorage.setItem('usuario_email', novoEmail);
-      document.getElementById('perfil-nome').textContent    = novoNome;
-      document.getElementById('perfil-email').textContent   = novoEmail;
-      document.getElementById('avatar-inicial').textContent = novoNome.charAt(0).toUpperCase();
+      document.getElementById('perfil-nome').textContent  = novoNome;
+      document.getElementById('perfil-email').textContent = novoEmail;
+      renderAvatares(localStorage.getItem('usuario_foto') || '', novoNome);
 
       fecharModalEditar();
       toast('Perfil atualizado com sucesso!');
@@ -357,21 +515,36 @@
   }
   function fecharModalExcluir() {
     document.getElementById('modal-excluir').style.display = 'none';
+    document.getElementById('senha-excluir').value = '';
+    document.getElementById('err-excluir').style.display = 'none';
   }
   async function confirmarExcluir() {
     const senha = document.getElementById('senha-excluir').value;
-    if (!senha) { toast('Digite sua senha para confirmar.', 'erro'); return; }
+    const errEl = document.getElementById('err-excluir');
+    if (!senha) { errEl.textContent = 'Digite sua senha para confirmar.'; errEl.style.display='block'; return; }
+    const btn = document.getElementById('btn-confirmar-excluir');
+    btn.disabled = true; btn.textContent = 'Aguarde...';
     try {
-      const resp = await fetch(`${API}?id=${id}&acao=desativar`, {
+      const resp = await fetch(`${API}?id=${id}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ senha }),
       });
       const dados = await resp.json();
-      if (!resp.ok) { toast(dados.erro || 'Erro ao desativar.', 'erro'); return; }
-      toast('Conta desativada com sucesso.', 'sucesso');
-      setTimeout(() => logout(), 1500);
-    } catch { toast('Erro de conexão.', 'erro'); }
+      if (!resp.ok) {
+        document.getElementById('err-excluir').textContent = dados.erro || 'Erro ao desativar.';
+        document.getElementById('err-excluir').style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Desativar Conta';
+        return;
+      }
+      toast('Conta desativada. Você será desconectado.', 'sucesso');
+      localStorage.setItem('usuario_status', 'inativo');
+      setTimeout(() => logout(), 2000);
+    } catch {
+      document.getElementById('err-excluir').textContent = 'Erro de conexão. Tente novamente.';
+      document.getElementById('err-excluir').style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Desativar Conta';
+    }
   }
 
   // ── Logout ───────────────────────────────────────────
@@ -379,7 +552,7 @@
     try {
       await fetch('http://localhost:9999/Estacao-refatorado/php/logout.php', { method: 'POST' });
     } catch {}
-    ['logado','usuario_id','usuario_nome','usuario_email','biblioteca_loans','biblioteca_history']
+    ['logado','usuario_id','usuario_nome','usuario_email','usuario_foto','usuario_status','biblioteca_loans','biblioteca_history']
       .forEach(k => localStorage.removeItem(k));
     window.location.href = 'Entrada.html';
   }
@@ -388,9 +561,11 @@
   document.getElementById('modal-editar').addEventListener('click', e => {
     if (e.target === document.getElementById('modal-editar')) fecharModalEditar();
   });
+  document.getElementById('modal-excluir').addEventListener('click', e => {
+    if (e.target === document.getElementById('modal-excluir')) fecharModalExcluir();
+  });
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { fecharModalEditar(); fecharModalExcluir(); }
-    if (e.key === 'Enter') confirmarExcluir();
   });
 </script>
 <script src="busca-global.js"></script>
