@@ -20,7 +20,7 @@
     <a href="PainelFuncionario.html">Dashboard</a>
   </nav>
   <div class="right-area">
-    <input type="text" placeholder="Pesquisar..." class="search">
+    <input type="text" id="campoBusca" placeholder="Pesquisar..." class="search" oninput="buscar(this.value)">
     <div style="display:flex;align-items:center;gap:.5rem;">
       <span id="func-nome-nav" style="font-size:.82rem;color:var(--on-surface-variant);white-space:nowrap;font-weight:500;"></span>
       <div class="user-avatar" id="user-avatar-nav" style="flex-shrink:0;">

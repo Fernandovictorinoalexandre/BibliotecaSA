@@ -46,3 +46,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
     exit;
 }
+
+// ── Log de auditoria (stub — implementar tabela logs se necessário) ──
+if (!function_exists('registrarLog')) {
+    function registrarLog(PDO $pdo, array $dados): void {
+        // Para ativar logs, crie a tabela e implemente aqui:
+        // INSERT INTO logs (funcionario_id, acao, entidade, entidade_id, detalhe) VALUES (...)
+    }
+}
