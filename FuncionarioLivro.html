@@ -149,6 +149,36 @@
         <option value="indisponivel">Indisponível</option>
       </select>
     </div>
+    <div class="input-group">
+      <label>Descrição</label>
+      <textarea id="editDescricao" rows="3" style="width:100%;padding:.6rem .9rem;border-radius:8px;background:var(--surface-container-high);border:1px solid var(--outline-variant);color:var(--on-surface);font-size:.875rem;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
+    </div>
+    <div class="input-group">
+      <label>Capa do Livro</label>
+      <div id="edit-capa-area" onclick="document.getElementById('edit-capa-file').click()" style="
+        border: 2px dashed rgba(0,245,212,.35); border-radius: 12px; padding: 1rem;
+        text-align: center; cursor: pointer; transition: border-color .2s, background .2s;
+        background: rgba(0,245,212,.04); margin-top:.35rem;"
+        onmouseenter="this.style.borderColor='rgba(0,245,212,.7)';this.style.background='rgba(0,245,212,.08)'"
+        onmouseleave="this.style.borderColor='rgba(0,245,212,.35)';this.style.background='rgba(0,245,212,.04)'">
+        <div id="edit-capa-preview-wrap" style="display:none;margin-bottom:.6rem;">
+          <img id="edit-capa-preview-img" src="" alt="Preview" style="
+            max-height:160px;max-width:100%;border-radius:8px;
+            box-shadow:0 4px 16px rgba(0,0,0,.4);object-fit:cover;">
+        </div>
+        <div id="edit-capa-placeholder">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(0,245,212,.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:.4rem;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <p style="margin:0;font-size:.82rem;color:rgba(0,245,212,.7);font-weight:600;">Clique para trocar a imagem</p>
+          <p style="margin:.2rem 0 0;font-size:.73rem;color:var(--on-surface-variant);">JPG, PNG, WEBP — máx. 2MB</p>
+        </div>
+        <div id="edit-capa-nome" style="display:none;font-size:.75rem;color:var(--on-surface-variant);margin-top:.4rem;"></div>
+      </div>
+      <input type="file" id="edit-capa-file" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none;" onchange="handleEditCapaChange(event)">
+      <button type="button" id="edit-capa-remover" onclick="removerEditCapa(event)" style="
+        display:none;margin-top:.4rem;padding:.3rem .8rem;border-radius:8px;
+        border:1px solid rgba(255,113,108,.4);background:transparent;
+        color:#ff716c;font-size:.75rem;cursor:pointer;">✕ Remover imagem</button>
+    </div>
     <div class="modal-acoes">
       <button class="btn-modal-cancel" onclick="fecharModal('modalEdicao')">Cancelar</button>
       <button class="btn-modal-save" id="btnSalvar" onclick="salvarEdicao()">Salvar</button>
@@ -258,6 +288,53 @@
     }
   }
 
+  // ── Capa base64 no modal de edição ───────────────────
+  let editCapaBase64 = null; // null = não alterada | string = nova imagem
+
+  function handleEditCapaChange(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { toast('Imagem muito grande. Use até 2MB.', 'erro'); event.target.value = ''; return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      editCapaBase64 = e.target.result;
+      document.getElementById('edit-capa-preview-img').src = editCapaBase64;
+      document.getElementById('edit-capa-preview-wrap').style.display = 'block';
+      document.getElementById('edit-capa-placeholder').style.display = 'none';
+      document.getElementById('edit-capa-nome').textContent = file.name;
+      document.getElementById('edit-capa-nome').style.display = 'block';
+      document.getElementById('edit-capa-remover').style.display = 'inline-block';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removerEditCapa(event) {
+    event.stopPropagation();
+    editCapaBase64 = '';  // string vazia = apagar capa
+    document.getElementById('edit-capa-file').value = '';
+    document.getElementById('edit-capa-preview-img').src = '';
+    document.getElementById('edit-capa-preview-wrap').style.display = 'none';
+    document.getElementById('edit-capa-placeholder').style.display = 'block';
+    document.getElementById('edit-capa-nome').style.display = 'none';
+    document.getElementById('edit-capa-remover').style.display = 'none';
+  }
+
+  function resetEditCapa(capaAtual) {
+    // Reseta o campo ao abrir o modal com a capa existente do livro
+    editCapaBase64 = null;
+    document.getElementById('edit-capa-file').value = '';
+    document.getElementById('edit-capa-nome').style.display = 'none';
+    document.getElementById('edit-capa-remover').style.display = capaAtual ? 'inline-block' : 'none';
+    if (capaAtual) {
+      document.getElementById('edit-capa-preview-img').src = capaAtual;
+      document.getElementById('edit-capa-preview-wrap').style.display = 'block';
+      document.getElementById('edit-capa-placeholder').style.display = 'none';
+    } else {
+      document.getElementById('edit-capa-preview-wrap').style.display = 'none';
+      document.getElementById('edit-capa-placeholder').style.display = 'block';
+    }
+  }
+
   async function abrirEdicao(id) {
     try {
       const resp = await fetch(`${API}?id=${id}`);
@@ -271,6 +348,8 @@
       document.getElementById('editQtd').value        = l.quantidade;
       document.getElementById('editCategoria').value  = l.categoria ?? 'Geral';
       document.getElementById('editStatus').value     = l.status;
+      document.getElementById('editDescricao').value  = l.descricao ?? '';
+      resetEditCapa(l.capa || '');
       abrirModal('modalEdicao');
     } catch {
       toast('Erro ao buscar dados do livro.', 'erro');
@@ -288,7 +367,10 @@
       quantidade:      parseInt(document.getElementById('editQtd').value) || 0,
       categoria:       document.getElementById('editCategoria').value,
       status:          document.getElementById('editStatus').value,
+      descricao:       document.getElementById('editDescricao').value.trim() || null,
     };
+    // Só inclui capa no payload se foi alterada
+    if (editCapaBase64 !== null) payload.capa = editCapaBase64;
 
     const btn = document.getElementById('btnSalvar');
     btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';

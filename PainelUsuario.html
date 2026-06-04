@@ -35,19 +35,12 @@
     <a href="Conta.html">Conta</a>
   </nav>
   <div class="right-area">
-<<<<<<< HEAD
     <div style="position:relative;display:inline-flex;align-items:center;">
       <input class="search" type="text" placeholder="Pesquisar..." id="campoBuscaHeader">
     </div>
     <div style="display:flex;align-items:center;gap:.5rem;">
       <span id="nav-nome-usuario" style="font-size:.82rem;color:var(--on-surface-variant);white-space:nowrap;"></span>
       <div class="user-avatar" id="nav-avatar-usuario" style="width:36px;height:36px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(0,245,212,.15);border:2px solid rgba(0,245,212,.3);flex-shrink:0;position:relative;">
-=======
-    <input class="search" type="text" placeholder="Pesquisar..." id="campoBuscaHeader">
-    <div style="display:flex;align-items:center;gap:.5rem;">
-      <span id="nav-nome-usuario" style="font-size:.82rem;color:var(--on-surface-variant);white-space:nowrap;"></span>
-      <div class="user-avatar" id="nav-avatar-usuario" style="width:36px;height:36px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(0,245,212,.15);border:2px solid rgba(0,245,212,.3);">
->>>>>>> 4d67b965136fac74f98ca0157c1eafd2d969c064
         <span class="material-symbols-outlined" style="font-size:1.2rem;color:var(--primary);">person</span>
       </div>
     </div>
@@ -214,15 +207,8 @@
   }
 
   function verLivro(id) {
-    fetch(`${API_LIVROS}?id=${id}`)
-      .then(r => r.json())
-      .then(l => {
-        localStorage.setItem('livro', JSON.stringify({
-          id: l.id, titulo: l.titulo, autor: l.autor,
-          isbn: l.isbn, capa: l.capa, descricao: l.descricao,
-        }));
-        window.location.href = 'LivroDetalhe.html';
-      }).catch(() => window.location.href = 'CatalogoLivros.html');
+    // Navega passando o ID na URL — LivroDetalhe buscará direto do banco
+    window.location.href = 'LivroDetalhe.html?livro=' + id;
   }
 
   mostrar('livros');
@@ -236,18 +222,11 @@
   const foto  = localStorage.getItem('usuario_foto') || '';
   const navNome   = document.getElementById('nav-nome-usuario');
   const navAvatar = document.getElementById('nav-avatar-usuario');
-<<<<<<< HEAD
   if (navNome && nome) navNome.textContent = nome.split(' ')[0];
   if (navAvatar) {
     if (foto) {
       navAvatar.innerHTML = '<img src="' + foto + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;display:block;">';
       navAvatar.style.background = 'transparent';
-=======
-  if (navNome && nome)   navNome.textContent = nome.split(' ')[0];
-  if (navAvatar) {
-    if (foto) {
-      navAvatar.innerHTML = '<img src="' + foto + '" style="width:100%;height:100%;object-fit:cover;">';
->>>>>>> 4d67b965136fac74f98ca0157c1eafd2d969c064
     } else if (nome) {
       const inicial = nome.charAt(0).toUpperCase();
       navAvatar.innerHTML = '<span style="font-size:.85rem;font-weight:700;color:#09122c;">' + inicial + '</span>';

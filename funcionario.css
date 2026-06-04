@@ -737,3 +737,17 @@ body:not(:has(.layout)) .main {
 .table-container tbody tr:last-child td { border-bottom: none; }
 .table-container tbody tr { transition: background .2s; }
 .table-container tbody tr:hover { background: rgba(255,255,255,.025); }
+
+/* Badge: aguardando devolução */
+.bs-aguardando_devolucao {
+  background: rgba(0,245,212,.12);
+  color: #00f5d4;
+  border: 1px solid rgba(0,245,212,.3);
+  font-size: .72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}

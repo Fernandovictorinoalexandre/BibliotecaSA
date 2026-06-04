@@ -64,6 +64,7 @@
   <section class="grid" id="statsArea">
     <div class="card"><p>Total</p><h3 id="statTotal">—</h3></div>
     <div class="card"><p>Ativos</p><h3 id="statAtivos">—</h3></div>
+    <div class="card"><p>Inativos</p><h3 id="statInativos">—</h3></div>
     <div class="card"><p>Suspensos</p><h3 id="statSuspensos">—</h3></div>
   </section>
 
@@ -127,14 +128,14 @@
   </div>
 </div>
 
-<!-- MODAL CONFIRMAÇÃO EXCLUSÃO -->
+<!-- MODAL CONFIRMAÇÃO INATIVAÇÃO -->
 <div class="modal-overlay" id="modalExclusao">
   <div class="modal modal-confirm">
-    <h3>Confirmar Exclusão</h3>
-    <p id="msgExclusao">Tem certeza que deseja excluir este usuário?</p>
+    <h3>Confirmar Inativação</h3>
+    <p id="msgExclusao">Tem certeza que deseja inativar este usuário?</p>
     <div class="modal-acoes">
       <button class="btn-modal-cancel" onclick="fecharModal('modalExclusao')">Cancelar</button>
-      <button class="btn-modal-del" id="btnConfirmarDel" onclick="confirmarExclusao()">Excluir</button>
+      <button class="btn-modal-del" id="btnConfirmarDel" onclick="confirmarExclusao()">Inativar</button>
     </div>
   </div>
 </div>
@@ -187,7 +188,7 @@
         <td><span class="badge ${u.status}">${u.status}</span></td>
         <td>
           <button class="btn-acao btn-editar"  onclick="abrirEdicao(${u.id})">Editar</button>
-          <button class="btn-acao btn-excluir" onclick="abrirExclusao(${u.id}, '${u.nome}')">Excluir</button>
+          <button class="btn-acao btn-excluir" onclick="abrirExclusao(${u.id}, '${u.nome}')">Inativar</button>
         </td>
       </tr>
     `).join('');
@@ -204,8 +205,9 @@
       renderizarTabela(dados);
 
       // Stats
-      document.getElementById('statTotal').textContent   = dados.length;
-      document.getElementById('statAtivos').textContent  = dados.filter(u => u.status === 'ativo').length;
+      document.getElementById('statTotal').textContent    = dados.length;
+      document.getElementById('statAtivos').textContent   = dados.filter(u => u.status === 'ativo').length;
+      document.getElementById('statInativos').textContent = dados.filter(u => u.status === 'inativo').length;
       document.getElementById('statSuspensos').textContent = dados.filter(u => u.status === 'suspenso').length;
 
     } catch {
@@ -271,7 +273,7 @@
   function abrirExclusao(id, nome) {
     idParaDeletar = id;
     document.getElementById('msgExclusao').textContent =
-      `Tem certeza que deseja excluir "${nome}"? Esta ação é irreversível.`;
+      `Tem certeza que deseja inativar "${nome}"?`;
     abrirModal('modalExclusao');
   }
 
@@ -283,7 +285,7 @@
       const resp = await fetch(`${API}?id=${idParaDeletar}`, { method: 'DELETE' });
       const dados = await resp.json();
       if (resp.ok) {
-        toast('Usuário removido.', 'sucesso');
+        toast('Usuário inativado.', 'sucesso');
         fecharModal('modalExclusao');
         carregarUsuarios();
       } else {
@@ -292,7 +294,7 @@
     } catch {
       toast('Erro de conexão.', 'erro');
     } finally {
-      btn.disabled = false; btn.innerHTML = 'Excluir';
+      btn.disabled = false; btn.innerHTML = 'Inativar';
     }
   }
 

@@ -114,7 +114,25 @@ label { color: var(--text-muted); font-size: 1rem; font-weight: bold; display: b
 .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 12px rgba(0,245,212,.3); }
 .input-group label { margin-bottom: .4rem; font-size: .85rem; }
 .input-group label input { margin-top: .4rem; }
+.input-group textarea{
+  width: 100% ;padding:  0.875rem 1.125rem;
+  border-radius: 30px;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(0,0,0,.3);
+  color: #ffffff; outline: none;
+}
+.input-group select{
+  width: 100%; padding: 0.875rem 1.125rem;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, .1);
+  background: rgba(0,0,0,.3);
+  color: #ffffff; outline: none;
+}
+ .input-group select option{
+ background-color: #222;
+  color: #ffffff; outline: none;
 
+}
 /* botão primário de auth (pequeno, centralizado) */
 .btn {
   cursor: pointer; font-family: inherit; border: none;

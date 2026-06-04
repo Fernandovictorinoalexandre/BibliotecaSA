@@ -86,14 +86,16 @@ if ($metodo === 'POST') {
     $hash = password_hash($d['senha'], PASSWORD_BCRYPT);
 
     $stmt = $pdo->prepare(
-        'INSERT INTO usuarios (nome, email, senha, data_nasc, status)
-         VALUES (:nome, :email, :senha, :data_nasc, :status)'
+        'INSERT INTO usuarios (nome, email, senha, data_nasc, cpf, telefone, status)
+         VALUES (:nome, :email, :senha, :data_nasc, :cpf, :telefone, :status)'
     );
     $stmt->execute([
         ':nome'      => trim($d['nome']),
         ':email'     => strtolower(trim($d['email'])),
         ':senha'     => $hash,
         ':data_nasc' => $d['data_nasc'] ?? null,
+        ':cpf'       => isset($d['cpf'])      ? preg_replace('/\D/', '', $d['cpf'])      : null,
+        ':telefone'  => isset($d['telefone']) ? preg_replace('/\D/', '', $d['telefone']) : null,
         ':status'    => $d['status']    ?? 'ativo',
     ]);
 
@@ -141,15 +143,10 @@ if ($metodo === 'PUT') {
     responder(200, ['mensagem' => 'Usuário atualizado com sucesso.']);
 }
 
-// ── DELETE (DESATIVAR CONTA) ──────────────────────────────
+// ── DELETE (INATIVAR CONTA) ───────────────────────────────
 
 if ($metodo === 'DELETE') {
-    if (!$id) responder(400, ['erro' => 'ID obrigatório para desativação.']);
-
-    $d     = bodyJson();
-    $senha = $d['senha'] ?? '';
-
-    if (empty($senha)) responder(422, ['erro' => 'Senha obrigatória para desativar a conta.']);
+    if (!$id) responder(400, ['erro' => 'ID obrigatório para inativação.']);
 
     // Busca usuário
     $chk = $pdo->prepare('SELECT id, nome, email, senha, data_nasc, status, criado_em FROM usuarios WHERE id = ?');
@@ -159,38 +156,14 @@ if ($metodo === 'DELETE') {
     if (!$usuario) responder(404, ['erro' => 'Usuário não encontrado.']);
 
     if ($usuario['status'] === 'inativo') {
-        responder(409, ['erro' => 'Esta conta já está desativada.']);
-    }
-
-    if (!password_verify($senha, $usuario['senha'])) {
-        responder(401, ['erro' => 'Senha incorreta. Tente novamente.']);
+        responder(409, ['erro' => 'Esta conta já está inativa.']);
     }
 
     // Bloqueia se tiver empréstimos ativos
     $emp = $pdo->prepare("SELECT COUNT(*) FROM emprestimos WHERE usuario_id = ? AND status IN ('ativo','atrasado') AND data_devolucao_real IS NULL");
     $emp->execute([$id]);
     if ($emp->fetchColumn() > 0) {
-        responder(409, ['erro' => 'Você possui livros em aberto. Devolva todos os livros antes de desativar a conta.']);
-    }
-
-    // Bloqueia se devolveu livro há menos de 1 dia (24 horas)
-    $recente = $pdo->prepare("
-        SELECT data_devolucao_real FROM emprestimos
-        WHERE usuario_id = ? AND data_devolucao_real IS NOT NULL
-        ORDER BY data_devolucao_real DESC
-        LIMIT 1
-    ");
-    $recente->execute([$id]);
-    $ultimaDevolucao = $recente->fetchColumn();
-    if ($ultimaDevolucao) {
-        $diffHoras = (time() - strtotime($ultimaDevolucao)) / 3600;
-        if ($diffHoras < 24) {
-            $horasRestantes = ceil(24 - $diffHoras);
-            responder(409, [
-                'erro' => "Você devolveu um livro recentemente. Aguarde {$horasRestantes} hora(s) para poder desativar a conta.",
-                'horas_restantes' => $horasRestantes
-            ]);
-        }
+        responder(409, ['erro' => 'Usuário possui livros em aberto. Solicite a devolução antes de inativar.']);
     }
 
     // Desativa o usuário
@@ -219,10 +192,10 @@ if ($metodo === 'DELETE') {
         }
 
         $pdo->commit();
-        responder(200, ['mensagem' => 'Conta desativada com sucesso. Entre em contato com a biblioteca para reativá-la.']);
+        responder(200, ['mensagem' => 'Usuário inativado com sucesso.']);
     } catch (\Throwable $e) {
         $pdo->rollBack();
-        responder(500, ['erro' => 'Erro interno ao desativar a conta. Tente novamente.']);
+        responder(500, ['erro' => 'Erro interno ao inativar o usuário. Tente novamente.']);
     }
 }
 

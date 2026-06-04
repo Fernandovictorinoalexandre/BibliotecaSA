@@ -195,15 +195,15 @@
   </div>
 </div>
 
-<!-- ── MODAL EXCLUSÃO ── -->
+<!-- ── MODAL INATIVAÇÃO ── -->
 <div class="modal-overlay" id="modalExclusao">
   <div class="modal" style="width:420px;">
-    <h3>Excluir Funcionário</h3>
-    <p class="modal-confirm">Tem certeza que deseja excluir <strong id="nomeParaDeletar"></strong>?
-      Esta ação não pode ser desfeita. Funcionários com empréstimos vinculados não podem ser removidos.</p>
+    <h3>Inativar Funcionário</h3>
+    <p class="modal-confirm">Tem certeza que deseja inativar <strong id="nomeParaDeletar"></strong>?
+      O funcionário não poderá acessar o sistema enquanto estiver inativo.</p>
     <div class="modal-acoes">
       <button class="btn-modal-cancel" onclick="fecharModal('modalExclusao')">Cancelar</button>
-      <button class="btn-modal-del"    id="btnDeletar" onclick="confirmarExclusao()">Excluir</button>
+      <button class="btn-modal-del"    id="btnDeletar" onclick="confirmarExclusao()">Inativar</button>
     </div>
   </div>
 </div>
@@ -259,7 +259,7 @@
         <td style="font-size:.8rem;color:var(--on-surface-variant);">${fmt(f.criado_em)}</td>
         <td>
           <button class="btn-acao btn-editar"  onclick="abrirEdicao(${f.id})">Editar</button>
-          <button class="btn-acao btn-excluir" onclick="abrirExclusao(${f.id}, '${f.nome.replace(/'/g,"\\'")}')">Excluir</button>
+          <button class="btn-acao btn-excluir" onclick="abrirExclusao(${f.id}, '${f.nome.replace(/'/g,"\\'")}')">Inativar</button>
         </td>
       </tr>
     `).join('');
@@ -419,9 +419,9 @@
       const dados = await resp.json();
 
       if (!resp.ok) {
-        toast(dados.erro || 'Erro ao excluir.', 'erro');
+        toast(dados.erro || 'Erro ao inativar.', 'erro');
       } else {
-        toast('Funcionário removido com sucesso!');
+        toast('Funcionário inativado com sucesso!');
         fecharModal('modalExclusao');
         carregarFuncionarios();
       }
@@ -429,7 +429,7 @@
       toast('Erro de conexão.', 'erro');
     } finally {
       btn.disabled = false;
-      btn.textContent = 'Excluir';
+      btn.textContent = 'Inativar';
       idParaDeletar  = null;
     }
   }

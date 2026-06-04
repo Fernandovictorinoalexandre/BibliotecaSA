@@ -53,7 +53,10 @@
 
           <div class="input-group">
             <label>Data de Publicação
-              <input type="date" id="data_publicacao" name="data_publicacao">
+              <input type="date" id="data_publicacao" name="data_publicacao"
+                min="1000-01-01" max="2099-12-31"
+                onkeydown="limitarAno(event, this)"
+                oninput="limitarAno(event, this)">
             </label>
           </div>
 
@@ -66,11 +69,12 @@
 
           <div class="input-group">
             <label>Número de Páginas
-              <input type="number" id="paginas" name="paginas" min="1" placeholder="ex: 320">
+              <input type="number" id="paginas" name="paginas" min="1" max="99999" placeholder="ex: 320">
             </label>
           </div>
 
           <div class="input-group">
+            <label>
               <select id="categoria" name="categoria">
                 <option value="Geral">Geral</option>
                 <option value="Fantasia">Fantasia</option>
@@ -150,6 +154,18 @@
     if (localStorage.getItem('func_logado') !== 'true') window.location.href = 'LoginFuncionario.html';
 
     const API = 'http://localhost:9999/Estacao-refatorado/php/livros.php';
+
+    // ── Limite 4 dígitos no ano ──────────────────────────
+    function limitarAno(event, el) {
+      const val = el.value;
+      if (val) {
+        const partes = val.split('-');
+        if (partes[0] && partes[0].length > 4) {
+          partes[0] = partes[0].slice(0, 4);
+          el.value = partes.join('-');
+        }
+      }
+    }
 
     // ── Capa base64 ──────────────────────────────────────
     let capaBase64 = null;

@@ -130,18 +130,19 @@ if ($metodo === 'PUT') {
     responder(200, ['mensagem' => 'Funcionário atualizado.']);
 }
 
-// ── DELETE ───────────────────────────────────────────────
+// ── DELETE (INATIVAR) ────────────────────────────────────
 if ($metodo === 'DELETE') {
     if (!$id) responder(400, ['erro' => 'ID obrigatório.']);
-    $chk = $pdo->prepare('SELECT id FROM emprestimos WHERE funcionario_id = ? LIMIT 1');
-    $chk->execute([$id]);
-    if ($chk->fetch()) responder(409, ['erro' => 'Funcionário possui empréstimos vinculados.']);
 
-    $stmt = $pdo->prepare('DELETE FROM funcionarios WHERE id = ?');
+    $chk = $pdo->prepare('SELECT id, status FROM funcionarios WHERE id = ?');
+    $chk->execute([$id]);
+    $func = $chk->fetch();
+    if (!$func) responder(404, ['erro' => 'Funcionário não encontrado.']);
+    if ($func['status'] === 'inativo') responder(409, ['erro' => 'Funcionário já está inativo.']);
+
+    $stmt = $pdo->prepare("UPDATE funcionarios SET status = 'inativo' WHERE id = ?");
     $stmt->execute([$id]);
-    $stmt->rowCount()
-        ? responder(200, ['mensagem' => 'Funcionário removido.'])
-        : responder(404, ['erro' => 'Funcionário não encontrado.']);
+    responder(200, ['mensagem' => 'Funcionário inativado com sucesso.']);
 }
 
 responder(405, ['erro' => 'Método não permitido.']);

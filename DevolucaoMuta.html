@@ -4,11 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Estação Literária — Devolução</title>
-<<<<<<< HEAD
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
-=======
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
->>>>>>> 4d67b965136fac74f98ca0157c1eafd2d969c064
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="leitor.css">
@@ -32,13 +28,9 @@
     <a href="Conta.html">Conta</a>
   </nav>
   <div class="right-area">
-<<<<<<< HEAD
     <div style="position:relative;display:inline-flex;align-items:center;">
       <input class="search" type="text" placeholder="Pesquisar...">
     </div>
-=======
-    <input class="search" type="text" placeholder="Pesquisar...">
->>>>>>> 4d67b965136fac74f98ca0157c1eafd2d969c064
     <span id="nav-nome-usuario" style="font-size:.82rem;color:var(--on-surface-variant);white-space:nowrap;"></span>
     <div class="user-avatar" id="nav-avatar-usuario" style="width:36px;height:36px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(0,245,212,.15);border:2px solid rgba(0,245,212,.3);cursor:pointer;" onclick="window.location.href='Conta.html'">
       <span class="material-symbols-outlined" style="font-size:1.2rem;color:var(--primary);">person</span>
@@ -254,13 +246,13 @@
       <div class="modal-icon" style="background:rgba(244,228,138,.1);border-color:rgba(244,228,138,.25);color:#f4e48a;">
         <span class="material-symbols-outlined">info</span>
       </div>
-      <h3 id="aviso-titulo">Devolução registrada</h3>
+      <h3 id="aviso-titulo">Solicitação enviada!</h3>
       <div class="aviso-devolucao">
         <div class="aviso-box">
           <span class="material-symbols-outlined">schedule</span>
           <div class="aviso-box-text">
-            <strong>Prazo de devolução física</strong>
-            <p>Você tem até <span>1 dia</span> para devolver o livro fisicamente na biblioteca.</p>
+            <strong>Aguardando confirmação do funcionário</strong>
+            <p>Leve o livro à biblioteca. O funcionário confirmará a entrega no sistema. Você tem até <span>1 dia</span> para entregar.</p>
           </div>
         </div>
         <div class="aviso-box">
@@ -301,7 +293,7 @@
      ESTADO
   ══════════════════════════════════════ */
   let loans   = []; // livros ativos/atrasados
-  let history = []; // devoluções desta sessão
+  let history = []; // devoluções — carregadas do banco
   let pendingId = null; // empId sendo devolvido
   let payAllMode = false; // flag para pagar todas
 
@@ -316,6 +308,7 @@
       if (!resp.ok) throw new Error();
       const lista = await resp.json();
       if (!Array.isArray(lista)) throw new Error();
+      // Ativos: sem data de devolução real (inclui aguardando_devolucao)
       loans = lista
         .filter(e => !e.data_devolucao_real)
         .map(e => ({
@@ -328,6 +321,19 @@
           status:     e.status,
           multa:      parseFloat(e.multa) || 0,
         }));
+
+      // Histórico: já devolvidos — vem do banco, persiste entre sessões
+      history = lista
+        .filter(e => e.data_devolucao_real)
+        .map(e => ({
+          empId:      String(e.id),
+          title:      e.titulo,
+          author:     e.autor,
+          dueDate:    (e.data_devolucao_prevista || '').split('T')[0],
+          returnedAt: (e.data_devolucao_real || '').split('T')[0],
+          fine:       parseFloat(e.multa) || 0,
+        }))
+        .reverse(); // mais recentes primeiro
     } catch {
       if (grid) grid.innerHTML = '<div style="text-align:center;padding:2rem;color:#ff716c;">Erro ao carregar devoluções. Verifique a conexão.</div>';
       return;
@@ -616,10 +622,11 @@
 
   async function devolverNoBanco(loan, multaPaga) {
     try {
+      // Solicita devolução — funcionário precisa confirmar fisicamente no sistema
       await fetch(`${API_EMP}?id=${loan.empId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ devolver: true, multa_paga: multaPaga ? 1 : 0 }),
+        body: JSON.stringify({ solicitar_devolucao: true, multa_paga: multaPaga ? 1 : 0 }),
       });
     } catch {}
   }
@@ -660,11 +667,6 @@
   }
 })();
 </script>
-<<<<<<< HEAD
 <script src="busca-global.js"></script>
 </body>
 </html>
-=======
-</body>
-</html>
->>>>>>> 4d67b965136fac74f98ca0157c1eafd2d969c064

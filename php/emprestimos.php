@@ -61,7 +61,7 @@ if ($metodo === 'GET') {
     $pdo->exec("
         UPDATE emprestimos
         SET status = 'atrasado'
-        WHERE status = 'ativo'
+        WHERE status IN ('ativo','renovado')
           AND data_devolucao_prevista < CURDATE()
           AND data_devolucao_real IS NULL
     ");
@@ -111,7 +111,7 @@ if ($metodo === 'POST') {
     // Verifica limite de 5 por usuário
     $ativos = $pdo->prepare(
         "SELECT COUNT(*) FROM emprestimos
-         WHERE usuario_id = ? AND status IN ('ativo','atrasado') AND data_devolucao_real IS NULL"
+         WHERE usuario_id = ? AND status IN ('ativo','atrasado','renovado') AND data_devolucao_real IS NULL"
     );
     $ativos->execute([$d['usuario_id']]);
     if ($ativos->fetchColumn() >= 5) responder(409, ['erro' => 'Usuário já possui 5 livros emprestados.']);
@@ -158,14 +158,7 @@ if ($metodo === 'POST') {
         }
 
         $pdo->commit();
-        $funcId = $d['funcionario_id'] ?? 0;
-        registrarLog($pdo, [
-            'funcionario_id' => $funcId,
-            'acao'           => 'EMPRESTIMO_CRIADO',
-            'entidade'       => 'emprestimos',
-            'entidade_id'    => (int)$novoId,
-            'detalhe'        => "Empréstimo #{$novoId} — usuário #{$d['usuario_id']} — livro #{$d['livro_id']}",
-        ]);
+
         responder(201, ['mensagem' => 'Empréstimo registrado.', 'id' => (int)$novoId]);
     } catch (Exception $e) {
         $pdo->rollBack();
@@ -185,8 +178,26 @@ if ($metodo === 'PUT') {
 
     $pdo->beginTransaction();
     try {
-        // DEVOLUÇÃO
+        // SOLICITAÇÃO DE DEVOLUÇÃO (usuário clica "Devolver" no portal)
+        // Muda status para 'aguardando_devolucao' — aguarda confirmação do funcionário
+        if (!empty($d['solicitar_devolucao'])) {
+            if (in_array($emp['status'], ['devolvido'])) {
+                responder(409, ['erro' => 'Empréstimo já devolvido.']);
+            }
+            $pdo->prepare("
+                UPDATE emprestimos SET status = 'aguardando_devolucao'
+                WHERE id = ?
+            ")->execute([$id]);
+            $pdo->commit();
+            responder(200, ['mensagem' => 'Devolução solicitada. Aguardando confirmação do funcionário.']);
+        }
+
+        // DEVOLUÇÃO CONFIRMADA PELO FUNCIONÁRIO
+        // Só permite se status = 'aguardando_devolucao'
         if (!empty($d['devolver'])) {
+            if ($emp['status'] !== 'aguardando_devolucao') {
+                responder(409, ['erro' => 'Este empréstimo não está aguardando devolução. O usuário precisa solicitar a devolução primeiro pelo portal.']);
+            }
             $hoje  = date('Y-m-d');
             $multa = 0;
             if ($emp['status'] === 'atrasado') {
@@ -216,13 +227,7 @@ if ($metodo === 'PUT') {
                     ->execute([$emp['livro_id']]);
             }
             $pdo->commit();
-            registrarLog($pdo, [
-                'funcionario_id' => $d['funcionario_id'] ?? $emp['funcionario_id'] ?? 0,
-                'acao'           => 'DEVOLUCAO_REGISTRADA',
-                'entidade'       => 'emprestimos',
-                'entidade_id'    => $id,
-                'detalhe'        => "Devolução empréstimo #{$id} — multa R\$ " . number_format($multa, 2, ',', '.'),
-            ]);
+
             responder(200, ['mensagem' => 'Devolução registrada.', 'multa' => $multa]);
         }
 
@@ -238,13 +243,7 @@ if ($metodo === 'PUT') {
                 WHERE id = ?
             ")->execute([$novaData, $id]);
             $pdo->commit();
-            registrarLog($pdo, [
-                'funcionario_id' => $d['funcionario_id'] ?? $emp['funcionario_id'] ?? 0,
-                'acao'           => 'EMPRESTIMO_RENOVADO',
-                'entidade'       => 'emprestimos',
-                'entidade_id'    => $id,
-                'detalhe'        => "Renovação empréstimo #{$id} — nova devolução: {$novaData}",
-            ]);
+
             responder(200, ['mensagem' => 'Empréstimo renovado.', 'nova_data' => $novaData]);
         }
 

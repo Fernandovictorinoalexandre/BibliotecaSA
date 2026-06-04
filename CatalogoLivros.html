@@ -28,14 +28,10 @@
   </nav>
 
   <div class="right-area">
-<<<<<<< HEAD
     <div style="position:relative;display:inline-flex;align-items:center;">
       <input type="text" id="campoBusca" placeholder="Pesquisar título ou autor..." class="search" style="padding-right:2.5rem;">
       <span class="material-symbols-outlined" style="position:absolute;right:.6rem;top:50%;transform:translateY(-50%);font-size:1.1rem;color:var(--primary);opacity:.7;pointer-events:none;">search</span>
     </div>
-=======
-    <input type="text" id="campoBusca" placeholder="Pesquisar título ou autor..." class="search">
->>>>>>> 4d67b965136fac74f98ca0157c1eafd2d969c064
     <div style="display:flex;align-items:center;gap:.5rem;">
       <span id="nav-nome-usuario" style="font-size:.82rem;color:var(--on-surface-variant);white-space:nowrap;"></span>
       <div class="user-avatar" id="nav-avatar-usuario" style="width:36px;height:36px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(0,245,212,.15);border:2px solid rgba(0,245,212,.3);">
@@ -271,18 +267,59 @@ const LIVROS_LOCAL = []; // fallback vazio
 /* ══════════════════════════════════════════
    ESTADO
 ══════════════════════════════════════════ */
-let todosLivros    = [];
-let filtroCategoria = 'todos';
-let filtroStatus    = 'todos';
-let filtroBusca     = '';
-let vistaAtual      = 'grid';
-let livroAtivoPag   = null; // livro aberto no pagamento
+let todosLivros       = [];
+let emprestimosAtivos = []; // livro_ids que o usuário já tem emprestados (vem do banco)
+let totalEmprestados  = 0;  // quantidade real de empréstimos ativos do usuário
+let filtroCategoria   = 'todos';
+let filtroStatus      = 'todos';
+let filtroBusca       = '';
+let vistaAtual        = 'grid';
+let livroAtivoPag     = null;
+
+const API_EMP = 'http://localhost:9999/Estacao-refatorado/php/emprestimos.php';
+
+/* ══════════════════════════════════════════
+   CARREGAR EMPRÉSTIMOS ATIVOS DO BANCO
+   (chamado antes de renderizar o catálogo)
+══════════════════════════════════════════ */
+async function carregarEmprestimosAtivos() {
+  if (!usuarioLogado.id || usuarioLogado.id === '001') return;
+  try {
+    const resp = await fetch(API_EMP + '?usuario_id=' + usuarioLogado.id);
+    if (!resp.ok) return;
+    const lista = await resp.json();
+    if (!Array.isArray(lista)) return;
+    // Filtra só os ativos (sem data_devolucao_real)
+    const ativos = lista.filter(e => !e.data_devolucao_real);
+    emprestimosAtivos = ativos.map(e => String(e.livro_id));
+    totalEmprestados  = ativos.length;
+    // Sincroniza localStorage para manter compatibilidade com Emprestimo.html
+    const loans = ativos.map(e => ({
+      id:         String(e.livro_id),
+      empId:      String(e.id),
+      title:      e.titulo,
+      author:     e.autor,
+      borrowedAt: e.data_emprestimo,
+      dueDate:    e.data_devolucao_prevista,
+      renewals:   e.renovacoes || 0,
+      late:       false,
+    }));
+    localStorage.setItem('biblioteca_loans', JSON.stringify(loans));
+  } catch {
+    // Fallback: tenta ler do localStorage se o banco não responder
+    const local = JSON.parse(localStorage.getItem('biblioteca_loans') || '[]');
+    emprestimosAtivos = local.map(e => String(e.id));
+    totalEmprestados  = local.length;
+  }
+}
 
 /* ══════════════════════════════════════════
    CARREGAR LIVROS DO BANCO
 ══════════════════════════════════════════ */
 async function carregarLivros() {
   renderSkeleton();
+  // Carrega empréstimos ativos do usuário PRIMEIRO para ter dados corretos
+  await carregarEmprestimosAtivos();
   try {
     const resp = await fetch(API_LIVROS);
     if (!resp.ok) throw new Error('Servidor retornou erro ' + resp.status);
@@ -401,10 +438,8 @@ function renderGrid(lista) {
     return;
   }
 
-  const emprestadosAtivos = JSON.parse(localStorage.getItem('biblioteca_loans') || '[]');
-
   grid.innerHTML = lista.map(livro => {
-    const jaEmprestado = emprestadosAtivos.some(e => String(e.id) === String(livro.id));
+    const jaEmprestado = emprestimosAtivos.includes(String(livro.id));
     const qtdDisp      = parseInt(livro.quantidade_disponivel ?? livro.quantidade) || 0;
     const disponivel   = qtdDisp > 0 && !jaEmprestado;
     const capaSrc      = livro.capa || '';
@@ -468,9 +503,8 @@ function emprestarLivro(id) {
   if (!livro) return;
   if (livro.status !== 'disponivel') { showToast('Este livro não está disponível.', 'erro'); return; }
 
-  const loans = JSON.parse(localStorage.getItem('biblioteca_loans') || '[]');
-  if (loans.length >= 5) { showToast('Você já tem 5 livros emprestados.', 'erro'); return; }
-  if (loans.some(e => String(e.id) === String(livro.id))) { showToast('Você já tem este livro.', 'erro'); return; }
+  if (totalEmprestados >= 5) { showToast('Você já tem 5 livros emprestados.', 'erro'); return; }
+  if (emprestimosAtivos.includes(String(livro.id))) { showToast('Você já tem este livro emprestado.', 'erro'); return; }
 
   livroAtivoPag = livro;
   PG.abrir(livro);
@@ -495,45 +529,39 @@ function openTicket(livro, metodoPagamento) {
   document.getElementById('tk-reqdate').textContent  = fmt(today);
   document.getElementById('tk-ticketnum').textContent= 'EMP-' + String(Math.floor(Math.random()*99999)+1).padStart(6,'0');
 
-  // Salva no localStorage de empréstimos ativos
-  const loans = JSON.parse(localStorage.getItem('biblioteca_loans') || '[]');
-  if (!loans.some(e => String(e.id) === String(livro.id))) {
-    const toISO = d => d.toISOString().split('T')[0];
-    loans.push({
-      id:        livro.id,
-      title:     livro.titulo,
-      author:    livro.autor,
-      img:       livro.capa || '',
-      borrowedAt:toISO(today),
-      dueDate:   toISO(due),
-      renewals:  0,
-      late:      false,
-    });
-    localStorage.setItem('biblioteca_loans', JSON.stringify(loans));
-
-    // Registra no banco de dados
-    fetch('http://localhost:9999/Estacao-refatorado/php/emprestimos.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        usuario_id:              parseInt(usuarioLogado.id) || null,
-        livro_id:                parseInt(livro.id)         || null,
-        data_emprestimo:         toISO(today),
-        data_devolucao_prevista: toISO(due),
-        metodo_pagamento:        metodoPagamento            || null,
-        valor_pago:              15.00,
-      }),
-    }).catch(() => {}); // falha silenciosa — empréstimo já salvo no localStorage
+  const toISO = d => d.toISOString().split('T')[0];
+  // Registra no banco e atualiza o estado local
+  fetch(API_EMP, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      usuario_id:              parseInt(usuarioLogado.id) || null,
+      livro_id:                parseInt(livro.id)         || null,
+      data_emprestimo:         toISO(today),
+      data_devolucao_prevista: toISO(due),
+      metodo_pagamento:        metodoPagamento            || null,
+      valor_pago:              15.00,
+    }),
+  }).then(() => {
+    // Recarrega os empréstimos do banco para manter estado correto
+    carregarEmprestimosAtivos();
+  }).catch(() => {});
+  // Atualiza estado local imediatamente (otimista)
+  if (!emprestimosAtivos.includes(String(livro.id))) {
+    emprestimosAtivos.push(String(livro.id));
+    totalEmprestados++;
   }
 
   document.getElementById('modalOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
-function closeTicket() {
+async function closeTicket() {
   document.getElementById('modalOverlay').classList.remove('open');
   document.body.style.overflow = '';
-  aplicarFiltros(); // atualiza badges após emprestar
+  // Recarrega empréstimos do banco para ter estado correto
+  await carregarEmprestimosAtivos();
+  aplicarFiltros();
 }
 
 function handleOverlayClick(e) {
@@ -604,9 +632,6 @@ carregarLivros();
   }
 })();
 </script>
-<<<<<<< HEAD
 <script src="busca-global.js"></script>
-=======
->>>>>>> 4d67b965136fac74f98ca0157c1eafd2d969c064
 </body>
 </html>

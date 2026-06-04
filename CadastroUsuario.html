@@ -25,15 +25,37 @@
 
           <div class="input-group">
             <label>Nome completo
-              <input type="text" id="nome" name="nome" autocomplete="name">
+              <input type="text" id="nome" name="nome" autocomplete="name" maxlength="100">
             </label>
             <span class="msg-campo" id="err-nome">Nome obrigatório.</span>
           </div>
 
           <div class="input-group">
             <label>Data de Nascimento
-              <input type="date" id="data_nasc" name="data_nasc">
+              <input type="date" id="data_nasc" name="data_nasc"
+                min="1900-01-01" max="2099-12-31"
+                onkeydown="limitarAno(event, this)"
+                oninput="limitarAno(event, this)">
             </label>
+            <span class="msg-campo" id="err-data_nasc">Data inválida.</span>
+          </div>
+
+          <div class="input-group">
+            <label>CPF
+              <input type="text" id="cpf" name="cpf" maxlength="14"
+                placeholder="000.000.000-00" autocomplete="off"
+                oninput="mascaraCPF(this)">
+            </label>
+            <span class="msg-campo" id="err-cpf">CPF inválido.</span>
+          </div>
+
+          <div class="input-group">
+            <label>Telefone
+              <input type="text" id="telefone" name="telefone" maxlength="15"
+                placeholder="(00) 00000-0000" autocomplete="tel"
+                oninput="mascaraTelefone(this)">
+            </label>
+            <span class="msg-campo" id="err-telefone">Telefone inválido.</span>
           </div>
 
           <div class="input-group">
@@ -82,6 +104,52 @@
       setTimeout(() => el.classList.remove('show'), 3500);
     }
 
+    // ── Máscara CPF ──────────────────────────────────────
+    function mascaraCPF(el) {
+      let v = el.value.replace(/\D/g, '').slice(0, 11);
+      if (v.length > 9)      v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+      else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+      else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+      el.value = v;
+    }
+
+    // ── Máscara Telefone ─────────────────────────────────
+    function mascaraTelefone(el) {
+      let v = el.value.replace(/\D/g, '').slice(0, 11);
+      if (v.length > 10)     v = v.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+      else if (v.length > 6) v = v.replace(/(\d{2})(\d{4,5})(\d{0,4})/, '($1) $2-$3');
+      else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+      else if (v.length > 0) v = v.replace(/(\d{0,2})/, '($1');
+      el.value = v;
+    }
+
+    // ── Limite de 4 dígitos no ano ───────────────────────
+    function limitarAno(event, el) {
+      // Bloqueia digitação de 5º dígito no campo de ano
+      const val = el.value;
+      if (val) {
+        const partes = val.split('-');
+        if (partes[0] && partes[0].length > 4) {
+          partes[0] = partes[0].slice(0, 4);
+          el.value = partes.join('-');
+        }
+      }
+    }
+
+    // ── Validação CPF (algoritmo oficial) ────────────────
+    function validarCPF(cpf) {
+      cpf = cpf.replace(/\D/g, '');
+      if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+      let s = 0;
+      for (let i = 0; i < 9; i++) s += parseInt(cpf[i]) * (10 - i);
+      let r = (s * 10) % 11; if (r === 10 || r === 11) r = 0;
+      if (r !== parseInt(cpf[9])) return false;
+      s = 0;
+      for (let i = 0; i < 10; i++) s += parseInt(cpf[i]) * (11 - i);
+      r = (s * 10) % 11; if (r === 10 || r === 11) r = 0;
+      return r === parseInt(cpf[10]);
+    }
+
     // ── Validação inline ─────────────────────────────────
     function mostrarErro(id, visivel) {
       const el = document.getElementById(id);
@@ -101,6 +169,8 @@
       const senha     = document.getElementById('senha').value;
       const confirmar = document.getElementById('confirmar').value;
       const data_nasc = document.getElementById('data_nasc').value;
+      const cpf       = document.getElementById('cpf').value.trim();
+      const telefone  = document.getElementById('telefone').value.trim();
 
       // Validação local
       let valido = true;
@@ -108,6 +178,24 @@
       const nomeOk = nome.length >= 2;
       marcarCampo('nome', !nomeOk); mostrarErro('err-nome', !nomeOk);
       if (!nomeOk) valido = false;
+
+      // Validar ano com 4 dígitos na data
+      let dataNascOk = true;
+      if (data_nasc) {
+        const ano = parseInt(data_nasc.split('-')[0]);
+        if (isNaN(ano) || ano < 1900 || ano > new Date().getFullYear()) dataNascOk = false;
+      }
+      marcarCampo('data_nasc', !dataNascOk); mostrarErro('err-data_nasc', !dataNascOk);
+      if (!dataNascOk) valido = false;
+
+      const cpfOk = !cpf || validarCPF(cpf);
+      marcarCampo('cpf', !cpfOk); mostrarErro('err-cpf', !cpfOk);
+      if (!cpfOk) valido = false;
+
+      const telDigitos = telefone.replace(/\D/g, '');
+      const telOk = !telefone || (telDigitos.length >= 10 && telDigitos.length <= 11);
+      marcarCampo('telefone', !telOk); mostrarErro('err-telefone', !telOk);
+      if (!telOk) valido = false;
 
       const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
       marcarCampo('email', !emailOk); mostrarErro('err-email', !emailOk);
@@ -132,7 +220,7 @@
         const resp = await fetch(API, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nome, email, senha, data_nasc: data_nasc || null }),
+          body: JSON.stringify({ nome, email, senha, data_nasc: data_nasc || null, cpf: cpf || null, telefone: telefone || null }),
         });
         const dados = await resp.json();
 

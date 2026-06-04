@@ -136,9 +136,13 @@
 </div>
 
 <!-- MODAL DEVOLUÇÃO -->
-  <div class="modal-overlay" id="modalDev" onclick="fecharSeForaDele(event,'modalDev')">
+<div class="modal-overlay" id="modalDev" onclick="fecharSeForaDele(event,'modalDev')">
   <div class="modal-box">
-    <h3>Registrar Devolução</h3>
+    <div style="background:rgba(0,245,212,.08);border:1px solid rgba(0,245,212,.2);border-radius:10px;padding:10px 14px;margin-bottom:1rem;display:flex;align-items:center;gap:8px;">
+      <span class="material-symbols-outlined" style="color:#00f5d4;font-size:18px;">verified</span>
+      <span style="font-size:.82rem;color:#00f5d4;font-weight:600;">Usuário já solicitou a devolução. Confirme o recebimento físico do livro.</span>
+    </div>
+    <h3>Confirmar Devolução</h3>
     <p id="dev-desc" style="color:#8899bb;font-size:.875rem;margin:0 0 1rem;"></p>
 
     <!-- Banner de atraso — aparece só quando atrasado -->
@@ -158,10 +162,39 @@
         <option value="0">Não — cobrar depois</option>
       </select>
     </div>
+
+    <!-- Confirmação física -->
+    <div style="background:rgba(0,245,212,.08);border:1px solid rgba(0,245,212,.2);border-radius:10px;padding:12px 14px;margin-top:4px;">
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:.875rem;">
+        <input type="checkbox" id="dev-confirmacao" style="margin-top:2px;accent-color:#00f5d4;width:16px;height:16px;flex-shrink:0;">
+        <span style="color:var(--on-surface);">Confirmo que o livro foi fisicamente entregue ao funcionário e está em condições adequadas.</span>
+      </label>
+    </div>
+
     <p class="modal-erro" id="dev-erro"></p>
     <div class="modal-acoes">
       <button class="btn-cancelar" onclick="fecharModal('modalDev')">Cancelar</button>
       <button class="btn-confirmar" id="btn-confirmar-dev" onclick="confirmarDevolucao()">✓ Confirmar Devolução</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NOTIFICAR USUÁRIO -->
+<div class="modal-overlay" id="modalNotif" onclick="fecharSeForaDele(event,'modalNotif')">
+  <div class="modal-box">
+    <h3>Notificar Usuário</h3>
+    <p id="notif-desc" style="color:#8899bb;font-size:.875rem;margin:0 0 1rem;"></p>
+    <div class="modal-campo">
+      <label>Mensagem</label>
+      <textarea id="notif-msg" rows="4"
+        style="width:100%;padding:.7rem;border-radius:10px;border:1px solid var(--outline);background:var(--surface-container);color:var(--on-surface);font-family:inherit;font-size:.875rem;resize:vertical;"></textarea>
+    </div>
+    <p class="modal-erro" id="notif-erro"></p>
+    <div class="modal-acoes">
+      <button class="btn-cancelar" onclick="fecharModal('modalNotif')">Cancelar</button>
+      <button class="btn-confirmar" id="btn-confirmar-notif" onclick="confirmarNotificacao()">
+        <span class="material-symbols-outlined" style="font-size:14px;vertical-align:middle;">send</span> Enviar Notificação
+      </button>
     </div>
   </div>
 </div>
@@ -246,10 +279,12 @@
 
     tbody.innerHTML = lista.map(e => {
       const atraso       = diasAtraso(e.data_devolucao_prevista);
-      const isLate       = e.status !== 'devolvido' && atraso > 0;
-      const statusLabel  = isLate ? 'atrasado' : e.status;
-      const podeDevolver = e.status !== 'devolvido';
-      const podeRenovar  = e.status === 'ativo' && e.renovacoes < 2 && !isLate;
+      const isLate       = e.status !== 'devolvido' && e.status !== 'aguardando_devolucao' && atraso > 0;
+      const isAguardando = e.status === 'aguardando_devolucao';
+      const statusLabel  = isAguardando ? 'aguardando_devolucao' : (isLate ? 'atrasado' : e.status);
+      // Botão "Devolver" SÓ aparece se usuário já solicitou a devolução
+      const podeDevolver = isAguardando;
+
       return `
       <tr>
         <td class="td-title">${e.titulo}</td>
@@ -267,11 +302,16 @@
         <td><span class="badge-status bs-${statusLabel}">${statusLabel}</span></td>
         <td class="td-right">
           <div class="action-cell">
-            ${podeDevolver ? `<button class="btn-dev" onclick="abrirDevolucao(${e.id})" title="Marcar como devolvido">
-              <span class="material-symbols-outlined" style="font-size:14px">assignment_return</span> Devolver
-            </button>` : '<span style="font-size:.78rem;color:var(--on-surface-variant);">✓ Devolvido</span>'}
-            ${podeRenovar ? `<button class="btn-ren" onclick="renovar(${e.id})" title="Renovar empréstimo">
-              <span class="material-symbols-outlined" style="font-size:14px">autorenew</span> Renovar
+            ${podeDevolver
+              ? `<button class="btn-dev" onclick="abrirDevolucao(${e.id})" title="Confirmar devolução física" style="background:rgba(0,245,212,.15);border-color:rgba(0,245,212,.4);color:#00f5d4;">
+                  <span class="material-symbols-outlined" style="font-size:14px">assignment_return</span> Confirmar
+                </button>`
+              : e.status === 'devolvido'
+                ? '<span style="font-size:.78rem;color:var(--on-surface-variant);">✓ Devolvido</span>'
+                : '<span style="font-size:.78rem;color:#8899bb;font-style:italic;">Aguard. solicitação</span>'
+            }
+            ${isLate ? `<button class="btn-ren" onclick="abrirNotificar(${e.id})" title="Notificar usuário sobre atraso" style="background:rgba(255,170,0,.12);border-color:rgba(255,170,0,.3);color:#ffaa00;">
+              <span class="material-symbols-outlined" style="font-size:14px">notifications</span> Notificar
             </button>` : ''}
           </div>
         </td>
@@ -322,6 +362,7 @@
     document.getElementById('dev-multa').value      = fmtMoney(multa);
     document.getElementById('dev-erro').textContent = '';
     document.getElementById('dev-multa-paga').value = '1';
+    document.getElementById('dev-confirmacao').checked = false;
 
     const banner = document.getElementById('dev-atraso-banner');
     const msg    = document.getElementById('dev-atraso-msg');
@@ -336,9 +377,15 @@
 
   async function confirmarDevolucao() {
     if (!empParaDev) return;
-    const paga = document.getElementById('dev-multa-paga').value;
-    const err  = document.getElementById('dev-erro');
-    const btn  = document.getElementById('btn-confirmar-dev');
+    const paga  = document.getElementById('dev-multa-paga').value;
+    const check = document.getElementById('dev-confirmacao');
+    const err   = document.getElementById('dev-erro');
+    const btn   = document.getElementById('btn-confirmar-dev');
+    if (!check.checked) {
+      err.textContent = 'Confirme que o livro foi fisicamente entregue antes de prosseguir.';
+      return;
+    }
+    err.textContent = '';
     btn.disabled = true; btn.textContent = 'Aguarde...';
     try {
       const resp = await fetch(`${API}?id=${empParaDev}`, {
@@ -360,20 +407,54 @@
     finally { btn.disabled = false; btn.textContent = '✓ Confirmar Devolução'; }
   }
 
-    // ── Renovação ─────────────────────────────────────────
-  async function renovar(id) {
-    if (!confirm('Renovar este empréstimo por mais 30 dias?')) return;
+  // ── Notificar usuário sobre atraso ───────────────────
+  const API_NOTIF = 'http://localhost:9999/Estacao-refatorado/php/notificacoes.php';
+  let empParaNotif = null;
+
+  function abrirNotificar(id) {
+    const emp = emprestimos.find(e => e.id === id); if (!emp) return;
+    empParaNotif = emp;
+    const atraso = diasAtraso(emp.data_devolucao_prevista);
+    document.getElementById('notif-desc').textContent =
+      `"${emp.titulo}" — ${emp.usuario_nome} (${atraso} dia(s) de atraso)`;
+    document.getElementById('notif-msg').value =
+      `Olá, ${emp.usuario_nome.split(' ')[0]}! O livro "${emp.titulo}" está com devolução em atraso de ${atraso} dia(s). Por favor, devolva o mais breve possível para evitar multa adicional. Atenciosamente, Estação Literária.`;
+    document.getElementById('notif-erro').textContent = '';
+    abrirModal('modalNotif');
+  }
+
+  async function confirmarNotificacao() {
+    if (!empParaNotif) return;
+    const msg  = document.getElementById('notif-msg').value.trim();
+    const err  = document.getElementById('notif-erro');
+    const btn  = document.getElementById('btn-confirmar-notif');
+    if (!msg) { err.textContent = 'Digite uma mensagem.'; return; }
+    btn.disabled = true; btn.textContent = 'Enviando...';
     try {
-      const resp  = await fetch(`${API}?id=${id}`, {
-        method: 'PUT',
+      const resp = await fetch(API_NOTIF, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ renovar: true }),
+        body: JSON.stringify({
+          usuario_id:    empParaNotif.usuario_id,
+          emprestimo_id: empParaNotif.id,
+          tipo:          'atraso',
+          titulo:        'Aviso de Atraso — Estação Literária',
+          mensagem:      msg,
+        }),
       });
       const dados = await resp.json();
-      resp.ok
-        ? (showToast(`Renovado até ${fmt(dados.nova_data)}`, 'ok'), carregar())
-        : showToast(dados.erro || 'Erro ao renovar.', 'erro');
-    } catch { showToast('Erro de conexão.', 'erro'); }
+      if (resp.ok) {
+        showToast('✓ Notificação enviada ao usuário.', 'ok');
+        fecharModal('modalNotif');
+        empParaNotif = null;
+      } else {
+        err.textContent = dados.erro || 'Erro ao enviar notificação.';
+      }
+    } catch { err.textContent = 'Erro de conexão.'; }
+    finally {
+      btn.disabled = false;
+      btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:14px;vertical-align:middle;">send</span> Enviar Notificação';
+    }
   }
 
   // ── Busca ─────────────────────────────────────────────

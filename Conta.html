@@ -23,7 +23,6 @@
     <a href="Suporte.html">Suporte</a>
     <a href="Conta.html" class="active">Conta</a>
   </nav>
-<<<<<<< HEAD
   <div class="right-area" style="display:flex;align-items:center;gap:1rem;flex-shrink:0;">
     <div style="position:relative;display:flex;align-items:center;flex-shrink:1;min-width:0;">
       <input type="text" placeholder="Pesquisar..." class="search" style="flex-shrink:1;min-width:0;">
@@ -31,13 +30,6 @@
     <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0;">
       <span id="nav-nome-usuario" style="font-size:.82rem;color:var(--on-surface-variant);white-space:nowrap;"></span>
       <div class="user-avatar" id="nav-avatar-usuario" style="width:36px;height:36px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(0,245,212,.15);border:2px solid rgba(0,245,212,.3);flex-shrink:0;position:relative;">
-=======
-  <div class="right-area">
-    <input type="text" placeholder="Pesquisar..." class="search">
-    <div style="display:flex;align-items:center;gap:.5rem;">
-      <span id="nav-nome-usuario" style="font-size:.82rem;color:var(--on-surface-variant);white-space:nowrap;"></span>
-      <div class="user-avatar" id="nav-avatar-usuario" style="width:36px;height:36px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(0,245,212,.15);border:2px solid rgba(0,245,212,.3);">
->>>>>>> 4d67b965136fac74f98ca0157c1eafd2d969c064
         <span class="material-symbols-outlined" style="font-size:1.2rem;color:var(--primary);">person</span>
       </div>
     </div>
@@ -251,22 +243,48 @@
   const nome  = localStorage.getItem('usuario_nome')  || 'Usuário';
   const email = localStorage.getItem('usuario_email') || '';
   let   foto  = localStorage.getItem('usuario_foto')  || '';
-  const statusLocal = localStorage.getItem('usuario_status') || 'ativo';
 
-  // Exibe banner se conta estiver inativa
-  if (statusLocal === 'inativo') {
-    const banner = document.getElementById('banner-inativo');
-    if (banner) { banner.style.display = 'flex'; }
-    // Oculta botão de desativar pois já está inativa
+  // ── Aplica status vindo do banco (carregarPerfil() vai sobrescrever) ──
+  function aplicarStatus(status) {
+    localStorage.setItem('usuario_status', status);
+    const banner      = document.getElementById('banner-inativo');
     const btnDesativar = document.querySelector('.btn-excluir');
-    if (btnDesativar) btnDesativar.style.display = 'none';
-    // Atualiza badge de status
-    const statusBadge = document.getElementById('status-conta');
-    if (statusBadge) {
-      statusBadge.textContent = 'Inativa';
-      statusBadge.style.background = 'rgba(255,165,0,.12)';
-      statusBadge.style.color = '#ffa500';
+    const statusBadge  = document.getElementById('status-conta');
+    if (status === 'inativo') {
+      if (banner)       banner.style.display = 'flex';
+      if (btnDesativar) btnDesativar.style.display = 'none';
+      if (statusBadge)  { statusBadge.textContent = 'Inativa'; statusBadge.style.background = 'rgba(255,165,0,.12)'; statusBadge.style.color = '#ffa500'; }
+    } else if (status === 'suspenso') {
+      if (statusBadge)  { statusBadge.textContent = 'Suspensa'; statusBadge.style.background = 'rgba(255,113,108,.12)'; statusBadge.style.color = '#ff716c'; }
+    } else {
+      if (banner)       banner.style.display = 'none';
+      if (btnDesativar) btnDesativar.style.display = '';
+      if (statusBadge)  { statusBadge.textContent = 'Ativa'; statusBadge.style.background = 'rgba(0,245,212,.12)'; statusBadge.style.color = '#00f5d4'; }
     }
+  }
+
+  // Aplica status do localStorage como inicial (será atualizado pelo banco)
+  aplicarStatus(localStorage.getItem('usuario_status') || 'ativo');
+
+  // ── Busca perfil atualizado do banco ──
+  async function carregarPerfil() {
+    if (!id) return;
+    try {
+      const resp = await fetch(API + '?id=' + id);
+      if (!resp.ok) return;
+      const dados = await resp.json();
+      if (!dados || !dados.id) return;
+      // Atualiza localStorage com dados frescos do banco
+      localStorage.setItem('usuario_nome',   dados.nome  || nome);
+      localStorage.setItem('usuario_email',  dados.email || email);
+      localStorage.setItem('usuario_status', dados.status || 'ativo');
+      if (dados.foto_perfil) { localStorage.setItem('usuario_foto', dados.foto_perfil); foto = dados.foto_perfil; }
+      // Atualiza UI
+      document.getElementById('perfil-nome').textContent  = dados.nome  || nome;
+      document.getElementById('perfil-email').textContent = dados.email || email;
+      renderAvatares(dados.foto_perfil || foto, dados.nome || nome);
+      aplicarStatus(dados.status || 'ativo');
+    } catch {}
   }
 
   // Reativar conta via PUT status=ativo
@@ -310,12 +328,8 @@
     if (navNome)   navNome.textContent = nomeExibido.split(' ')[0];
     if (navAvatar) {
       if (fotoBase64) {
-<<<<<<< HEAD
         navAvatar.innerHTML = '<img src="' + fotoBase64 + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;display:block;">';
         navAvatar.style.background = 'transparent';
-=======
-        navAvatar.innerHTML = '<img src="' + fotoBase64 + '" style="width:100%;height:100%;object-fit:cover;">';
->>>>>>> 4d67b965136fac74f98ca0157c1eafd2d969c064
       } else {
         navAvatar.innerHTML = '<span style="font-size:.85rem;font-weight:700;color:#09122c;">' + inicial + '</span>';
         navAvatar.style.background = '#73ffe3';
@@ -335,7 +349,6 @@
   renderAvatares(foto, nome);
 
   // ── Upload de foto ───────────────────────────────────
-<<<<<<< HEAD
   function comprimirImagem(file, maxSize, qualidade) {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -392,30 +405,6 @@
       console.error('Erro upload foto:', err);
       toast('Erro ao processar a imagem. Tente outra foto.', 'erro');
     }
-=======
-  async function handleFotoChange(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    if (file.size > 2 * 1024 * 1024) { toast('Imagem muito grande. Use até 2MB.', 'erro'); return; }
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-      const base64 = e.target.result;
-      try {
-        const resp = await fetch(API + '?id=' + id, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ foto_perfil: base64 }),
-        });
-        const dados = await resp.json();
-        if (!resp.ok) { toast(dados.erro || 'Erro ao salvar foto.', 'erro'); return; }
-        foto = base64;
-        localStorage.setItem('usuario_foto', base64);
-        renderAvatares(foto, localStorage.getItem('usuario_nome') || nome);
-        toast('Foto atualizada com sucesso!');
-      } catch { toast('Erro de conexão.', 'erro'); }
-    };
-    reader.readAsDataURL(file);
->>>>>>> 4d67b965136fac74f98ca0157c1eafd2d969c064
   }
 
   // ── Utilitários ─────────────────────────────────────
@@ -499,6 +488,7 @@
     }
   }
 
+  carregarPerfil();
   carregarEmprestimos();
 
   // ── Editar perfil (PUT) ──────────────────────────────
