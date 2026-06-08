@@ -2,6 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Estação Literária - Acervo de Livros</title>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -81,7 +82,7 @@
           <thead>
             <tr>
               <th>ID</th><th>Título</th><th>Autor</th>
-              <th>ISBN</th><th>Editora</th><th>Qtd</th><th>Status</th><th>Ações</th>
+              <th class="col-lg">ISBN</th><th class="col-md">Editora</th><th>Qtd</th><th>Status</th><th>Ações</th>
             </tr>
           </thead>
           <tbody id="corpoTabela">
@@ -91,6 +92,33 @@
           </tbody>
         </table>
       </div>
+    </div>
+  </section>
+
+  <!-- TABELA DE LIVROS INATIVOS -->
+  <section class="table-section" style="margin-top:2rem;">
+    <div class="table-header">
+      <h3 style="display:flex;align-items:center;gap:.5rem;">
+        <span class="material-symbols-outlined" style="color:#ff716c;font-size:1.2rem;">menu_book</span>
+        Exemplares Inativos
+      </h3>
+    </div>
+    <div class="table-scroll">
+      <table class="table" id="tabelaLivrosInativos">
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th class="col-sm">Autor</th>
+            <th class="col-lg">ISBN</th>
+            <th>Qtd</th>
+            <th class="col-md">Inativado em</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="corpoLivrosInativos">
+          <tr><td colspan="6" class="empty-state"><span class="spinner"></span> Carregando...</td></tr>
+        </tbody>
+      </table>
     </div>
   </section>
 </main>
@@ -210,30 +238,15 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="utils.js"></script>
+<script src="func-utils.js"></script>
 <script>
-  if (localStorage.getItem('func_logado') !== 'true') window.location.href = 'LoginFuncionario.html';
-  async function logout() {
-    try { await fetch('http://localhost:9999/Estacao-refatorado/php/logout.php', { method: 'POST' }); } catch {}
-    ['func_logado','func_id','func_nome','func_email','func_cargo','func_matricula']
-      .forEach(k => localStorage.removeItem(k));
-    window.location.href = 'LoginFuncionario.html';
-  }
-
   const API = 'http://localhost:9999/Estacao-refatorado/php/livros.php';
+
   let idParaDeletar = null;
+  let todosLivros = [];
 
-  function toast(msg, tipo = 'sucesso') {
-    const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.className = `toast ${tipo} show`;
-    setTimeout(() => el.classList.remove('show'), 3500);
-  }
-
-  function abrirModal(id)  { document.getElementById(id).classList.add('aberto'); }
-  function fecharModal(id) { document.getElementById(id).classList.remove('aberto'); }
-  document.querySelectorAll('.modal-overlay').forEach(m => {
-    m.addEventListener('click', e => { if (e.target === m) fecharModal(m.id); });
-  });
+  document.addEventListener('DOMContentLoaded', () => { inicializarModais(); });
 
   function renderizarTabela(livros) {
     const tbody = document.getElementById('corpoTabela');
@@ -244,18 +257,21 @@
     tbody.innerHTML = livros.map(l => `
       <tr>
         <td>${l.id}</td>
-        <td>${l.titulo}</td>
+        <td>${esc(l.titulo)}</td>
         <td>${l.autor}</td>
-        <td>${l.isbn}</td>
-        <td>${l.editora ?? '—'}</td>
+        <td class="col-lg">${l.isbn}</td>
+        <td class="col-md">${esc(l.editora ?? '—')}</td>
         <td>${l.quantidade}</td>
-        <td>
-          <span class="badge ${l.status}">${l.status}</span>
-          ${l.quantidade > 1 ? `<div style="font-size:.72rem;color:var(--on-surface-variant);margin-top:2px;">${l.quantidade_disponivel ?? 0} dispon.</div>` : ''}
+        <td style="display:flex;align-items:center;gap:6px;">
+            <span class="badge">
+              ${l.quantidade_disponivel ?? 0} disponível
+          </span>
         </td>
         <td>
-          <button class="btn-acao btn-editar"  onclick="abrirEdicao(${l.id})">Editar</button>
-          <button class="btn-acao btn-excluir" onclick="abrirInativar(${l.id}, '${l.titulo.replace(/'/g, String.fromCharCode(39))}', ${l.quantidade}, ${l.quantidade_disponivel ?? 0})">Inativar</button>
+          <div style="display:flex;gap:4px;justify-content:flex-end;flex-wrap:nowrap;">
+            <button class="btn-acao btn-editar"  onclick="abrirEdicao(${l.id})">Editar</button>
+            <button class="btn-acao btn-excluir" onclick="abrirInativar(${l.id}, '${l.titulo.replace(/'/g, String.fromCharCode(39))}', ${l.quantidade}, ${l.quantidade_disponivel ?? 0})">Inativar</button>
+          </div>
         </td>
       </tr>
     `).join('');
@@ -457,23 +473,56 @@
   });
 
   carregarLivros();
+  carregarLivrosInativos();
 
-  // ── Avatar com iniciais ──────────────────────────────
-  (function() {
-    const nome = localStorage.getItem('func_nome') || '';
-    const el   = document.getElementById('func-nome-nav');
-    const av   = document.getElementById('user-avatar-nav');
-    if (el) el.textContent = nome;
-    if (av && nome) {
-      const partes  = nome.trim().split(' ').filter(Boolean);
-      const iniciais = (partes[0]?.[0] || '') + (partes[1]?.[0] || '');
-      av.innerHTML  = `<span style="font-size:.8rem;font-weight:700;color:#09122c;">${iniciais.toUpperCase()}</span>`;
-      av.style.background = '#73ffe3';
-      av.style.display    = 'flex';
-      av.style.alignItems = 'center';
-      av.style.justifyContent = 'center';
+  // ── Livros Inativos ──────────────────────────────────
+  async function carregarLivrosInativos() {
+    const tbody = document.getElementById('corpoLivrosInativos');
+    try {
+      const r = await fetch(API + '?inativos=1');
+      const dados = await r.json();
+      if (!dados.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Nenhum exemplar inativo.</td></tr>';
+        return;
+      }
+      const fmt = d => d ? new Date(d).toLocaleDateString('pt-BR') : '—';
+      tbody.innerHTML = dados.map(li => `
+        <tr>
+          <td style="font-weight:600;">${li.titulo}</td>
+          <td class="col-sm" style="font-size:.85rem;color:var(--on-surface-variant);">${li.autor}</td>
+          <td class="col-lg" style="font-family:monospace;font-size:.82rem;">${li.isbn}</td>
+          <td style="font-weight:700;">${li.quantidade}</td>
+          <td class="col-md" style="font-size:.8rem;color:var(--on-surface-variant);">${fmt(li.inativado_em)}</td>
+          <td>
+            <div style="display:flex;gap:4px;justify-content:flex-end;flex-wrap:nowrap;">
+              <button class="btn-acao btn-editar" onclick="reativarLivro(${li.reg_id}, '${li.titulo.replace(/'/g,"\'")}', ${li.quantidade})">Reativar</button>
+            </div>
+          </td>
+        </tr>`).join('');
+    } catch {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Erro ao carregar.</td></tr>';
     }
-  })();
+  }
+
+  async function reativarLivro(regId, titulo, qtd) {
+    if (!confirm(`Reativar ${qtd} exemplar(es) de "${titulo}"?`)) return;
+    try {
+      const r = await fetch(`${API}?reativar=${regId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const d = await r.json();
+      if (r.ok) {
+        showToast(d.mensagem || 'Exemplares reativados.', 'ok');
+        carregarLivros();
+        carregarLivrosInativos();
+      } else {
+        showToast(d.erro || 'Erro ao reativar.', 'erro');
+      }
+    } catch {
+      showToast('Erro de conexão.', 'erro');
+    }
+  }
 </script>
 </body>
 </html>

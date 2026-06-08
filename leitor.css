@@ -984,3 +984,124 @@ body.page-detalhe main {
 .table-container tbody tr { border-top: 1px solid rgba(255,255,255,.04); transition: background .2s; }
 .table-container tbody tr:hover { background: rgba(255,255,255,.025); }
 .table-container tbody tr:last-child { border-bottom: none; }
+
+/* ═══════════════════════════════════════════════════
+   Modal de Pagamento de Multa — DevolucaoMuta.html
+   Espelha o estilo do modal de devolução
+═══════════════════════════════════════════════════ */
+
+/* Botão voltar dentro do modal */
+.btn-voltar-modal {
+  background: none; border: none;
+  color: var(--primary); font-size: .82rem; cursor: pointer;
+  padding: 0; margin-bottom: 1rem; display: block;
+  font-family: inherit;
+}
+.btn-voltar-modal:hover { text-decoration: underline; }
+
+/* Métodos de pagamento (PIX / Cartão) */
+.pg-metodos-modal { display: flex; flex-direction: column; gap: .75rem; margin: 1rem 0; }
+.pg-metodo-modal {
+  display: flex; align-items: center; gap: 1rem;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 14px; padding: 1rem 1.2rem;
+  cursor: pointer; transition: all .2s; text-align: left;
+  color: #fff; font-family: inherit; width: 100%;
+}
+.pg-metodo-modal:hover {
+  border-color: rgba(0,245,212,.4);
+  background: rgba(0,245,212,.06);
+  transform: translateX(4px);
+}
+.pg-metodo-modal .icone { font-size: 1.6rem; }
+.pg-metodo-modal strong { display: block; font-size: .95rem; color: #fff; }
+.pg-metodo-modal small  { color: #8899bb; font-size: .78rem; }
+.pg-metodo-modal .arrow { margin-left: auto; color: var(--primary); font-size: 1.4rem; }
+
+/* PIX — wrap do QR */
+.pix-wrap { text-align: center; margin: 1rem 0; }
+.pix-qr {
+  display: inline-block;
+  background: #fff; border-radius: 12px;
+  padding: 10px; margin-bottom: .6rem;
+  box-shadow: 0 0 24px rgba(0,245,212,.15);
+}
+
+/* Caixa da chave PIX */
+.pix-chave-box {
+  background: rgba(0,245,212,.06);
+  border: 1px solid rgba(0,245,212,.2);
+  border-radius: 12px; padding: .9rem 1rem;
+  margin-bottom: 1.2rem;
+}
+.pix-chave-label {
+  color: #8899bb; font-size: .75rem;
+  display: block; margin-bottom: .4rem;
+}
+.pix-chave-row { display: flex; align-items: center; gap: .75rem; }
+.pix-chave-valor {
+  color: var(--primary); font-size: .85rem;
+  flex: 1; word-break: break-all;
+}
+.pix-copiar {
+  background: rgba(0,245,212,.15);
+  border: 1px solid rgba(0,245,212,.3);
+  color: var(--primary); border-radius: 8px;
+  padding: .35rem .8rem; font-size: .78rem;
+  cursor: pointer; white-space: nowrap;
+  transition: background .2s; font-family: inherit;
+}
+.pix-copiar:hover { background: rgba(0,245,212,.3); }
+
+/* Formulário do cartão */
+.cartao-form { display: flex; flex-direction: column; gap: .9rem; margin-top: .5rem; }
+.cartao-campo { display: flex; flex-direction: column; gap: .4rem; }
+.cartao-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.cartao-campo label { color: #8899bb; font-size: .78rem; }
+.cartao-campo input {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px; padding: .7rem 1rem;
+  color: #fff; font-size: .9rem; font-family: inherit;
+  transition: border-color .2s;
+}
+.cartao-campo input:focus {
+  outline: none;
+  border-color: rgba(0,245,212,.5);
+  box-shadow: 0 0 0 3px rgba(0,245,212,.08);
+}
+.cartao-campo input::placeholder { color: #445; }
+.cartao-erro {
+  color: #ff716c; font-size: .8rem;
+  min-height: 1rem; margin: 0;
+}
+
+/* Aviso de devolução (passo-aviso) */
+.aviso-devolucao { margin: 1.2rem 0; }
+.aviso-box {
+  display: flex; align-items: flex-start; gap: .75rem;
+  background: rgba(0,245,212,.06);
+  border: 1px solid rgba(0,245,212,.2);
+  border-radius: 12px; padding: 1rem 1.1rem;
+}
+.aviso-box .material-symbols-outlined { color: var(--primary); font-size: 1.5rem; flex-shrink: 0; margin-top: .1rem; }
+.aviso-box-text strong { display: block; color: #fff; font-size: .9rem; margin-bottom: .3rem; }
+.aviso-box-text p { color: #8899bb; font-size: .8125rem; margin: 0; line-height: 1.5; }
+
+/* Botão cancelar solicitação de devolução */
+.btn-cancel-dev {
+  display: flex; align-items: center; justify-content: center; gap: .35rem;
+  width: 100%; padding: .55rem .8rem;
+  background: rgba(255,113,108,.08);
+  border: 1px solid rgba(255,113,108,.25);
+  border-radius: 10px; color: #ff716c;
+  font-size: .78rem; font-weight: 600;
+  font-family: inherit; cursor: pointer;
+  transition: background .2s, border-color .2s;
+  margin-top: .45rem;
+}
+.btn-cancel-dev:hover {
+  background: rgba(255,113,108,.18);
+  border-color: rgba(255,113,108,.45);
+}

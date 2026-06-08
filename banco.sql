@@ -20,7 +20,7 @@ USE estacao_literaria;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ════════════════════════════════════════════════════════════════
---  TABELAS
+--  TABELAS PRINCIPAIS
 -- ════════════════════════════════════════════════════════════════
 
 -- ── 1. USUÁRIOS ──────────────────────────────────────────────────
@@ -38,20 +38,7 @@ CREATE TABLE usuarios (
   atualizado_em TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── 2. CONTAS DESATIVADAS ────────────────────────────────────────
-CREATE TABLE usuarios_inativos (
-  id            INT          AUTO_INCREMENT PRIMARY KEY,
-  usuario_id    INT          NOT NULL UNIQUE,
-  nome          VARCHAR(120),
-  email         VARCHAR(150),
-  senha         VARCHAR(255),
-  data_nasc     DATE,
-  criado_em     TIMESTAMP    DEFAULT NULL,
-  desativado_em TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ── 3. FUNCIONÁRIOS ──────────────────────────────────────────────
+-- ── 2. FUNCIONÁRIOS ──────────────────────────────────────────────
 CREATE TABLE funcionarios (
   id            INT          AUTO_INCREMENT PRIMARY KEY,
   nome          VARCHAR(120) NOT NULL,
@@ -64,7 +51,7 @@ CREATE TABLE funcionarios (
   atualizado_em TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── 4. LIVROS ────────────────────────────────────────────────────
+-- ── 3. LIVROS ────────────────────────────────────────────────────
 CREATE TABLE livros (
   id              INT          AUTO_INCREMENT PRIMARY KEY,
   titulo          VARCHAR(200) NOT NULL,
@@ -82,7 +69,7 @@ CREATE TABLE livros (
   atualizado_em   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── 5. EMPRÉSTIMOS ───────────────────────────────────────────────
+-- ── 4. EMPRÉSTIMOS ───────────────────────────────────────────────
 CREATE TABLE emprestimos (
   id                      INT          AUTO_INCREMENT PRIMARY KEY,
   usuario_id              INT          NOT NULL,
@@ -104,7 +91,7 @@ CREATE TABLE emprestimos (
   FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── 6. NOTIFICAÇÕES ──────────────────────────────────────────────
+-- ── 5. NOTIFICAÇÕES ──────────────────────────────────────────────
 CREATE TABLE notificacoes (
   id            INT          AUTO_INCREMENT PRIMARY KEY,
   usuario_id    INT          NOT NULL,
@@ -118,7 +105,7 @@ CREATE TABLE notificacoes (
   FOREIGN KEY (emprestimo_id) REFERENCES emprestimos(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── 7. TENTATIVAS DE LOGIN ───────────────────────────────────────
+-- ── 6. TENTATIVAS DE LOGIN ───────────────────────────────────────
 CREATE TABLE login_tentativas (
   id            INT          AUTO_INCREMENT PRIMARY KEY,
   ip            VARCHAR(45)  NOT NULL,
@@ -131,16 +118,72 @@ CREATE TABLE login_tentativas (
 
 
 -- ════════════════════════════════════════════════════════════════
+--  TABELAS DE HISTÓRICO DE INATIVAÇÕES
+-- ════════════════════════════════════════════════════════════════
+
+-- ── 7. USUÁRIOS INATIVOS ─────────────────────────────────────────
+CREATE TABLE usuarios_inativos (
+  id              INT          AUTO_INCREMENT PRIMARY KEY,
+  usuario_id      INT          NOT NULL UNIQUE,
+  nome            VARCHAR(120) NOT NULL,
+  email           VARCHAR(150) NOT NULL,
+  cpf             CHAR(11)     DEFAULT NULL,
+  telefone        VARCHAR(11)  DEFAULT NULL,
+  data_nasc       DATE         DEFAULT NULL,
+  motivo          VARCHAR(255) DEFAULT NULL,
+  inativado_por   INT          DEFAULT NULL,
+  criado_em       DATETIME     DEFAULT NULL,
+  inativado_em    DATETIME     DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (usuario_id)    REFERENCES usuarios(id)    ON DELETE CASCADE,
+  FOREIGN KEY (inativado_por) REFERENCES funcionarios(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ── 8. FUNCIONÁRIOS INATIVOS ─────────────────────────────────────
+CREATE TABLE funcionarios_inativos (
+  id              INT          AUTO_INCREMENT PRIMARY KEY,
+  funcionario_id  INT          NOT NULL UNIQUE,
+  nome            VARCHAR(120) NOT NULL,
+  email           VARCHAR(150) NOT NULL,
+  cargo           VARCHAR(80)  DEFAULT NULL,
+  matricula       VARCHAR(20)  DEFAULT NULL,
+  motivo          VARCHAR(255) DEFAULT NULL,
+  inativado_por   INT          DEFAULT NULL,
+  criado_em       DATETIME     DEFAULT NULL,
+  inativado_em    DATETIME     DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id) ON DELETE CASCADE,
+  FOREIGN KEY (inativado_por)  REFERENCES funcionarios(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ── 9. LIVROS INATIVOS (exemplares retirados do acervo) ──────────
+CREATE TABLE livros_inativos (
+  id              INT          AUTO_INCREMENT PRIMARY KEY,
+  livro_id        INT          NOT NULL,
+  titulo          VARCHAR(200) NOT NULL,
+  autor           VARCHAR(120) NOT NULL,
+  isbn            VARCHAR(13)  NOT NULL,
+  quantidade      INT          NOT NULL DEFAULT 1,
+  motivo          VARCHAR(255) DEFAULT NULL,
+  inativado_por   INT          DEFAULT NULL,
+  inativado_em    DATETIME     DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (livro_id)      REFERENCES livros(id)       ON DELETE CASCADE,
+  FOREIGN KEY (inativado_por) REFERENCES funcionarios(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ════════════════════════════════════════════════════════════════
 --  ÍNDICES
 -- ════════════════════════════════════════════════════════════════
 
-CREATE INDEX idx_emp_usuario ON emprestimos (usuario_id);
-CREATE INDEX idx_emp_livro   ON emprestimos (livro_id);
-CREATE INDEX idx_emp_status  ON emprestimos (status);
-CREATE INDEX idx_liv_status  ON livros (status);
-CREATE INDEX idx_liv_cat     ON livros (categoria);
-CREATE INDEX idx_ltent_ip    ON login_tentativas (ip);
-CREATE INDEX idx_notif_uid   ON notificacoes (usuario_id);
+CREATE INDEX idx_emp_usuario   ON emprestimos (usuario_id);
+CREATE INDEX idx_emp_livro     ON emprestimos (livro_id);
+CREATE INDEX idx_emp_status    ON emprestimos (status);
+CREATE INDEX idx_liv_status    ON livros (status);
+CREATE INDEX idx_liv_cat       ON livros (categoria);
+CREATE INDEX idx_ltent_ip      ON login_tentativas (ip);
+CREATE INDEX idx_notif_uid     ON notificacoes (usuario_id);
+CREATE INDEX idx_uinat_uid     ON usuarios_inativos (usuario_id);
+CREATE INDEX idx_finat_fid     ON funcionarios_inativos (funcionario_id);
+CREATE INDEX idx_linat_lid     ON livros_inativos (livro_id);
 
 
 -- ════════════════════════════════════════════════════════════════
@@ -165,132 +208,19 @@ INSERT INTO usuarios (nome, email, senha, data_nasc, status) VALUES
 
 -- ── Livros ────────────────────────────────────────────────────────
 INSERT INTO livros (titulo, autor, isbn, editora, categoria, paginas, data_publicacao, quantidade, status, capa, descricao) VALUES
-(
-  'O Senhor dos Anéis',
-  'J.R.R. Tolkien',
-  '9788533613379',
-  'HarperCollins',
-  'Fantasia',
-  1178,
-  '1954-07-29',
-  3, 'disponivel',
-  'https://covers.openlibrary.org/b/isbn/9788533613379-L.jpg',
-  'A épica jornada de Frodo Bolseiro para destruir o Um Anel e salvar a Terra-média das trevas de Sauron.'
-),
-(
-  'Dom Casmurro',
-  'Machado de Assis',
-  '9788535910254',
-  'Penguin Companhia',
-  'Clássico',
-  256,
-  '1899-01-01',
-  2, 'disponivel',
-  'https://covers.openlibrary.org/b/isbn/9788535910254-L.jpg',
-  'Bentinho narra sua vida e o amor por Capitu, em um dos romances mais debatidos da literatura brasileira.'
-),
-(
-  'Duna',
-  'Frank Herbert',
-  '9788576572008',
-  'Aleph',
-  'Ficção Científica',
-  680,
-  '1965-08-01',
-  2, 'disponivel',
-  'https://covers.openlibrary.org/b/isbn/9788576572008-L.jpg',
-  'Em um futuro distante, Paul Atreides lidera uma revolta no planeta desértico de Arrakis, fonte da especiaria mais valiosa do universo.'
-),
-(
-  'A Revolução dos Bichos',
-  'George Orwell',
-  '9788535914849',
-  'Companhia das Letras',
-  'Clássico',
-  120,
-  '1945-08-17',
-  4, 'disponivel',
-  'https://covers.openlibrary.org/b/isbn/9788535914849-L.jpg',
-  'Uma sátira política brilhante em que animais de uma fazenda se rebelam contra seus donos humanos.'
-),
-(
-  'Neuromancer',
-  'William Gibson',
-  '9788576572435',
-  'Aleph',
-  'Ficção Científica',
-  368,
-  '1984-07-01',
-  2, 'disponivel',
-  'https://covers.openlibrary.org/b/isbn/9788576572435-L.jpg',
-  'O romance fundador do cyberpunk que definiu a visão moderna da realidade virtual e do ciberespaço.'
-),
-(
-  'O Hobbit',
-  'J.R.R. Tolkien',
-  '9788533613125',
-  'HarperCollins',
-  'Fantasia',
-  310,
-  '1937-09-21',
-  3, 'disponivel',
-  'https://covers.openlibrary.org/b/isbn/9788533613125-L.jpg',
-  'Bilbo Bolseiro é arrastado para uma aventura inesperada com treze anões e o mago Gandalf em busca de um tesouro guardado por um dragão.'
-),
-(
-  '1984',
-  'George Orwell',
-  '9788535909555',
-  'Companhia das Letras',
-  'Ficção Científica',
-  328,
-  '1949-06-08',
-  3, 'disponivel',
-  'https://covers.openlibrary.org/b/isbn/9788535909555-L.jpg',
-  'Winston Smith vive em uma sociedade totalitária controlada pelo Grande Irmão, onde o passado é reescrito e o pensamento independente é crime.'
-),
-(
-  'Memórias Póstumas de Brás Cubas',
-  'Machado de Assis',
-  '9788535902785',
-  'Penguin Companhia',
-  'Clássico',
-  240,
-  '1881-01-01',
-  2, 'disponivel',
-  'https://covers.openlibrary.org/b/isbn/9788535902785-L.jpg',
-  'Narrado por um defunto autor, este romance inaugura o Realismo brasileiro com ironia e profundidade psicológica incomparáveis.'
-),
-(
-  'O Código Da Vinci',
-  'Dan Brown',
-  '9788575421932',
-  'Sextante',
-  'Mistério',
-  480,
-  '2003-03-18',
-  2, 'disponivel',
-  'https://covers.openlibrary.org/b/isbn/9788575421932-L.jpg',
-  'O simbologista Robert Langdon é arrastado para uma investigação que envolve sociedades secretas, arte e os maiores mistérios do Vaticano.'
-),
-(
-  'O Pequeno Príncipe',
-  'Antoine de Saint-Exupéry',
-  '9788532522085',
-  'Geração Editorial',
-  'Infantil',
-  96,
-  '1943-04-06',
-  5, 'disponivel',
-  'https://covers.openlibrary.org/b/isbn/9788532522085-L.jpg',
-  'Um piloto preso no deserto encontra um misterioso menino de outro planeta. Uma fábula poética sobre amizade, amor e o sentido da vida.'
-);
+('O Senhor dos Anéis','J.R.R. Tolkien','9788533613379','HarperCollins','Fantasia',1178,'1954-07-29',3,'disponivel','https://covers.openlibrary.org/b/isbn/9788533613379-L.jpg','A épica jornada de Frodo Bolseiro para destruir o Um Anel e salvar a Terra-média das trevas de Sauron.'),
+('Dom Casmurro','Machado de Assis','9788535910254','Penguin Companhia','Clássico',256,'1899-01-01',2,'disponivel','https://covers.openlibrary.org/b/isbn/9788535910254-L.jpg','Bentinho narra sua vida e o amor por Capitu, em um dos romances mais debatidos da literatura brasileira.'),
+('Duna','Frank Herbert','9788576572008','Aleph','Ficção Científica',680,'1965-08-01',2,'disponivel','https://covers.openlibrary.org/b/isbn/9788576572008-L.jpg','Em um futuro distante, Paul Atreides lidera uma revolta no planeta desértico de Arrakis, fonte da especiaria mais valiosa do universo.'),
+('A Revolução dos Bichos','George Orwell','9788535914849','Companhia das Letras','Clássico',120,'1945-08-17',4,'disponivel','https://covers.openlibrary.org/b/isbn/9788535914849-L.jpg','Uma sátira política brilhante em que animais de uma fazenda se rebelam contra seus donos humanos.'),
+('Neuromancer','William Gibson','9788576572435','Aleph','Ficção Científica',368,'1984-07-01',2,'disponivel','https://covers.openlibrary.org/b/isbn/9788576572435-L.jpg','O romance fundador do cyberpunk que definiu a visão moderna da realidade virtual e do ciberespaço.'),
+('O Hobbit','J.R.R. Tolkien','9788533613125','HarperCollins','Fantasia',310,'1937-09-21',3,'disponivel','https://covers.openlibrary.org/b/isbn/9788533613125-L.jpg','Bilbo Bolseiro é arrastado para uma aventura inesperada com treze anões e o mago Gandalf em busca de um tesouro guardado por um dragão.'),
+('1984','George Orwell','9788535909555','Companhia das Letras','Ficção Científica',328,'1949-06-08',3,'disponivel','https://covers.openlibrary.org/b/isbn/9788535909555-L.jpg','Winston Smith vive em uma sociedade totalitária controlada pelo Grande Irmão, onde o passado é reescrito e o pensamento independente é crime.'),
+('Memórias Póstumas de Brás Cubas','Machado de Assis','9788535902785','Penguin Companhia','Clássico',240,'1881-01-01',2,'disponivel','https://covers.openlibrary.org/b/isbn/9788535902785-L.jpg','Narrado por um defunto autor, este romance inaugura o Realismo brasileiro com ironia e profundidade psicológica incomparáveis.'),
+('O Código Da Vinci','Dan Brown','9788575421932','Sextante','Mistério',480,'2003-03-18',2,'disponivel','https://covers.openlibrary.org/b/isbn/9788575421932-L.jpg','O simbologista Robert Langdon é arrastado para uma investigação que envolve sociedades secretas, arte e os maiores mistérios do Vaticano.'),
+('O Pequeno Príncipe','Antoine de Saint-Exupéry','9788532522085','Geração Editorial','Infantil',96,'1943-04-06',5,'disponivel','https://covers.openlibrary.org/b/isbn/9788532522085-L.jpg','Um piloto preso no deserto encontra um misterioso menino de outro planeta. Uma fábula poética sobre amizade, amor e o sentido da vida.');
 
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ════════════════════════════════════════════════════════════════
 --  FIM
 -- ════════════════════════════════════════════════════════════════
-
--- Adiciona status 'aguardando_devolucao' ao ENUM de emprestimos
-ALTER TABLE emprestimos MODIFY COLUMN status ENUM('ativo','devolvido','atrasado','renovado','aguardando_devolucao') DEFAULT 'ativo';

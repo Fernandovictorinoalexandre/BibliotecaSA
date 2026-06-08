@@ -57,13 +57,24 @@ if ($metodo === 'GET') {
         $params = array_merge($params, [$like, $like, $like]);
     }
 
-    // Atualiza automaticamente atrasados
+    // ── Cron de status ──────────────────────────────────────
+    // 1. Marca como atrasado tudo que venceu
     $pdo->exec("
         UPDATE emprestimos
         SET status = 'atrasado'
         WHERE status IN ('ativo','renovado')
           AND data_devolucao_prevista < CURDATE()
           AND data_devolucao_real IS NULL
+    ");
+    // 2. Reverte status E zera multa em um único UPDATE (data voltou ao normal)
+    $pdo->exec("
+        UPDATE emprestimos
+        SET status = IF(renovacoes > 0, 'renovado', 'ativo'),
+            multa  = 0
+        WHERE status = 'atrasado'
+          AND data_devolucao_prevista >= CURDATE()
+          AND data_devolucao_real IS NULL
+          AND multa_paga = 0
     ");
 
     $stmt = $pdo->prepare('
@@ -89,6 +100,14 @@ if ($metodo === 'POST') {
     if (empty($d['usuario_id'])) responder(422, ['erro' => 'usuario_id obrigatório.']);
     if (empty($d['livro_id']))   responder(422, ['erro' => 'livro_id obrigatório.']);
 
+    // Bloqueia empréstimo para usuário inativo ou suspenso
+    $chkUsr = $pdo->prepare('SELECT status FROM usuarios WHERE id = ?');
+    $chkUsr->execute([$d['usuario_id']]);
+    $usr = $chkUsr->fetch();
+    if (!$usr) responder(404, ['erro' => 'Usuário não encontrado.']);
+    if ($usr['status'] === 'inativo')   responder(409, ['erro' => 'Usuário com conta inativa. Peça que o usuário reative a conta.']);
+    if ($usr['status'] === 'suspenso')  responder(409, ['erro' => 'Usuário suspenso. Não é possível realizar empréstimos.']);
+
     // Verifica livro disponível considerando quantidade de exemplares
     $livro = $pdo->prepare('SELECT id, status, quantidade FROM livros WHERE id = ?');
     $livro->execute([$d['livro_id']]);
@@ -111,7 +130,7 @@ if ($metodo === 'POST') {
     // Verifica limite de 5 por usuário
     $ativos = $pdo->prepare(
         "SELECT COUNT(*) FROM emprestimos
-         WHERE usuario_id = ? AND status IN ('ativo','atrasado','renovado') AND data_devolucao_real IS NULL"
+         WHERE usuario_id = ? AND status IN ('ativo','atrasado','renovado','aguardando_devolucao') AND data_devolucao_real IS NULL"
     );
     $ativos->execute([$d['usuario_id']]);
     if ($ativos->fetchColumn() >= 5) responder(409, ['erro' => 'Usuário já possui 5 livros emprestados.']);
@@ -119,7 +138,8 @@ if ($metodo === 'POST') {
     // Verifica se já tem este livro
     $jatem = $pdo->prepare(
         "SELECT id FROM emprestimos
-         WHERE usuario_id = ? AND livro_id = ? AND data_devolucao_real IS NULL"
+         WHERE usuario_id = ? AND livro_id = ? AND data_devolucao_real IS NULL
+         AND status != 'devolvido'"
     );
     $jatem->execute([$d['usuario_id'], $d['livro_id']]);
     if ($jatem->fetch()) responder(409, ['erro' => 'Usuário já tem este livro emprestado.']);
@@ -178,6 +198,20 @@ if ($metodo === 'PUT') {
 
     $pdo->beginTransaction();
     try {
+        // CANCELAR SOLICITAÇÃO DE DEVOLUÇÃO (funcionário desfaz)
+        if (!empty($d['cancelar_devolucao'])) {
+            if ($emp['status'] !== 'aguardando_devolucao') {
+                responder(409, ['erro' => 'Este empréstimo não está aguardando devolução.']);
+            }
+            // Devolve ao status correto — verifica se está atrasado
+            $hoje = date('Y-m-d');
+            $novoStatus = ($emp['data_devolucao_prevista'] < $hoje) ? 'atrasado' : 'ativo';
+            $pdo->prepare("UPDATE emprestimos SET status = ? WHERE id = ?")
+                ->execute([$novoStatus, $id]);
+            $pdo->commit();
+            responder(200, ['mensagem' => 'Solicitação de devolução cancelada. Empréstimo reativado.']);
+        }
+
         // SOLICITAÇÃO DE DEVOLUÇÃO (usuário clica "Devolver" no portal)
         // Muda status para 'aguardando_devolucao' — aguarda confirmação do funcionário
         if (!empty($d['solicitar_devolucao'])) {
@@ -200,9 +234,10 @@ if ($metodo === 'PUT') {
             }
             $hoje  = date('Y-m-d');
             $multa = 0;
-            if ($emp['status'] === 'atrasado') {
-                $dias  = (int) floor((strtotime($hoje) - strtotime($emp['data_devolucao_prevista'])) / 86400);
-                $multa = $dias * 1.00;
+            // Calcula multa pela data prevista, independente do status atual
+            $diasAtraso = (int) floor((strtotime($hoje) - strtotime($emp['data_devolucao_prevista'])) / 86400);
+            if ($diasAtraso > 0) {
+                $multa = $diasAtraso * 0.50;
             }
             $pdo->prepare("
                 UPDATE emprestimos
@@ -235,16 +270,26 @@ if ($metodo === 'PUT') {
         if (!empty($d['renovar'])) {
             if ($emp['renovacoes'] >= 2) responder(409, ['erro' => 'Limite de 2 renovações atingido.']);
             if ($emp['status'] === 'atrasado') responder(409, ['erro' => 'Não é possível renovar empréstimo em atraso.']);
+            if ($emp['status'] === 'aguardando_devolucao') responder(409, ['erro' => 'Não é possível renovar: devolução já solicitada.']);
 
-            $novaData = date('Y-m-d', strtotime($emp['data_devolucao_prevista'] . ' +30 days'));
+            // Soma 30 dias a partir da data prevista atual
+            $novaData        = date('Y-m-d', strtotime($emp['data_devolucao_prevista'] . ' +30 days'));
+            $metodoPagamento = $d['metodo_pagamento'] ?? null;
+            $valorPago       = isset($d['valor_pago']) ? (float) $d['valor_pago'] : 15.00;
+
             $pdo->prepare("
                 UPDATE emprestimos
-                SET data_devolucao_prevista = ?, renovacoes = renovacoes + 1, status = 'renovado'
+                SET data_devolucao_prevista = ?,
+                    renovacoes              = renovacoes + 1,
+                    status                  = 'renovado',
+                    metodo_pagamento        = ?,
+                    valor_pago              = ?
                 WHERE id = ?
-            ")->execute([$novaData, $id]);
+            ")->execute([$novaData, $metodoPagamento, $valorPago, $id]);
             $pdo->commit();
 
-            responder(200, ['mensagem' => 'Empréstimo renovado.', 'nova_data' => $novaData]);
+            responder(200, ['mensagem' => 'Empréstimo renovado.', 'nova_data' => $novaData,
+                            'metodo_pagamento' => $metodoPagamento, 'valor_pago' => $valorPago]);
         }
 
         // ATUALIZAÇÃO GERAL

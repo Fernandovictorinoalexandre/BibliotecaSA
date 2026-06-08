@@ -233,6 +233,7 @@
   <div>© 2026 Todos os direitos reservados</div>
 </footer>
 
+<script src="utils.js"></script>
 <script>
   const API = 'http://localhost:9999/Estacao-refatorado/php/usuarios.php';
   const API_EMP = 'http://localhost:9999/Estacao-refatorado/php/emprestimos.php';
@@ -408,11 +409,6 @@
   }
 
   // ── Utilitários ─────────────────────────────────────
-  function fmt(iso) {
-    if (!iso) return '—';
-    const [y, m, d] = iso.split('T')[0].split('-');
-    return `${d}/${m}/${y}`;
-  }
   function isLate(iso) {
     const due = new Date(iso); due.setHours(0,0,0,0);
     const hoje = new Date(); hoje.setHours(0,0,0,0);
@@ -445,13 +441,21 @@
       document.getElementById('stat-historico').textContent = devolvidos.length;
       document.getElementById('livros-ativos-label').textContent = ativos.length + ' / 5';
 
-      // Multa
+      // Multa — R$ 0,50 por dia — usa status do banco como fonte verdadeira
+      const MULTA_DIA = 0.50;
       let multa = 0;
       ativos.forEach(e => {
-        if (isLate(e.data_devolucao_prevista)) {
-          const dias = Math.floor((Date.now() - new Date(e.data_devolucao_prevista)) / 86400000);
-          multa += dias;
+        if (parseFloat(e.multa) > 0 && e.status === 'atrasado') {
+          // Banco já registrou a multa
+          multa += parseFloat(e.multa);
+        } else if (e.status === 'atrasado') {
+          // Atrasado mas multa ainda não gravada — calcula pelo prazo
+          const hoje = new Date(); hoje.setHours(0,0,0,0);
+          const venc = new Date(e.data_devolucao_prevista); venc.setHours(0,0,0,0);
+          const dias = Math.max(0, Math.floor((hoje - venc) / 86400000));
+          multa += dias * MULTA_DIA;
         }
+        // status ativo/renovado → multa = 0 (ignora multa residual do banco)
       });
       const multaEl = document.getElementById('stat-multa');
       multaEl.textContent = 'R$ ' + multa.toFixed(2).replace('.', ',');
@@ -555,7 +559,7 @@
       const resp = await fetch(`${API}?id=${id}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ senha }),
+        // senha não é mais necessária — funcionário é quem inativa
       });
       const dados = await resp.json();
       if (!resp.ok) {

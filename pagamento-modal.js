@@ -12,6 +12,7 @@
 
   // ── Estado ─────────────────────────────────────────────
   let livroAtual = null;
+  let modoRenovacao = false; // false = empréstimo, true = renovação
 
   // ── HTML do modal injetado no body ─────────────────────
   const modalHTML = `
@@ -23,12 +24,12 @@
 
       <div class="pg-header">
         <div class="pg-icon">📚</div>
-        <h2>Confirmar Empréstimo</h2>
+        <h2 id="pg-titulo-modal">Confirmar Empréstimo</h2>
         <p id="pg-titulo-livro" class="pg-livro-nome"></p>
       </div>
 
       <div class="pg-preco-box">
-        <span class="pg-preco-label">Valor do empréstimo (30 dias)</span>
+        <span class="pg-preco-label" id="pg-preco-label">Valor do empréstimo (30 dias)</span>
         <span class="pg-preco-valor">R$ 15,00</span>
       </div>
 
@@ -144,6 +145,12 @@
             <input type="text" id="pg-cvv" placeholder="123"
               maxlength="4" inputmode="numeric">
           </div>
+        </div>
+
+        <div class="pg-campo">
+          <label>CPF do Titular</label>
+          <input type="text" id="pg-cpf" placeholder="000.000.000-00"
+            maxlength="14" oninput="PG.mascaraCPF(this)" inputmode="numeric">
         </div>
 
         <div class="pg-campo">
@@ -422,10 +429,13 @@
   // ── API Pública ─────────────────────────────────────────
   window.PG = {
 
-    // Abre o modal de pagamento passando o livro
+    // Abre o modal de pagamento passando o livro (modo empréstimo)
     abrir(livro) {
-      livroAtual = livro;
+      modoRenovacao = false;
+      livroAtual    = livro;
       document.getElementById('pg-titulo-livro').textContent = livro.titulo || livro.title || livro;
+      document.getElementById('pg-titulo-modal').textContent = 'Confirmar Empréstimo';
+      document.getElementById('pg-preco-label').textContent  = 'Valor do empréstimo (30 dias)';
       mostrar('pg-passo1');
       document.getElementById('pg-overlay').classList.add('aberto');
       document.body.style.overflow = 'hidden';
@@ -434,12 +444,24 @@
     fechar() {
       document.getElementById('pg-overlay').classList.remove('aberto');
       document.body.style.overflow = '';
-      // Limpa campos do cartão
-      ['pg-numero','pg-nome-cartao','pg-validade','pg-cvv'].forEach(id => {
+      modoRenovacao = false;
+      ['pg-numero','pg-nome-cartao','pg-cpf','pg-validade','pg-cvv'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
       });
       document.getElementById('pg-erro-cartao').textContent = '';
+    },
+
+    // Abre em modo RENOVAÇÃO
+    abrirRenovacao(emprestimo) {
+      modoRenovacao = true;
+      livroAtual    = emprestimo;
+      document.getElementById('pg-titulo-livro').textContent = emprestimo.titulo || '';
+      document.getElementById('pg-titulo-modal').textContent = 'Renovar Empréstimo';
+      document.getElementById('pg-preco-label').textContent  = 'Taxa de renovação (+ 30 dias)';
+      mostrar('pg-passo1');
+      document.getElementById('pg-overlay').classList.add('aberto');
+      document.body.style.overflow = 'hidden';
     },
 
     fecharSeForaDoModal(e) {
@@ -465,14 +487,23 @@
 
     confirmarPagamento(metodo) {
       mostrar('pg-passo-processando');
-      // Simula processamento de 2s
+      // Salva o modo ANTES de fechar (fechar() zera modoRenovacao)
+      const eraRenovacao = modoRenovacao;
+      const livroSalvo   = livroAtual;
       setTimeout(() => {
         PG.fechar();
-        // Abre o ticket (função já existente nas páginas)
-        if (typeof openTicket === 'function') {
-          openTicket(livroAtual, metodo);
-        } else if (typeof emprestarLivro === 'function') {
-          emprestarLivro(livroAtual.id || livroAtual, metodo);
+        if (eraRenovacao) {
+          // Modo renovação — chama confirmarRenovacao() da página
+          if (typeof confirmarRenovacao === 'function') {
+            confirmarRenovacao(metodo);
+          }
+        } else {
+          // Modo empréstimo — abre ticket como antes
+          if (typeof openTicket === 'function') {
+            openTicket(livroSalvo, metodo);
+          } else if (typeof emprestarLivro === 'function') {
+            emprestarLivro(livroSalvo.id || livroSalvo, metodo);
+          }
         }
       }, 2000);
     },
@@ -484,8 +515,10 @@
       const cvv    = document.getElementById('pg-cvv').value;
       const erro   = document.getElementById('pg-erro-cartao');
 
+      const cpf    = document.getElementById('pg-cpf').value.replace(/\D/g,'');
       if (numero.length < 16) { erro.textContent = 'Número do cartão inválido.'; return; }
       if (nome.length < 3)    { erro.textContent = 'Informe o nome como no cartão.'; return; }
+      if (cpf.length < 11)    { erro.textContent = 'CPF do titular inválido.'; return; }
       if (val.length < 5)     { erro.textContent = 'Data de validade inválida.'; return; }
       if (cvv.length < 3)     { erro.textContent = 'CVV inválido.'; return; }
       erro.textContent = '';
@@ -501,6 +534,14 @@
     mascaraValidade(input) {
       let v = input.value.replace(/\D/g,'').substring(0,4);
       if (v.length >= 2) v = v.slice(0,2) + '/' + v.slice(2);
+      input.value = v;
+    },
+
+    mascaraCPF(input) {
+      let v = input.value.replace(/\D/g,'').slice(0,11);
+      if (v.length > 9)      v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+      else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+      else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, '$1.$2');
       input.value = v;
     }
   };

@@ -2,6 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Estação Literária — Painel</title>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -160,22 +161,12 @@
 
 </main>
 
+<script src="utils.js"></script>
+<script src="func-utils.js"></script>
 <script>
   const API_DASH = 'http://localhost:9999/Estacao-refatorado/php/dashboard.php';
   const API_FUNC = 'http://localhost:9999/Estacao-refatorado/php/funcionarios.php';
 
-  if (localStorage.getItem('func_logado') !== 'true') {
-    window.location.href = 'LoginFuncionario.html';
-  }
-
-  function fmtMoney(v) {
-    return 'R$ ' + Number(v).toFixed(2).replace('.', ',');
-  }
-  function fmt(iso) {
-    if (!iso) return '—';
-    const [y,m,d] = iso.split('-');
-    return `${d}/${m}/${y}`;
-  }
   function mesAtual() {
     return new Date().toLocaleString('pt-BR', { month: 'long' });
   }
@@ -267,6 +258,7 @@
               <option value="ativo"    ${f.status==='ativo'    ?'selected':''}>🟢 Ativo</option>
               <option value="folga"    ${f.status==='folga'    ?'selected':''}>🟡 De folga</option>
               <option value="suspenso" ${f.status==='suspenso' ?'selected':''}>🔴 Suspenso</option>
+              <option value="inativo"  ${f.status==='inativo'  ?'selected':''}>⚫ Inativo</option>
             </select>
           </td>
         </tr>`).join('');
@@ -279,7 +271,7 @@
 
   async function atualizarStatus(id, novoStatus, sel) {
     try {
-      const r = await fetch(API_FUNC + '/' + id, {
+      const r = await fetch(`${API_FUNC}?id=${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: novoStatus }),
@@ -290,32 +282,9 @@
   }
 
   // ── Logout ──────────────────────────────────────────────
-  async function logout() {
-    try { await fetch('http://localhost:9999/Estacao-refatorado/php/logout.php', { method: 'POST' }); } catch {}
-    ['func_logado','func_id','func_nome','func_email','func_cargo','func_matricula']
-      .forEach(k => localStorage.removeItem(k));
-    window.location.href = 'Entrada.html';
-  }
 
   carregarDash();
   carregarFuncionarios();
-
-  // ── Avatar com iniciais ──────────────────────────────
-  (function() {
-    const nome = localStorage.getItem('func_nome') || '';
-    const el   = document.getElementById('func-nome-nav');
-    const av   = document.getElementById('user-avatar-nav');
-    if (el) el.textContent = nome;
-    if (av && nome) {
-      const partes   = nome.trim().split(' ').filter(Boolean);
-      const iniciais = (partes[0]?.[0] || '') + (partes[1]?.[0] || '');
-      av.innerHTML   = `<span style="font-size:.8rem;font-weight:700;color:#09122c;">${iniciais.toUpperCase()}</span>`;
-      av.style.background      = '#73ffe3';
-      av.style.display         = 'flex';
-      av.style.alignItems      = 'center';
-      av.style.justifyContent  = 'center';
-    }
-  })();
 </script>
 </body>
 </html>

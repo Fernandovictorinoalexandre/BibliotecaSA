@@ -2,6 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Estação Literária — Gestão de Funcionários</title>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -70,7 +71,7 @@
     <div class="card"><p>Suspensos</p><h3 id="statSuspenso" style="color:#ff716c;">—</h3></div>
   </section>
 
-  <!-- TABELA -->
+  <!-- TABELA ATIVOS -->
   <section class="table-section fade-up">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
       <h2>Funcionários</h2>
@@ -80,51 +81,67 @@
       </button>
     </div>
     <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Nome</th>
-            <th>E-mail</th>
-            <th>Cargo</th>
-            <th>Matrícula</th>
-            <th>Status</th>
-            <th>Cadastro</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody id="corpoTabela">
-          <tr><td colspan="8" class="empty-state">Carregando...</td></tr>
-        </tbody>
-      </table>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th class="col-sm">E-mail</th>
+              <th>Cargo</th>
+              <th class="col-lg">Matrícula</th>
+              <th>Status</th>
+              <th class="col-md">Cadastro</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="corpoTabela">
+            <tr><td colspan="7" class="empty-state">Carregando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TABELA INATIVOS -->
+  <section class="table-section" style="margin-top:2rem;">
+    <div class="table-header">
+      <h3 style="display:flex;align-items:center;gap:.5rem;">
+        <span class="material-symbols-outlined" style="color:#ff716c;font-size:1.2rem;">badge</span>
+        Funcionários Inativos
+      </h3>
+    </div>
+    <div class="table-container">
+      <div class="table-scroll">
+        <table id="tabelaFuncInativos">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th class="col-sm">E-mail</th>
+              <th class="col-md">Cargo</th>
+              <th class="col-lg">Matrícula</th>
+              <th class="col-md">Inativado em</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="corpoFuncInativos">
+            <tr><td colspan="6" class="empty-state">Carregando...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 
 </main>
 
-<!-- ── MODAL CADASTRO ── -->
+<!-- MODAL CADASTRO -->
 <div class="modal-overlay" id="modalCadastro">
   <div class="modal">
     <h3>Novo Funcionário</h3>
-
-    <div class="input-group">
-      <label>Nome completo *</label>
-      <input type="text" id="cadNome" placeholder="Ex: Maria Silva">
-    </div>
-    <div class="input-group">
-      <label>E-mail *</label>
-      <input type="email" id="cadEmail" placeholder="funcionario@biblioteca.com">
-    </div>
-    <div class="input-group">
-      <label>Senha *</label>
-      <input type="password" id="cadSenha" placeholder="Mínimo 6 caracteres">
-    </div>
-    <div class="input-group">
-      <label>Matrícula *</label>
-      <input type="text" id="cadMatricula" placeholder="Ex: BIB0042" style="text-transform:uppercase;">
-    </div>
-    <div class="input-group">
-      <label>Cargo</label>
+    <div class="input-group"><label>Nome completo *</label><input type="text" id="cadNome" placeholder="Ex: Maria Silva"></div>
+    <div class="input-group"><label>E-mail *</label><input type="email" id="cadEmail" placeholder="funcionario@biblioteca.com"></div>
+    <div class="input-group"><label>Senha *</label><input type="password" id="cadSenha" placeholder="Mínimo 6 caracteres"></div>
+    <div class="input-group"><label>Matrícula *</label><input type="text" id="cadMatricula" placeholder="Ex: BIB0042" style="text-transform:uppercase;"></div>
+    <div class="input-group"><label>Cargo</label>
       <select id="cadCargo">
         <option value="Bibliotecário">Bibliotecário</option>
         <option value="Assistente">Assistente</option>
@@ -132,15 +149,13 @@
         <option value="Estagiário">Estagiário</option>
       </select>
     </div>
-    <div class="input-group">
-      <label>Status</label>
+    <div class="input-group"><label>Status</label>
       <select id="cadStatus">
         <option value="ativo">Ativo</option>
         <option value="folga">De folga</option>
         <option value="suspenso">Suspenso</option>
       </select>
     </div>
-
     <div class="modal-acoes">
       <button class="btn-modal-cancel" onclick="fecharModal('modalCadastro')">Cancelar</button>
       <button class="btn-modal-save" id="btnCadastrar" onclick="cadastrar()">Cadastrar</button>
@@ -148,30 +163,16 @@
   </div>
 </div>
 
-<!-- ── MODAL EDIÇÃO ── -->
+<!-- MODAL EDIÇÃO -->
 <div class="modal-overlay" id="modalEdicao">
   <div class="modal">
     <h3>Editar Funcionário</h3>
     <input type="hidden" id="editId">
-
-    <div class="input-group">
-      <label>Nome completo</label>
-      <input type="text" id="editNome">
-    </div>
-    <div class="input-group">
-      <label>E-mail</label>
-      <input type="email" id="editEmail">
-    </div>
-    <div class="input-group">
-      <label>Nova senha <span style="color:var(--on-surface-variant);font-weight:400;">(deixe em branco para manter)</span></label>
-      <input type="password" id="editSenha" placeholder="Mínimo 6 caracteres">
-    </div>
-    <div class="input-group">
-      <label>Matrícula</label>
-      <input type="text" id="editMatricula" style="text-transform:uppercase;">
-    </div>
-    <div class="input-group">
-      <label>Cargo</label>
+    <div class="input-group"><label>Nome completo</label><input type="text" id="editNome"></div>
+    <div class="input-group"><label>E-mail</label><input type="email" id="editEmail"></div>
+    <div class="input-group"><label>Nova senha <span style="color:var(--on-surface-variant);font-weight:400;">(deixe em branco para manter)</span></label><input type="password" id="editSenha" placeholder="Mínimo 6 caracteres"></div>
+    <div class="input-group"><label>Matrícula</label><input type="text" id="editMatricula" style="text-transform:uppercase;"></div>
+    <div class="input-group"><label>Cargo</label>
       <select id="editCargo">
         <option value="Bibliotecário">Bibliotecário</option>
         <option value="Assistente">Assistente</option>
@@ -179,15 +180,13 @@
         <option value="Estagiário">Estagiário</option>
       </select>
     </div>
-    <div class="input-group">
-      <label>Status</label>
+    <div class="input-group"><label>Status</label>
       <select id="editStatus">
         <option value="ativo">Ativo</option>
         <option value="folga">De folga</option>
         <option value="suspenso">Suspenso</option>
       </select>
     </div>
-
     <div class="modal-acoes">
       <button class="btn-modal-cancel" onclick="fecharModal('modalEdicao')">Cancelar</button>
       <button class="btn-modal-save" id="btnSalvar" onclick="salvarEdicao()">Salvar</button>
@@ -195,7 +194,7 @@
   </div>
 </div>
 
-<!-- ── MODAL INATIVAÇÃO ── -->
+<!-- MODAL INATIVAÇÃO -->
 <div class="modal-overlay" id="modalExclusao">
   <div class="modal" style="width:420px;">
     <h3>Inativar Funcionário</h3>
@@ -203,91 +202,66 @@
       O funcionário não poderá acessar o sistema enquanto estiver inativo.</p>
     <div class="modal-acoes">
       <button class="btn-modal-cancel" onclick="fecharModal('modalExclusao')">Cancelar</button>
-      <button class="btn-modal-del"    id="btnDeletar" onclick="confirmarExclusao()">Inativar</button>
+      <button class="btn-modal-del" id="btnDeletar" onclick="confirmarExclusao()">Inativar</button>
     </div>
   </div>
 </div>
 
-<!-- ── TOAST ── -->
+<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<script src="utils.js"></script>
+<script src="func-utils.js"></script>
 <script>
   const API = 'http://localhost:9999/Estacao-refatorado/php/funcionarios.php';
+
   let idParaDeletar = null;
   let todosFunc = [];
 
-  // ── Proteção de rota ─────────────────────────────────
-  if (localStorage.getItem('func_logado') !== 'true') {
-    window.location.href = 'LoginFuncionario.html';
-  }
-  document.getElementById('func-nome-nav').textContent =
-    localStorage.getItem('func_nome') || 'Funcionário';
-
-  // ── Utilitários ──────────────────────────────────────
-  function toast(msg, tipo = 'sucesso') {
-    const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.className = `toast ${tipo} show`;
-    setTimeout(() => el.classList.remove('show'), 3500);
-  }
-  function abrirModal(id)  { document.getElementById(id).classList.add('aberto'); }
-  function fecharModal(id) { document.getElementById(id).classList.remove('aberto'); }
-  document.querySelectorAll('.modal-overlay').forEach(m => {
-    m.addEventListener('click', e => { if (e.target === m) fecharModal(m.id); });
-  });
-  function fmt(iso) {
-    if (!iso) return '—';
-    const [y,m,d] = iso.split('T')[0].split('-');
-    return `${d}/${m}/${y}`;
-  }
-
-  // ── Renderizar tabela ────────────────────────────────
+  // ── Renderizar tabela ativos ─────────────────────────
   function renderizarTabela(lista) {
     const tbody = document.getElementById('corpoTabela');
     if (!lista.length) {
-      tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Nenhum funcionário encontrado.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Nenhum funcionário encontrado.</td></tr>';
       return;
     }
-    tbody.innerHTML = lista.map(f => `
-      <tr>
-        <td style="font-family:monospace;font-size:.82rem;color:var(--on-surface-variant);">${f.id}</td>
-        <td style="font-weight:600;">${f.nome}</td>
-        <td style="font-size:.85rem;color:var(--on-surface-variant);">${f.email}</td>
-        <td style="font-size:.85rem;">${f.cargo}</td>
-        <td style="font-family:monospace;font-size:.82rem;">${f.matricula}</td>
-        <td><span class="badge ${f.status}">${f.status}</span></td>
-        <td style="font-size:.8rem;color:var(--on-surface-variant);">${fmt(f.criado_em)}</td>
-        <td>
-          <button class="btn-acao btn-editar"  onclick="abrirEdicao(${f.id})">Editar</button>
-          <button class="btn-acao btn-excluir" onclick="abrirExclusao(${f.id}, '${f.nome.replace(/'/g,"\\'")}')">Inativar</button>
-        </td>
-      </tr>
-    `).join('');
+    tbody.innerHTML = lista.map(function(f) {
+      return '<tr>' +
+        '<td style="font-weight:600;">' + esc(f.nome) + '</td>' +
+        '<td class="col-sm" style="font-size:.85rem;color:var(--on-surface-variant);">' + esc(f.email) + '</td>' +
+        '<td style="font-size:.85rem;">' + esc(f.cargo) + '</td>' +
+        '<td class="col-lg" style="font-family:monospace;font-size:.82rem;">' + esc(f.matricula) + '</td>' +
+        '<td><span class="badge ' + esc(f.status) + '">' + esc(f.status) + '</span></td>' +
+        '<td class="col-md" style="font-size:.8rem;color:var(--on-surface-variant);">' + fmt(f.criado_em) + '</td>' +
+        '<td><div style="display:flex;gap:4px;justify-content:flex-end;flex-wrap:nowrap;">' +
+        '<button class="btn-acao btn-editar" onclick="abrirEdicao(' + f.id + ')">Editar</button>' +
+        '<button class="btn-acao btn-excluir" onclick="abrirExclusao(' + f.id + ', this.dataset.nome)" data-nome="' + esc(f.nome) + '">Inativar</button>' +
+        '</div></td>' +
+        '</tr>';
+    }).join('');
   }
 
-  // ── Carregar lista ───────────────────────────────────
-  async function carregarFuncionarios(busca = '') {
+  // ── Carregar ativos ──────────────────────────────────
+  async function carregarFuncionarios(busca) {
+    busca = busca || '';
     try {
-      const url  = busca ? `${API}?busca=${encodeURIComponent(busca)}` : API;
+      const url  = busca ? API + '?busca=' + encodeURIComponent(busca) : API;
       const resp = await fetch(url);
       todosFunc  = await resp.json();
-
       renderizarTabela(todosFunc);
-
-      document.getElementById('statTotal').textContent   = todosFunc.length;
-      document.getElementById('statAtivo').textContent   = todosFunc.filter(f => f.status === 'ativo').length;
-      document.getElementById('statFolga').textContent   = todosFunc.filter(f => f.status === 'folga').length;
-      document.getElementById('statSuspenso').textContent= todosFunc.filter(f => f.status === 'suspenso').length;
-
-    } catch {
+      document.getElementById('statTotal').textContent    = todosFunc.length;
+      document.getElementById('statAtivo').textContent    = todosFunc.filter(function(f){ return f.status === 'ativo'; }).length;
+      document.getElementById('statFolga').textContent    = todosFunc.filter(function(f){ return f.status === 'folga'; }).length;
+      document.getElementById('statSuspenso').textContent = todosFunc.filter(function(f){ return f.status === 'suspenso'; }).length;
+    } catch(e) {
       document.getElementById('corpoTabela').innerHTML =
-        '<tr><td colspan="8" class="empty-state">Erro ao carregar dados. Verifique a conexão.</td></tr>';
+        '<tr><td colspan="7" class="empty-state">Erro ao carregar. Verifique a conexão.</td></tr>';
     }
   }
 
   function buscar(valor) {
     clearTimeout(buscar._t);
-    buscar._t = setTimeout(() => carregarFuncionarios(valor.trim()), 350);
+    buscar._t = setTimeout(function() { carregarFuncionarios(valor.trim()); }, 350);
   }
 
   // ── Cadastro ─────────────────────────────────────────
@@ -310,16 +284,11 @@
       cargo:     document.getElementById('cadCargo').value,
       status:    document.getElementById('cadStatus').value,
     };
-
     if (!payload.nome || !payload.email || !payload.senha || !payload.matricula) {
-      toast('Preencha todos os campos obrigatórios.', 'erro');
-      return;
+      toast('Preencha todos os campos obrigatórios.', 'erro'); return;
     }
-
     const btn = document.getElementById('btnCadastrar');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span>';
-
     try {
       const resp = await fetch(API, {
         method: 'POST',
@@ -327,15 +296,15 @@
         body: JSON.stringify(payload),
       });
       const dados = await resp.json();
-
       if (!resp.ok) {
         toast(dados.erro || 'Erro ao cadastrar.', 'erro');
       } else {
         toast('Funcionário cadastrado com sucesso!');
         fecharModal('modalCadastro');
         carregarFuncionarios();
+        carregarFuncInativos();
       }
-    } catch {
+    } catch(e) {
       toast('Erro de conexão.', 'erro');
     } finally {
       btn.disabled = false;
@@ -344,23 +313,17 @@
   }
 
   // ── Edição ───────────────────────────────────────────
-  async function abrirEdicao(id) {
-    try {
-      const resp = await fetch(`${API}?id=${id}`);
-      const f    = await resp.json();
-
-      document.getElementById('editId').value        = f.id;
-      document.getElementById('editNome').value      = f.nome;
-      document.getElementById('editEmail').value     = f.email;
-      document.getElementById('editSenha').value     = '';
-      document.getElementById('editMatricula').value = f.matricula;
-      document.getElementById('editCargo').value     = f.cargo;
-      document.getElementById('editStatus').value    = f.status;
-
-      abrirModal('modalEdicao');
-    } catch {
-      toast('Erro ao buscar dados do funcionário.', 'erro');
-    }
+  function abrirEdicao(id) {
+    const f = todosFunc.find(function(x) { return x.id === id; });
+    if (!f) return;
+    document.getElementById('editId').value        = f.id;
+    document.getElementById('editNome').value      = f.nome;
+    document.getElementById('editEmail').value     = f.email;
+    document.getElementById('editSenha').value     = '';
+    document.getElementById('editMatricula').value = f.matricula;
+    document.getElementById('editCargo').value     = f.cargo;
+    document.getElementById('editStatus').value    = f.status;
+    abrirModal('modalEdicao');
   }
 
   async function salvarEdicao() {
@@ -374,35 +337,33 @@
     };
     const senha = document.getElementById('editSenha').value;
     if (senha) payload.senha = senha;
-
+    if (!payload.nome || !payload.email) {
+      toast('Nome e e-mail são obrigatórios.', 'erro'); return;
+    }
     const btn = document.getElementById('btnSalvar');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span>';
-
     try {
-      const resp = await fetch(`${API}?id=${id}`, {
+      const resp = await fetch(API + '?id=' + id, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
       const dados = await resp.json();
-
       if (!resp.ok) {
         toast(dados.erro || 'Erro ao salvar.', 'erro');
       } else {
-        toast('Funcionário atualizado com sucesso!');
+        toast('Funcionário atualizado!');
         fecharModal('modalEdicao');
         carregarFuncionarios();
       }
-    } catch {
+    } catch(e) {
       toast('Erro de conexão.', 'erro');
     } finally {
       btn.disabled = false;
-      btn.textContent = 'Salvar';
     }
   }
 
-  // ── Exclusão ─────────────────────────────────────────
+  // ── Inativação ───────────────────────────────────────
   function abrirExclusao(id, nome) {
     idParaDeletar = id;
     document.getElementById('nomeParaDeletar').textContent = nome;
@@ -410,56 +371,81 @@
   }
 
   async function confirmarExclusao() {
+    if (!idParaDeletar) return;
     const btn = document.getElementById('btnDeletar');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span>';
-
     try {
-      const resp = await fetch(`${API}?id=${idParaDeletar}`, { method: 'DELETE' });
+      const resp = await fetch(API + '?id=' + idParaDeletar, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
       const dados = await resp.json();
-
       if (!resp.ok) {
         toast(dados.erro || 'Erro ao inativar.', 'erro');
       } else {
-        toast('Funcionário inativado com sucesso!');
+        toast('Funcionário inativado.');
         fecharModal('modalExclusao');
+        idParaDeletar = null;
         carregarFuncionarios();
+        carregarFuncInativos();
       }
-    } catch {
+    } catch(e) {
       toast('Erro de conexão.', 'erro');
     } finally {
       btn.disabled = false;
-      btn.textContent = 'Inativar';
-      idParaDeletar  = null;
     }
   }
 
-  // ── Logout ───────────────────────────────────────────
-  async function logout() {
-    try { await fetch('http://localhost:9999/Estacao-refatorado/php/logout.php', { method: 'POST' }); } catch {}
-    ['func_logado','func_id','func_nome','func_email','func_cargo','func_matricula']
-      .forEach(k => localStorage.removeItem(k));
-    window.location.href = 'LoginFuncionario.html';
+  // ── Funcionários Inativos ────────────────────────────
+  async function carregarFuncInativos() {
+    const tbody = document.getElementById('corpoFuncInativos');
+    try {
+      const r = await fetch(API + '?inativos=1');
+      const dados = await r.json();
+      if (!dados.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Nenhum funcionário inativo.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = dados.map(function(f) {
+        const dt = f.inativado_em ? new Date(f.inativado_em).toLocaleDateString('pt-BR') : '—';
+        return '<tr>' +
+          '<td style="font-weight:600;">' + esc(f.nome) + '</td>' +
+          '<td class="col-sm" style="font-size:.85rem;color:var(--on-surface-variant);">' + esc(f.email) + '</td>' +
+          '<td class="col-md" style="font-size:.85rem;">' + esc(f.cargo || '—') + '</td>' +
+          '<td class="col-lg" style="font-family:monospace;font-size:.82rem;">' + esc(f.matricula || '—') + '</td>' +
+          '<td class="col-md" style="font-size:.8rem;color:var(--on-surface-variant);">' + dt + '</td>' +
+          '<td><div style="display:flex;gap:4px;justify-content:flex-end;flex-wrap:nowrap;">' +
+          '<button class="btn-acao btn-editar" onclick="reativarFunc(' + f.id + ', this.dataset.nome)" data-nome="' + esc(f.nome) + '">Reativar</button>' +
+          '</div></td></tr>';
+      }).join('');
+    } catch(e) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Erro ao carregar.</td></tr>';
+    }
   }
 
+  async function reativarFunc(id, nome) {
+    if (!confirm('Reativar "' + nome + '"?')) return;
+    try {
+      const r = await fetch(API + '?id=' + id, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const d = await r.json();
+      if (r.ok) {
+        toast(d.mensagem || 'Funcionário reativado.');
+        carregarFuncionarios();
+        carregarFuncInativos();
+      } else {
+        toast(d.erro || 'Erro ao reativar.', 'erro');
+      }
+    } catch(e) {
+      toast('Erro de conexão.', 'erro');
+    }
+  }
+
+  // ── Inicialização ────────────────────────────────────
   carregarFuncionarios();
-
-  // ── Avatar com iniciais ──────────────────────────────
-  (function() {
-    const nome = localStorage.getItem('func_nome') || '';
-    const el   = document.getElementById('func-nome-nav');
-    const av   = document.getElementById('user-avatar-nav');
-    if (el) el.textContent = nome;
-    if (av && nome) {
-      const partes  = nome.trim().split(' ').filter(Boolean);
-      const iniciais = (partes[0]?.[0] || '') + (partes[1]?.[0] || '');
-      av.innerHTML  = `<span style="font-size:.8rem;font-weight:700;color:#09122c;">${iniciais.toUpperCase()}</span>`;
-      av.style.background = '#73ffe3';
-      av.style.display    = 'flex';
-      av.style.alignItems = 'center';
-      av.style.justifyContent = 'center';
-    }
-  })();
+  carregarFuncInativos();
 </script>
 </body>
 </html>

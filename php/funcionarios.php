@@ -46,19 +46,30 @@ if ($metodo === 'GET') {
         $f = $stmt->fetch();
         $f ? responder(200, $f) : responder(404, ['erro' => 'Funcionário não encontrado.']);
     }
+    if (!empty($_GET['inativos'])) {
+        $stmt = $pdo->query(
+            "SELECT fi.funcionario_id AS id, fi.nome, fi.email, fi.cargo, fi.matricula, fi.inativado_em
+             FROM funcionarios_inativos fi
+             JOIN funcionarios f ON f.id = fi.funcionario_id
+             WHERE f.status = 'inativo'
+             ORDER BY fi.inativado_em DESC"
+        );
+        responder(200, $stmt->fetchAll());
+    }
+
     $busca = $_GET['busca'] ?? '';
     if ($busca) {
         $stmt = $pdo->prepare(
-            'SELECT id, nome, email, cargo, matricula, status, criado_em
-             FROM funcionarios WHERE nome LIKE ? OR email LIKE ? OR matricula LIKE ?
-             ORDER BY nome'
+            "SELECT id, nome, email, cargo, matricula, status, criado_em
+             FROM funcionarios WHERE status != 'inativo' AND (nome LIKE ? OR email LIKE ? OR matricula LIKE ?)
+             ORDER BY nome"
         );
         $like = "%$busca%";
         $stmt->execute([$like, $like, $like]);
     } else {
         $stmt = $pdo->query(
-            'SELECT id, nome, email, cargo, matricula, status, criado_em
-             FROM funcionarios ORDER BY nome'
+            "SELECT id, nome, email, cargo, matricula, status, criado_em
+             FROM funcionarios WHERE status != 'inativo' ORDER BY nome"
         );
     }
     responder(200, $stmt->fetchAll());
@@ -134,15 +145,63 @@ if ($metodo === 'PUT') {
 if ($metodo === 'DELETE') {
     if (!$id) responder(400, ['erro' => 'ID obrigatório.']);
 
-    $chk = $pdo->prepare('SELECT id, status FROM funcionarios WHERE id = ?');
+    $chk = $pdo->prepare('SELECT id, nome, email, cargo, matricula, status, criado_em FROM funcionarios WHERE id = ?');
     $chk->execute([$id]);
     $func = $chk->fetch();
     if (!$func) responder(404, ['erro' => 'Funcionário não encontrado.']);
     if ($func['status'] === 'inativo') responder(409, ['erro' => 'Funcionário já está inativo.']);
 
-    $stmt = $pdo->prepare("UPDATE funcionarios SET status = 'inativo' WHERE id = ?");
-    $stmt->execute([$id]);
-    responder(200, ['mensagem' => 'Funcionário inativado com sucesso.']);
+    $d = bodyJson();
+
+    $pdo->beginTransaction();
+    try {
+        $pdo->prepare("UPDATE funcionarios SET status = 'inativo' WHERE id = ?")->execute([$id]);
+
+        // Registra no histórico de inativações
+        $pdo->prepare(
+            'INSERT INTO funcionarios_inativos
+               (funcionario_id, nome, email, cargo, matricula, motivo, inativado_por, criado_em, inativado_em)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+             ON DUPLICATE KEY UPDATE inativado_em = NOW(), motivo = VALUES(motivo)'
+        )->execute([
+            $func['id'],
+            $func['nome'],
+            $func['email'],
+            $func['cargo'],
+            $func['matricula'],
+            $d['motivo']        ?? null,
+            $d['inativado_por'] ?? null,
+            $func['criado_em'],
+        ]);
+
+        $pdo->commit();
+        responder(200, ['mensagem' => 'Funcionário inativado com sucesso.']);
+    } catch (\Throwable $e) {
+        $pdo->rollBack();
+        responder(500, ['erro' => 'Erro ao inativar funcionário.']);
+    }
+}
+
+// ── PATCH (REATIVAR) ─────────────────────────────────────
+if ($metodo === 'PATCH') {
+    if (!$id) responder(400, ['erro' => 'ID obrigatório.']);
+
+    $chk = $pdo->prepare('SELECT id, status FROM funcionarios WHERE id = ?');
+    $chk->execute([$id]);
+    $f = $chk->fetch();
+    if (!$f) responder(404, ['erro' => 'Funcionário não encontrado.']);
+    if ($f['status'] !== 'inativo') responder(409, ['erro' => 'Funcionário já está ativo.']);
+
+    $pdo->beginTransaction();
+    try {
+        $pdo->prepare("UPDATE funcionarios SET status = 'ativo' WHERE id = ?")->execute([$id]);
+        $pdo->prepare("DELETE FROM funcionarios_inativos WHERE funcionario_id = ?")->execute([$id]);
+        $pdo->commit();
+        responder(200, ['mensagem' => 'Funcionário reativado com sucesso.']);
+    } catch (\Throwable $e) {
+        $pdo->rollBack();
+        responder(500, ['erro' => 'Erro ao reativar funcionário.']);
+    }
 }
 
 responder(405, ['erro' => 'Método não permitido.']);
