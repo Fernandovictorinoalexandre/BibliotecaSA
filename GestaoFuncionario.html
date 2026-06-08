@@ -214,10 +214,49 @@
 <script src="func-utils.js"></script>
 <script>
   const API = 'http://localhost:9999/Estacao-refatorado/php/funcionarios.php';
+<<<<<<< HEAD
+=======
+  const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+>>>>>>> ad88522de953afc72096d265041dd2c97e48cd82
 
   let idParaDeletar = null;
   let todosFunc = [];
 
+<<<<<<< HEAD
+=======
+  // ── Proteção de rota ─────────────────────────────────
+  if (localStorage.getItem('func_logado') !== 'true') {
+    window.location.href = 'LoginFuncionario.html';
+  }
+
+  // ── Logout ───────────────────────────────────────────
+  async function logout() {
+    try { await fetch('http://localhost:9999/Estacao-refatorado/php/logout.php', { method: 'POST' }); } catch {}
+    ['func_logado','func_id','func_nome','func_email','func_cargo','func_matricula']
+      .forEach(k => localStorage.removeItem(k));
+    window.location.href = 'LoginFuncionario.html';
+  }
+
+  // ── Utilitários ──────────────────────────────────────
+  function toast(msg, tipo) {
+    tipo = tipo || 'sucesso';
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'toast ' + tipo + ' show';
+    setTimeout(function() { el.classList.remove('show'); }, 3500);
+  }
+  function abrirModal(id)  { document.getElementById(id).classList.add('aberto'); }
+  function fecharModal(id) { document.getElementById(id).classList.remove('aberto'); }
+  document.querySelectorAll('.modal-overlay').forEach(function(m) {
+    m.addEventListener('click', function(e) { if (e.target === m) fecharModal(m.id); });
+  });
+  function fmt(iso) {
+    if (!iso) return '—';
+    const p = iso.split('T')[0].split('-');
+    return p[2] + '/' + p[1] + '/' + p[0];
+  }
+
+>>>>>>> ad88522de953afc72096d265041dd2c97e48cd82
   // ── Renderizar tabela ativos ─────────────────────────
   function renderizarTabela(lista) {
     const tbody = document.getElementById('corpoTabela');
@@ -446,6 +485,26 @@
   // ── Inicialização ────────────────────────────────────
   carregarFuncionarios();
   carregarFuncInativos();
+<<<<<<< HEAD
+=======
+
+  // ── Avatar com iniciais ──────────────────────────────
+  (function() {
+    const nome = localStorage.getItem('func_nome') || '';
+    const el   = document.getElementById('func-nome-nav');
+    const av   = document.getElementById('user-avatar-nav');
+    if (el) el.textContent = nome;
+    if (av && nome) {
+      const partes   = nome.trim().split(' ').filter(Boolean);
+      const iniciais = (partes[0] ? partes[0][0] : '') + (partes[1] ? partes[1][0] : '');
+      av.innerHTML = '<span style="font-size:.8rem;font-weight:700;color:#09122c;">' + iniciais.toUpperCase() + '</span>';
+      av.style.background     = '#73ffe3';
+      av.style.display        = 'flex';
+      av.style.alignItems     = 'center';
+      av.style.justifyContent = 'center';
+    }
+  })();
+>>>>>>> ad88522de953afc72096d265041dd2c97e48cd82
 </script>
 </body>
 </html>
