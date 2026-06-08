@@ -2,6 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Estação Literária - Usuários</title>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -91,6 +92,31 @@
       </table>
     </div>
   </section>
+
+  <!-- TABELA DE USUÁRIOS INATIVOS -->
+  <section class="table-section" style="margin-top:2rem;">
+    <div class="table-header">
+      <h3 style="display:flex;align-items:center;gap:.5rem;">
+        <span class="material-symbols-outlined" style="color:#ff716c;font-size:1.2rem;">person_off</span>
+        Usuários Inativos
+      </h3>
+    </div>
+    <div class="table-scroll">
+      <table class="table" id="tabelaInativos">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th class="col-sm">E-mail</th>
+            <th class="col-md">Inativado em</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="corpoInativos">
+          <tr><td colspan="4" class="empty-state"><span class="spinner"></span> Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 </main>
 
 <!-- MODAL EDIÇÃO -->
@@ -152,6 +178,7 @@
   }
 
   const API = 'http://localhost:9999/Estacao-refatorado/php/usuarios.php';
+  const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   let idParaDeletar = null;
   let todosUsuarios = [];
 
@@ -182,8 +209,8 @@
     tbody.innerHTML = usuarios.map(u => `
       <tr>
         <td>${u.id}</td>
-        <td>${u.nome}</td>
-        <td>${u.email}</td>
+        <td>${esc(u.nome)}</td>
+        <td>${esc(u.email)}</td>
         <td>${u.data_nasc ? u.data_nasc : '—'}</td>
         <td><span class="badge ${u.status}">${u.status}</span></td>
         <td>
@@ -307,8 +334,54 @@
 
   // ── Inicialização ────────────────────────────────────
   carregarUsuarios();
+  carregarInativos();
 
-  // ── Avatar com iniciais ──────────────────────────────
+  // ── Usuários Inativos ─────────────────────────────────
+  async function carregarInativos() {
+    const tbody = document.getElementById('corpoInativos');
+    try {
+      const r = await fetch(API + '?inativos=1');
+      const dados = await r.json();
+      if (!dados.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Nenhum usuário inativo.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = dados.map(u => {
+        const dataInat = u.inativado_em ? new Date(u.inativado_em).toLocaleDateString('pt-BR') : '—';
+        return '<tr>' +
+          '<td style="font-weight:600;">' + esc(u.nome) + '</td>' +
+          '<td class="col-sm" style="font-size:.85rem;color:var(--on-surface-variant);">' + esc(u.email) + '</td>' +
+          '<td class="col-md" style="font-size:.8rem;color:var(--on-surface-variant);">' + dataInat + '</td>' +
+          '<td><div style="display:flex;gap:4px;justify-content:flex-end;flex-wrap:nowrap;">' +
+          '<button class="btn-acao btn-editar" onclick="reativarUsuario(' + u.id + ', this.dataset.nome)" data-nome="' + esc(u.nome) + '">Reativar</button>' +
+          '</div></td></tr>';
+      }).join('');
+    } catch {
+      tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Erro ao carregar.</td></tr>';
+    }
+  }
+
+    async function reativarUsuario(id, nome) {
+    if (!confirm('Reativar "' + nome + '"?')) return;
+    try {
+      const r = await fetch(API + '?id=' + id, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const d = await r.json();
+      if (r.ok) {
+        toast(d.mensagem || 'Usuário reativado.', 'sucesso');
+        carregarUsuarios();
+        carregarInativos();
+      } else {
+        toast(d.erro || 'Erro ao reativar.', 'erro');
+      }
+    } catch {
+      toast('Erro de conexão.', 'erro');
+    }
+  }
+
+    // ── Avatar com iniciais ──────────────────────────────
   (function() {
     const nome = localStorage.getItem('func_nome') || '';
     const el   = document.getElementById('func-nome-nav');

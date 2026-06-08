@@ -55,6 +55,16 @@ if ($metodo === 'GET') {
             : responder(404, ['erro' => 'Livro não encontrado.']);
     }
 
+    if (!empty($_GET['inativos'])) {
+        $stmt = $pdo->query(
+            'SELECT li.id AS reg_id, li.livro_id, li.titulo, li.autor, li.isbn,
+                    li.quantidade, li.motivo, li.inativado_em
+             FROM livros_inativos li
+             ORDER BY li.inativado_em DESC'
+        );
+        responder(200, $stmt->fetchAll());
+    }
+
     if ($busca) {
         $stmt = $pdo->prepare(
             'SELECT l.*,
@@ -118,6 +128,43 @@ if ($metodo === 'POST') {
 }
 
 // ── PUT (ATUALIZAR) ──────────────────────────────────────
+
+// ── PUT (REATIVAR EXEMPLARES) ────────────────────────────
+// PUT ?id=REG_ID  body: { acao: 'reativar' }
+// REG_ID = livros_inativos.id (reg_id)
+
+if ($metodo === 'PUT' && isset($_GET['reativar'])) {
+    $regId = (int) ($_GET['reativar']);
+    if (!$regId) responder(400, ['erro' => 'ID do registro obrigatório.']);
+
+    $stmt = $pdo->prepare('SELECT * FROM livros_inativos WHERE id = ?');
+    $stmt->execute([$regId]);
+    $reg = $stmt->fetch();
+    if (!$reg) responder(404, ['erro' => 'Registro de inativo não encontrado.']);
+
+    $livroId = $reg['livro_id'];
+    $qtd     = (int) $reg['quantidade'];
+
+    $livro = $pdo->prepare('SELECT quantidade, status FROM livros WHERE id = ?');
+    $livro->execute([$livroId]);
+    $l = $livro->fetch();
+    if (!$l) responder(404, ['erro' => 'Livro base não encontrado.']);
+
+    $novaQtd    = (int)$l['quantidade'] + $qtd;
+    $novoStatus = 'disponivel';
+
+    $pdo->beginTransaction();
+    try {
+        $pdo->prepare('UPDATE livros SET quantidade = ?, status = ? WHERE id = ?')
+            ->execute([$novaQtd, $novoStatus, $livroId]);
+        $pdo->prepare('DELETE FROM livros_inativos WHERE id = ?')->execute([$regId]);
+        $pdo->commit();
+        responder(200, ['mensagem' => "{$qtd} exemplar(es) reativado(s).", 'quantidade_restante' => $novaQtd]);
+    } catch (\Throwable $e) {
+        $pdo->rollBack();
+        responder(500, ['erro' => 'Erro ao reativar exemplares.']);
+    }
+}
 
 if ($metodo === 'PUT') {
     if (!$id) responder(400, ['erro' => 'ID obrigatório para atualização.']);
@@ -184,14 +231,54 @@ if ($metodo === 'PATCH') {
     $livro = $stmt->fetch();
     if (!$livro) responder(404, ['erro' => 'Livro não encontrado.']);
 
+    // Verificar quantos exemplares estão emprestados (não podem ser inativados)
+    $empAtivos = $pdo->prepare(
+        "SELECT COUNT(*) FROM emprestimos WHERE livro_id = ? AND data_devolucao_real IS NULL
+          AND status IN ('ativo','atrasado','renovado','aguardando_devolucao')"
+    );
+    $empAtivos->execute([$id]);
+    $qtdEmprestada = (int) $empAtivos->fetchColumn();
+    $disponivelParaInativar = (int)$livro['quantidade'] - $qtdEmprestada;
+
+    if ($qtd > $disponivelParaInativar) {
+        responder(422, ['erro' => "Só é possível inativar {$disponivelParaInativar} exemplar(es). Os demais estão emprestados."]);
+    }
+
     $novaQtd = (int) $livro['quantidade'] - $qtd;
-    if ($novaQtd < 0) responder(422, ['erro' => "Quantidade a inativar ({$qtd}) maior que o total disponível ({$livro['quantidade']})."]);
+    if ($novaQtd < 0) responder(422, ['erro' => "Quantidade a inativar ({$qtd}) maior que o total ({$livro['quantidade']})."]);
 
     // Define novo status automaticamente
     $novoStatus = $novaQtd === 0 ? 'indisponivel' : 'disponivel';
 
-    $stmt = $pdo->prepare('UPDATE livros SET quantidade = ?, status = ? WHERE id = ?');
-    $stmt->execute([$novaQtd, $novoStatus, $id]);
+    // Busca dados completos do livro para o histórico
+    $livroFull = $pdo->prepare('SELECT titulo, autor, isbn FROM livros WHERE id = ?');
+    $livroFull->execute([$id]);
+    $lf = $livroFull->fetch();
+
+    $pdo->beginTransaction();
+    try {
+        $pdo->prepare('UPDATE livros SET quantidade = ?, status = ? WHERE id = ?')
+            ->execute([$novaQtd, $novoStatus, $id]);
+
+        // Registra no histórico de livros inativos
+        $pdo->prepare(
+            'INSERT INTO livros_inativos (livro_id, titulo, autor, isbn, quantidade, motivo, inativado_por, inativado_em)
+             VALUES (?, ?, ?, ?, ?, ?, ?, NOW())'
+        )->execute([
+            $id,
+            $lf['titulo'],
+            $lf['autor'],
+            $lf['isbn'],
+            $qtd,
+            $d['motivo']        ?? null,
+            $d['inativado_por'] ?? null,
+        ]);
+
+        $pdo->commit();
+    } catch (\Throwable $e) {
+        $pdo->rollBack();
+        responder(500, ['erro' => 'Erro ao registrar inativação.']);
+    }
 
     $msg = $qtd === 1
         ? "1 exemplar inativado."
@@ -213,5 +300,6 @@ if ($metodo === 'DELETE') {
         ? responder(200, ['mensagem' => 'Livro removido com sucesso.'])
         : responder(404, ['erro' => 'Livro não encontrado.']);
 }
+
 
 responder(405, ['erro' => 'Método não permitido.']);

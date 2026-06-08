@@ -207,7 +207,7 @@ aside.sidebar, .sidebar {
 }
 .table-scroll { overflow-x: auto; }
 
-table { width: 100%; border-collapse: collapse; }
+table { width: 100%; border-collapse: collapse; min-width: 600px; }
 thead { background: rgba(9,18,44,.5); }
 th {
   text-align: left; padding: 14px 18px;
@@ -260,7 +260,7 @@ tbody tr:last-child { border-bottom: none; }
 .book-isbn { font-size: 11px; color: #a3aac9; margin-top: 2px; }
 
 /* ações */
-.action-cell { display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+.action-cell { display: flex; align-items: center; justify-content: flex-end; gap: 4px; white-space: nowrap; }
 .action {
   padding: 6px; border-radius: 4px; color: #a3aac9;
   transition: background .2s, color .2s, transform .15s;
@@ -420,6 +420,29 @@ tbody tr:last-child { border-bottom: none; }
   .search { width: 140px; }
 }
 
+/* ── Colunas responsivas das tabelas ────────────────────
+   Use as classes abaixo nos <th> e <td> correspondentes
+   para esconder colunas secundárias em telas menores.
+   .col-md  → oculta em < 900px
+   .col-lg  → oculta em < 1100px
+──────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .col-lg { display: none; }
+}
+@media (max-width: 900px) {
+  .col-md { display: none; }
+  /* tabela: padding menor para caber mais */
+  th, td { padding: 10px 10px; }
+  .btn-acao { padding: 4px 8px; font-size: .72rem; }
+}
+@media (max-width: 640px) {
+  .col-sm { display: none; }
+  th, td { padding: 8px 8px; font-size: .78rem; }
+  .btn-acao { padding: 3px 7px; font-size: .7rem; }
+  /* Título do cabeçalho das páginas em linha única */
+  .header-actions { flex-wrap: wrap; }
+}
+
 /* ── CORREÇÕES ── */
 
 /* EmprestimoFuncionario usa .layout flex */
@@ -560,11 +583,15 @@ body:not(:has(.layout)) .main {
     .btn-acao {
       padding: 4px 10px; border-radius: 6px; border: none;
       font-size: .78rem; cursor: pointer; font-weight: 600;
+      white-space: nowrap; flex-shrink: 0;
     }
     .btn-editar  { background: rgba(115,255,227,.15); color: var(--primary); }
     .btn-excluir { background: rgba(255,113,108,.15); color: var(--error); margin-left: 6px; }
     .btn-editar:hover  { background: rgba(115,255,227,.3); }
     .btn-excluir:hover { background: rgba(255,113,108,.3); }
+    /* Célula de ações nunca quebra */
+    td:last-child { white-space: nowrap; }
+    td:last-child .btn-acao + .btn-acao { margin-left: 6px; }
 
     .empty-state { text-align: center; padding: 3rem; color: var(--on-surface-variant); }
 

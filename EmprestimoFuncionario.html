@@ -78,6 +78,7 @@
       <button class="filtro-btn"        data-f="atrasado"  onclick="setFiltro(event,'atrasado')">Atrasados</button>
       <button class="filtro-btn"        data-f="renovado"  onclick="setFiltro(event,'renovado')">Renovados</button>
       <button class="filtro-btn"        data-f="devolvido" onclick="setFiltro(event,'devolvido')">Devolvidos</button>
+      <button class="filtro-btn"        data-f="aguardando_devolucao" onclick="setFiltro(event,'aguardando_devolucao')">Aguardando</button>
     </div>
 
     <div class="table-section">
@@ -112,12 +113,16 @@
   <div class="modal-box">
     <h3>Novo Empréstimo</h3>
     <div class="modal-campo">
-      <label>ID do Usuário</label>
-      <input type="number" id="n-usuario" placeholder="Ex: 1">
+      <label>Buscar Usuário</label>
+      <input type="text" id="n-usuario-busca" placeholder="Digite o nome ou e-mail..." oninput="buscarUsuarioModal(this.value)">
+      <input type="hidden" id="n-usuario">
+      <div id="n-usuario-resultado" style="margin-top:.4rem;font-size:.82rem;color:var(--on-surface-variant);"></div>
     </div>
     <div class="modal-campo">
-      <label>ID do Livro</label>
-      <input type="number" id="n-livro" placeholder="Ex: 3">
+      <label>Buscar Livro</label>
+      <input type="text" id="n-livro-busca" placeholder="Digite o título ou ISBN..." oninput="buscarLivroModal(this.value)">
+      <input type="hidden" id="n-livro">
+      <div id="n-livro-resultado" style="margin-top:.4rem;font-size:.82rem;color:var(--on-surface-variant);"></div>
     </div>
     <div class="modal-campo">
       <label>Método de Pagamento</label>
@@ -203,6 +208,7 @@
 
 <script>
   const API = 'http://localhost:9999/Estacao-refatorado/php/emprestimos.php';
+  const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
   if (localStorage.getItem('func_logado') !== 'true') window.location.href = 'LoginFuncionario.html';
   async function logout() {
@@ -239,7 +245,7 @@
   function calcMulta(emp) {
     if (emp.status === 'devolvido') return 0;
     const dias = diasAtraso(emp.data_devolucao_prevista);
-    return dias > 0 ? dias * 1.00 : (emp.multa || 0);
+    return dias > 0 ? dias * 0.50 : (emp.multa || 0);
   }
 
   function setFiltro(e, f) {
@@ -253,6 +259,13 @@
       const url = busca ? `${API}?busca=${encodeURIComponent(busca)}` : API;
       const resp  = await fetch(url);
       emprestimos = await resp.json();
+      // Toast de atraso só na carga (não a cada troca de filtro)
+      if (!busca) {
+        const atrasados = emprestimos.filter(e =>
+          e.status !== 'devolvido' && diasAtraso(e.data_devolucao_prevista) > 0
+        );
+        if (atrasados.length) showToast(`⚠️ ${atrasados.length} empréstimo(s) em atraso!`, 'erro');
+      }
       renderTabela();
     } catch {
       document.getElementById('tbody-emp').innerHTML =
@@ -271,12 +284,6 @@
       return;
     }
 
-    // Toast automático para atrasados — só na carga inicial (filtro todos)
-    if (filtroAtual === 'todos') {
-      const atrasados = lista.filter(e => e.status !== 'devolvido' && diasAtraso(e.data_devolucao_prevista) > 0);
-      if (atrasados.length) showToast(`⚠️ ${atrasados.length} empréstimo(s) em atraso!`, 'erro');
-    }
-
     tbody.innerHTML = lista.map(e => {
       const atraso       = diasAtraso(e.data_devolucao_prevista);
       const isLate       = e.status !== 'devolvido' && e.status !== 'aguardando_devolucao' && atraso > 0;
@@ -287,11 +294,11 @@
 
       return `
       <tr>
-        <td class="td-title">${e.titulo}</td>
+        <td class="td-title">${esc(e.titulo)}</td>
         <td>
           <div class="user-cell">
-            <div class="user-initials">${e.usuario_nome.substring(0,2).toUpperCase()}</div>
-            <span>${e.usuario_nome}</span>
+            <div class="user-initials">${esc(e.usuario_nome.substring(0,2).toUpperCase())}</div>
+            <span>${esc(e.usuario_nome)}</span>
           </div>
         </td>
         <td class="td-muted">${fmt(e.data_emprestimo)}</td>
@@ -305,6 +312,9 @@
             ${podeDevolver
               ? `<button class="btn-dev" onclick="abrirDevolucao(${e.id})" title="Confirmar devolução física" style="background:rgba(0,245,212,.15);border-color:rgba(0,245,212,.4);color:#00f5d4;">
                   <span class="material-symbols-outlined" style="font-size:14px">assignment_return</span> Confirmar
+                </button>
+                <button class="btn-ren" onclick="cancelarDevolucao(${e.id})" title="Cancelar solicitação" style="background:rgba(255,113,108,.08);border-color:rgba(255,113,108,.3);color:#ff716c;font-size:.72rem;">
+                  ✕ Cancelar
                 </button>`
               : e.status === 'devolvido'
                 ? '<span style="font-size:.78rem;color:var(--on-surface-variant);">✓ Devolvido</span>'
@@ -320,11 +330,64 @@
   }
 
   // ── Novo empréstimo ───────────────────────────────────
+  const API_USU = 'http://localhost:9999/Estacao-refatorado/php/usuarios.php';
+  const API_LIV = 'http://localhost:9999/Estacao-refatorado/php/livros.php';
+
   function abrirModalNovo() {
-    document.getElementById('n-usuario').value    = '';
-    document.getElementById('n-livro').value      = '';
-    document.getElementById('n-erro').textContent = '';
+    document.getElementById('n-usuario-busca').value    = '';
+    document.getElementById('n-usuario').value          = '';
+    document.getElementById('n-usuario-resultado').textContent = '';
+    document.getElementById('n-livro-busca').value      = '';
+    document.getElementById('n-livro').value            = '';
+    document.getElementById('n-livro-resultado').textContent = '';
+    document.getElementById('n-erro').textContent       = '';
     abrirModal('modalNovo');
+  }
+
+  let debU, debL;
+  async function buscarUsuarioModal(q) {
+    clearTimeout(debU);
+    if (!q.trim()) { document.getElementById('n-usuario').value = ''; document.getElementById('n-usuario-resultado').textContent = ''; return; }
+    debU = setTimeout(async () => {
+      try {
+        const r = await fetch(`${API_USU}?busca=${encodeURIComponent(q)}`);
+        const lista = await r.json();
+        const res = document.getElementById('n-usuario-resultado');
+        if (!lista.length) { res.textContent = 'Nenhum usuário encontrado.'; document.getElementById('n-usuario').value = ''; return; }
+        res.innerHTML = lista.slice(0,5).map(u =>
+          `<div style="padding:4px 0;cursor:pointer;color:var(--on-surface);" onclick="selecionarUsuario(${u.id},'${u.nome.replace(/'/g,"\\'")}')">${u.nome} <span style="color:var(--on-surface-variant);">&lt;${u.email}&gt;</span></div>`
+        ).join('');
+      } catch { document.getElementById('n-usuario-resultado').textContent = 'Erro ao buscar.'; }
+    }, 350);
+  }
+  function selecionarUsuario(id, nome) {
+    document.getElementById('n-usuario').value = id;
+    document.getElementById('n-usuario-busca').value = nome;
+    document.getElementById('n-usuario-resultado').textContent = `✓ Selecionado: ${nome} (ID ${id})`;
+    document.getElementById('n-usuario-resultado').style.color = '#00f5d4';
+  }
+
+  async function buscarLivroModal(q) {
+    clearTimeout(debL);
+    if (!q.trim()) { document.getElementById('n-livro').value = ''; document.getElementById('n-livro-resultado').textContent = ''; return; }
+    debL = setTimeout(async () => {
+      try {
+        const r = await fetch(`${API_LIV}?busca=${encodeURIComponent(q)}`);
+        const lista = await r.json();
+        const res = document.getElementById('n-livro-resultado');
+        const disponiveis = lista.filter(l => l.status !== 'indisponivel');
+        if (!disponiveis.length) { res.textContent = 'Nenhum livro disponível encontrado.'; document.getElementById('n-livro').value = ''; return; }
+        res.innerHTML = disponiveis.slice(0,5).map(l =>
+          `<div style="padding:4px 0;cursor:pointer;color:var(--on-surface);" onclick="selecionarLivro(${l.id},'${l.titulo.replace(/'/g,"\\'")}')">${l.titulo} <span style="color:var(--on-surface-variant);">— ${l.autor}</span> <span style="color:${l.status==='disponivel'?'#00f5d4':'#ffaa00'};font-size:.78rem;">${l.status}</span></div>`
+        ).join('');
+      } catch { document.getElementById('n-livro-resultado').textContent = 'Erro ao buscar.'; }
+    }, 350);
+  }
+  function selecionarLivro(id, titulo) {
+    document.getElementById('n-livro').value = id;
+    document.getElementById('n-livro-busca').value = titulo;
+    document.getElementById('n-livro-resultado').textContent = `✓ Selecionado: ${titulo} (ID ${id})`;
+    document.getElementById('n-livro-resultado').style.color = '#00f5d4';
   }
 
   async function criarEmprestimo() {
@@ -332,7 +395,8 @@
     const lid = document.getElementById('n-livro').value;
     const met = document.getElementById('n-metodo').value;
     const err = document.getElementById('n-erro');
-    if (!uid || !lid) { err.textContent = 'Preencha o ID do usuário e do livro.'; return; }
+    if (!uid) { err.textContent = 'Selecione um usuário da lista.'; return; }
+    if (!lid) { err.textContent = 'Selecione um livro da lista.'; return; }
     err.textContent = '';
     try {
       const resp = await fetch(API, {
@@ -348,6 +412,21 @@
       if (resp.ok) { showToast('Empréstimo registrado com sucesso!', 'ok'); fecharModal('modalNovo'); carregar(); }
       else { err.textContent = dados.erro || 'Erro ao registrar.'; }
     } catch { err.textContent = 'Erro de conexão.'; }
+  }
+
+  // ── Cancelar solicitação de devolução ────────────────
+  async function cancelarDevolucao(id) {
+    if (!confirm('Cancelar solicitação de devolução e reativar este empréstimo?')) return;
+    try {
+      const resp = await fetch(`${API}?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cancelar_devolucao: true }),
+      });
+      const dados = await resp.json();
+      if (resp.ok) { showToast('Solicitação cancelada. Empréstimo reativado.', 'ok'); carregar(); }
+      else { showToast(dados.erro || 'Erro ao cancelar.', 'erro'); }
+    } catch { showToast('Erro de conexão.', 'erro'); }
   }
 
   // ── Devolução ─────────────────────────────────────────
@@ -440,6 +519,7 @@
           tipo:          'atraso',
           titulo:        'Aviso de Atraso — Estação Literária',
           mensagem:      msg,
+          func_id:       parseInt(localStorage.getItem('func_id')) || null,
         }),
       });
       const dados = await resp.json();

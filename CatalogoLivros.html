@@ -249,12 +249,8 @@
 ══════════════════════════════════════════ */
 const API_LIVROS = 'http://localhost:9999/Estacao-refatorado/php/livros.php';
 
-// Proteção de página
-if (!localStorage.getItem('logado')) {
-  window.location.href = 'LoginUsuario.html';
-}
-
 if (!localStorage.getItem('logado')) window.location.href = 'LoginUsuario.html';
+  const usuarioInativo = localStorage.getItem('usuario_status') === 'inativo';
 
 const usuarioLogado = {
   id:   localStorage.getItem('usuario_id')   || '001',
@@ -469,7 +465,8 @@ function renderGrid(lista) {
           </button>
           <button class="btn btn-primary"
             onclick="emprestarLivro('${livro.id}')"
-            ${!disponivel ? 'disabled style="opacity:.4;cursor:not-allowed"' : ''}>
+            ${(!disponivel || usuarioInativo) ? 'disabled style="opacity:.4;cursor:not-allowed"' : ''}
+            ${usuarioInativo ? 'title="Conta inativa — reative sua conta para emprestar"' : ''}>
             ${jaEmprestado ? 'Em uso' : 'Emprestar'}
           </button>
         </div>
@@ -501,6 +498,7 @@ function verDetalhes(id) {
 function emprestarLivro(id) {
   const livro = todosLivros.find(l => String(l.id) === String(id));
   if (!livro) return;
+  if (usuarioInativo) { showToast('Conta inativa. Reative sua conta em "Conta" para emprestar.', 'erro'); return; }
   if (livro.status !== 'disponivel') { showToast('Este livro não está disponível.', 'erro'); return; }
 
   if (totalEmprestados >= 5) { showToast('Você já tem 5 livros emprestados.', 'erro'); return; }

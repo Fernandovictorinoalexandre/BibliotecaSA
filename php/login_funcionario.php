@@ -8,7 +8,7 @@
 require_once __DIR__ . '/conexao.php';
 
 const MAX_TENTATIVAS = 5;
-const BLOQUEIO_MIN   = 15;
+const BLOQUEIO_MIN   = 1;
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -90,8 +90,7 @@ if (!$credenciaisOk) {
                                         ->format('Y-m-d H:i:s');
         $msg = "Conta bloqueada após " . MAX_TENTATIVAS . " tentativas. Aguarde " . BLOQUEIO_MIN . " minutos.";
     } else {
-        $restam = MAX_TENTATIVAS - $tentativasAtuais;
-        $msg    = "E-mail ou senha incorretos. Você tem mais {$restam} tentativa(s) antes do bloqueio.";
+        $msg = "E-mail ou senha incorretos.";
     }
 
     $pdo->prepare(
@@ -106,10 +105,8 @@ if (!$credenciaisOk) {
     $code = $novoBloqueio ? 429 : 401;
     http_response_code($code);
     echo json_encode([
-        'erro'       => $msg,
-        'bloqueado'  => (bool) $novoBloqueio,
-        'tentativas' => $tentativasAtuais,
-        'max'        => MAX_TENTATIVAS,
+        'erro'      => $msg,
+        'bloqueado' => (bool) $novoBloqueio,
     ]);
     exit;
 }

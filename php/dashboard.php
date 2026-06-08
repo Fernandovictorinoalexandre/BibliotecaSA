@@ -18,7 +18,7 @@ $pdo = getConexao();
 $pdo->exec("
     UPDATE emprestimos
     SET status = 'atrasado'
-    WHERE status IN ('ativo','renovado')
+    WHERE status IN ('ativo','renovado','aguardando_devolucao')
       AND data_devolucao_prevista < CURDATE()
       AND data_devolucao_real IS NULL
 ");
@@ -44,7 +44,7 @@ $exemplDisp = $pdo->query("
     LEFT JOIN (
         SELECT livro_id, COUNT(*) AS total
         FROM emprestimos
-        WHERE status IN ('ativo','atrasado','renovado')
+        WHERE status IN ('ativo','atrasado','renovado','aguardando_devolucao')
           AND data_devolucao_real IS NULL
         GROUP BY livro_id
     ) e_ativos ON e_ativos.livro_id = l.id
@@ -54,7 +54,7 @@ $exemplDisp = $pdo->query("
 $exemplEmprestados = $pdo->query("
     SELECT COUNT(*)
     FROM emprestimos
-    WHERE status IN ('ativo','atrasado','renovado')
+    WHERE status IN ('ativo','atrasado','renovado','aguardando_devolucao')
       AND data_devolucao_real IS NULL
 ")->fetchColumn();
 
@@ -68,7 +68,7 @@ $totalFuncionarios = $pdo->query("SELECT COUNT(*) FROM funcionarios")->fetchColu
 // ── EMPRÉSTIMOS ───────────────────────────────────────────────────
 $empAtivos    = $pdo->query("
     SELECT COUNT(*) FROM emprestimos
-    WHERE status IN ('ativo','renovado')
+    WHERE status IN ('ativo','renovado','aguardando_devolucao')
       AND data_devolucao_real IS NULL
 ")->fetchColumn();
 

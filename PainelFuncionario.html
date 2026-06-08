@@ -2,6 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Estação Literária — Painel</title>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -267,6 +268,7 @@
               <option value="ativo"    ${f.status==='ativo'    ?'selected':''}>🟢 Ativo</option>
               <option value="folga"    ${f.status==='folga'    ?'selected':''}>🟡 De folga</option>
               <option value="suspenso" ${f.status==='suspenso' ?'selected':''}>🔴 Suspenso</option>
+              <option value="inativo"  ${f.status==='inativo'  ?'selected':''}>⚫ Inativo</option>
             </select>
           </td>
         </tr>`).join('');
@@ -279,7 +281,7 @@
 
   async function atualizarStatus(id, novoStatus, sel) {
     try {
-      const r = await fetch(API_FUNC + '/' + id, {
+      const r = await fetch(`${API_FUNC}?id=${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: novoStatus }),
@@ -294,7 +296,7 @@
     try { await fetch('http://localhost:9999/Estacao-refatorado/php/logout.php', { method: 'POST' }); } catch {}
     ['func_logado','func_id','func_nome','func_email','func_cargo','func_matricula']
       .forEach(k => localStorage.removeItem(k));
-    window.location.href = 'Entrada.html';
+    window.location.href = 'LoginFuncionario.html';
   }
 
   carregarDash();

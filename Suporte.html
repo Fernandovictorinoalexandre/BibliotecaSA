@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="usuario.css">
   <link rel="stylesheet" href="suporte.css">
+</head>
+<body class="page-internal">
 
 <!-- ── HEADER ── -->
 <header class="header">
@@ -279,7 +281,7 @@ if (!PADRAO.includes(respostaLocal)) {
 // se não encontrou -> Gemini
 try {
 
-  const resposta = await fetch('gemini.php', {
+  const resposta = await fetch('php/gemini.php', {
 
     method: 'POST',
 

@@ -17,11 +17,23 @@ $pdo    = getConexao();
 
 // GET/PUT → usuário vê/marca as próprias; funcionário acessa qualquer uma
 // POST    → só funcionário pode criar notificação
+// Autenticação flexível: aceita sessão PHP ou func_id no header/body
+// (funcionário usa localStorage, usuário usa sessão PHP)
+$sessaoUsuario = usuarioLogadoOuNull();
+$sessaoFunc    = !empty($_SESSION['funcionario_id']) ? (int)$_SESSION['funcionario_id'] : null;
+
 if ($metodo === 'POST') {
-    exigirFuncionario();
+    // POST pode vir de funcionário com ou sem sessão PHP ativa
+    // Apenas verifica que há alguma autenticação ou func_id no body
+    $bodyTemp = file_get_contents('php://input');
+    $dTemp    = $bodyTemp ? (json_decode($bodyTemp, true) ?? []) : [];
+    $funcIdBody = isset($dTemp['func_id']) ? (int)$dTemp['func_id'] : null;
+    if ($sessaoFunc === null && $sessaoUsuario === null && $funcIdBody === null) {
+        http_response_code(401);
+        echo json_encode(['erro' => 'Não autenticado.']);
+        exit;
+    }
 } else {
-    $sessaoUsuario = usuarioLogadoOuNull();
-    $sessaoFunc    = !empty($_SESSION['funcionario_id']) ? (int)$_SESSION['funcionario_id'] : null;
     if ($sessaoUsuario === null && $sessaoFunc === null) {
         http_response_code(401);
         echo json_encode(['erro' => 'Não autenticado.']);

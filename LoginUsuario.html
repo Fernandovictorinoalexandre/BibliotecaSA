@@ -51,11 +51,9 @@
         font-size:.875rem;text-align:center;display:none;margin-bottom:.75rem;">
       </div>
       <div id="aviso-tentativas" style="
-        background:rgba(244,228,138,.08);border:1px solid rgba(244,228,138,.3);
-        color:#f4e48a;border-radius:8px;padding:.5rem 1rem;
-        font-size:.8rem;text-align:center;display:none;margin-bottom:.75rem;">
+        color:#ff9a3c;font-size:.8rem;text-align:center;
+        display:none;margin-bottom:.5rem;font-weight:500;">
       </div>
-
       <button class="btn btn-primary" type="submit" id="btnEntrar">Entrar</button>
 
     </form>
@@ -87,7 +85,21 @@
 
   function mostrarErro(id, vis) { document.getElementById(id).style.display = vis ? 'block' : 'none'; }
   function marcarCampo(id, inv) { document.getElementById(id).classList.toggle('campo-erro', inv); }
-  function limparErroServidor()  { document.getElementById('erro-servidor').style.display = 'none'; }
+  let _countdownTimer = null;
+
+  function limparErroServidor() {
+    document.getElementById('erro-servidor').style.display = 'none';
+    document.getElementById('aviso-tentativas').style.display = 'none';
+    // Se havia countdown ativo, cancela e restaura o botão
+    if (_countdownTimer) {
+      clearInterval(_countdownTimer);
+      _countdownTimer = null;
+      const btn = document.getElementById('btnEntrar');
+      btn.disabled    = false;
+      btn.textContent = 'Entrar';
+      delete btn.dataset.bloqueado;
+    }
+  }
 
   document.getElementById('formLogin').addEventListener('submit', async e => {
     e.preventDefault();
@@ -133,17 +145,16 @@
           window.location.href = 'PainelUsuario.html';
         }
       } else {
-        const el     = document.getElementById('erro-servidor');
-        const aviso  = document.getElementById('aviso-tentativas');
+        const el = document.getElementById('erro-servidor');
         el.textContent = dados.erro || 'Erro ao fazer login.';
         el.style.display = 'block';
-        aviso.style.display = 'none';
 
+        const aviso = document.getElementById('aviso-tentativas');
         if (dados.bloqueado) {
-          // Bloqueia o botão e inicia countdown
-          iniciarCountdown(dados.minutos_restantes || 15);
+          aviso.style.display = 'none';
+          iniciarCountdown(dados.minutos_restantes || 1);
         } else if (dados.tentativas && dados.max) {
-          aviso.textContent = `Tentativa ${dados.tentativas} de ${dados.max}.`;
+          aviso.textContent = 'Tentativa ' + dados.tentativas + ' de ' + dados.max + ' — após ' + dados.max + ' bloqueio de 1 minuto.';
           aviso.style.display = 'block';
         }
       }
@@ -162,7 +173,7 @@
   document.getElementById('senha').addEventListener('input', limparErroServidor);
 
   // ── Countdown de bloqueio ──────────────────────────────
-  let _countdownTimer = null;
+
   function iniciarCountdown(minutos) {
     const btn   = document.getElementById('btnEntrar');
     const el    = document.getElementById('erro-servidor');
@@ -181,7 +192,6 @@
         btn.textContent = 'Entrar';
         delete btn.dataset.bloqueado;
         el.style.display = 'none';
-        document.getElementById('aviso-tentativas').style.display = 'none';
       }
       segundos--;
     }

@@ -48,7 +48,7 @@
 
       <!-- Mobile CTA -->
       <div class="mobile-cta">
-        <button class="btn-loan" onclick="PG.abrir(livro)">
+        <button class="btn-loan" onclick="tentarEmprestar()">
           <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">qr_code_scanner</span>
           SOLICITAR EMPRÉSTIMO
         </button>
@@ -243,10 +243,10 @@
     </div>
   </div>
 
-  <script src="utils.js"></script>
   <script src="pagamento-modal.js"></script>
   <script>
     if (!localStorage.getItem('logado')) window.location.href = 'LoginUsuario.html';
+    const usuarioInativo = localStorage.getItem('usuario_status') === 'inativo';
 
     // ══════════════════════════════════════
     // VARIÁVEL GLOBAL DO LIVRO ATUAL
@@ -453,6 +453,14 @@
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') closeTicket();
     });
+
+    function tentarEmprestar() {
+      if (usuarioInativo) {
+        alert('Sua conta está inativa. Vá em "Conta" e reative para poder emprestar.');
+        return;
+      }
+      PG.abrir(livroAtual || livro);
+    }
   </script>
 
 <!-- Modal de Pagamento -->

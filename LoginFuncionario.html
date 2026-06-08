@@ -42,12 +42,6 @@
         color:#ff716c;border-radius:8px;padding:.7rem 1rem;
         font-size:.875rem;text-align:center;display:none;margin-bottom:.75rem;">
       </div>
-      <div id="aviso-tentativas" style="
-        background:rgba(244,228,138,.08);border:1px solid rgba(244,228,138,.3);
-        color:#f4e48a;border-radius:8px;padding:.5rem 1rem;
-        font-size:.8rem;text-align:center;display:none;margin-bottom:.75rem;">
-      </div>
-
       <button class="btn btn-primary" type="submit" id="btnEntrar">Entrar</button>
 
     </form>
@@ -69,7 +63,17 @@
 
   function mostrarErro(id, vis) { document.getElementById(id).style.display = vis ? 'block' : 'none'; }
   function marcarCampo(id, inv) { document.getElementById(id).classList.toggle('campo-erro', inv); }
-  function limparErroServidor()  { document.getElementById('erro-servidor').style.display = 'none'; }
+  function limparErroServidor() {
+    document.getElementById('erro-servidor').style.display = 'none';
+    if (_countdownTimer) {
+      clearInterval(_countdownTimer);
+      _countdownTimer = null;
+      const btn = document.getElementById('btnEntrar');
+      btn.disabled    = false;
+      btn.textContent = 'Entrar';
+      delete btn.dataset.bloqueado;
+    }
+  }
 
   document.getElementById('formLogin').addEventListener('submit', async e => {
     e.preventDefault();
@@ -111,15 +115,11 @@
         window.location.href = 'PainelFuncionario.html';
       } else {
         const el    = document.getElementById('erro-servidor');
-        const aviso = document.getElementById('aviso-tentativas');
         el.textContent = dados.erro || 'Erro ao fazer login.';
         el.style.display = 'block';
-        aviso.style.display = 'none';
 
         if (dados.bloqueado) {
           iniciarCountdown(dados.minutos_restantes || 15);
-        } else if (dados.tentativas && dados.max) {
-          aviso.textContent = `Tentativa ${dados.tentativas} de ${dados.max}.`;
           aviso.style.display = 'block';
         }
       }
@@ -157,7 +157,6 @@
         btn.textContent = 'Entrar';
         delete btn.dataset.bloqueado;
         el.style.display = 'none';
-        document.getElementById('aviso-tentativas').style.display = 'none';
       }
       segundos--;
     }

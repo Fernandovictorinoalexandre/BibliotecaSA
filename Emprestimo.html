@@ -95,19 +95,8 @@
   </main>
 </div>
 
-<!-- ── MODAL RENOVAÇÃO ── -->
-<div class="modal-overlay" id="modalRenovacao" onclick="fecharModalSeForaDele(event)">
-  <div class="modal-box">
-    <div class="modal-icon">🔄</div>
-    <h3 id="modal-titulo-livro">Renovar Empréstimo</h3>
-    <p>Tem certeza que deseja renovar este livro por mais <strong>30 dias</strong>?</p>
-    <div class="nova-data" id="modal-nova-data"></div>
-    <div class="modal-acoes">
-      <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
-      <button class="btn-confirmar-renew" onclick="confirmarRenovacao()">Renovar</button>
-    </div>
-  </div>
-</div>
+<!-- ── MODAL RENOVAÇÃO (via pagamento) ── -->
+<!-- Usa o pg-overlay do pagamento-modal.js — sem HTML próprio aqui -->
 
 <!-- ── MODAL TICKET ── -->
 <div class="modal-overlay-ticket" id="modalOverlay" onclick="fecharTicketSeForaDele(event)">
@@ -253,8 +242,6 @@
 
   /* ── Converte registro do banco → objeto local ── */
   function dbToLoan(e) {
-    const today = new Date(); today.setHours(0,0,0,0);
-    const due   = new Date(e.data_devolucao_prevista); due.setHours(0,0,0,0);
     return {
       id:        String(e.livro_id),
       empId:     String(e.id),
@@ -263,7 +250,9 @@
       borrowedAt: e.data_emprestimo ? e.data_emprestimo.split('T')[0] : '',
       dueDate:   e.data_devolucao_prevista ? e.data_devolucao_prevista.split('T')[0] : '',
       renewals:  e.renovacoes || 0,
-      late:      due < today,
+      // late vem do status do banco — evita conflito com data local do PC
+      late:      e.status === 'atrasado',
+      multa:     parseFloat(e.multa) || 0,
       status:    e.status,
     };
   }
@@ -325,10 +314,10 @@
 
     wrap.innerHTML = loans.map(loan => {
       const dias     = calcDias(loan.dueDate);
-      const canRenew = loan.renewals < MAX_RENEWALS && !loan.late;
+      const canRenew = loan.renewals < MAX_RENEWALS && !loan.late && loan.status !== 'aguardando_devolucao';
       let sc = 's-ok', st = 'Em dia';
-      if (loan.late)      { sc = 's-late'; st = 'Atrasado'; }
-      else if (dias <= 5) { sc = 's-warn'; st = `Vence em ${dias}d`; }
+      if (loan.late)           { sc = 's-late'; st = 'Atrasado'; }
+      else if (dias >= 0 && dias <= 5) { sc = 's-warn'; st = `Vence em ${dias}d`; }
 
       return `
       <div class="loan-row${loan.late ? ' late' : ''}" id="loan-${loan.id}">
@@ -346,7 +335,7 @@
         <div class="loan-right">
           <span class="loan-status ${sc}">${st}</span>
           <div class="loan-actions">
-            <button class="btn-renew-active" onclick="abrirModalRenovacao(${loan.id})"
+            <button class="btn-renew-active" onclick="abrirModalRenovacao('${loan.empId}')"
               ${canRenew ? '' : 'disabled'}
               title="${loan.renewals >= MAX_RENEWALS ? 'Limite atingido' : loan.late ? 'Não renovável em atraso' : 'Renovar 30 dias'}">
               <span class="material-symbols-outlined">autorenew</span>
@@ -464,41 +453,62 @@
   }
 
   /* ══════════════════════════════════════════
-     MODAL DE RENOVAÇÃO
+     RENOVAÇÃO — abre modal de pagamento (R$ 15)
   ══════════════════════════════════════════ */
   function abrirModalRenovacao(id) {
-    const loan = loans.find(l => String(l.id) === String(id)); if (!loan) return;
+    const loan = loans.find(l => String(l.empId) === String(id));
+    if (!loan) return;
+
+    // Validações antes de abrir o pagamento
+    if (loan.renewals >= MAX_RENEWALS) {
+      showToast('Limite de ' + MAX_RENEWALS + ' renovações atingido.', 'warn'); return;
+    }
+    if (loan.late) {
+      showToast('Não é possível renovar com atraso.', 'warn'); return;
+    }
+    if (loan.status === 'aguardando_devolucao') {
+      showToast('Devolução já solicitada — não é possível renovar.', 'warn'); return;
+    }
+
     idParaRenovar = id;
-    const novaData = new Date(loan.dueDate); novaData.setDate(novaData.getDate() + 30);
-    document.getElementById('modal-titulo-livro').textContent = loan.title;
-    document.getElementById('modal-nova-data').textContent    = 'Nova data de devolução: ' + fmt(toISO(novaData));
-    document.getElementById('modalRenovacao').classList.add('aberto');
-    document.body.style.overflow = 'hidden';
+
+    // Abre o modal de pagamento em modo renovação
+    PG.abrirRenovacao({
+      empId:  loan.empId,
+      titulo: loan.title,
+      autor:  loan.author,
+    });
   }
-  function fecharModal() {
-    document.getElementById('modalRenovacao').classList.remove('aberto');
-    document.body.style.overflow = '';
+
+  // Chamado pelo pagamento-modal.js após pagamento confirmado (modo renovação)
+  async function confirmarRenovacao(metodo) {
+    const empId = idParaRenovar; // salva antes de limpar
+    const loan  = loans.find(l => String(l.empId) === String(empId));
     idParaRenovar = null;
-  }
-  function fecharModalSeForaDele(e) { if (e.target.id === 'modalRenovacao') fecharModal(); }
+    if (!loan) { showToast('Empréstimo não encontrado.', 'warn'); return; }
 
-  function confirmarRenovacao() {
-    const loan = loans.find(l => String(l.id) === String(idParaRenovar)); if (!loan) return;
-    if (loan.renewals >= MAX_RENEWALS) { showToast('Limite de renovações atingido.','error'); fecharModal(); return; }
-    if (loan.late)                     { showToast('Não renovável com atraso.','error'); fecharModal(); return; }
-
-    const nd = new Date(loan.dueDate); nd.setDate(nd.getDate()+30);
-    const novaDataStr = toISO(nd);
-    fecharModal();
-    showToast('"' + loan.title + '" renovado! Nova devolução: ' + fmt(novaDataStr), 'ok');
-
-    // Sincroniza renovação com o banco de dados usando empId direto
-    if (loan.empId) {
-      fetch(API_EMP + '?id=' + loan.empId, {
+    try {
+      const resp = await fetch(API_EMP + '?id=' + loan.empId, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ renovar: true }),
-      }).then(() => carregarDobanco()).catch(() => {});
+        body: JSON.stringify({ renovar: true, metodo_pagamento: metodo, valor_pago: 15.00 }),
+      });
+      const dados = await resp.json();
+      if (resp.ok) {
+        // Atualiza o objeto local imediatamente — não espera o reload
+        loan.dueDate  = dados.nova_data;
+        loan.renewals = (loan.renewals || 0) + 1;
+        loan.status   = 'renovado';
+        loan.late     = false;
+        renderLoans();
+        showToast('"' + loan.title + '" renovado até ' + fmt(dados.nova_data) + '!', 'ok');
+        // Sincroniza com o banco em background
+        carregarDobanco();
+      } else {
+        showToast(dados.erro || 'Erro ao renovar.', 'warn');
+      }
+    } catch {
+      showToast('Erro de conexão ao renovar.', 'warn');
     }
   }
 

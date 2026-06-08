@@ -36,7 +36,7 @@ function validarUsuario(array $d, bool $novo = true): ?string {
 if ($metodo === 'GET') {
     if ($id) {
         $stmt = $pdo->prepare(
-            'SELECT id, nome, email, data_nasc, status, foto_perfil, criado_em, atualizado_em
+            'SELECT id, nome, email, data_nasc, cpf, telefone, status, foto_perfil, criado_em, atualizado_em
              FROM usuarios WHERE id = ?'
         );
         $stmt->execute([$id]);
@@ -46,27 +46,40 @@ if ($metodo === 'GET') {
             : responder(404, ['erro' => 'Usuário não encontrado.']);
     }
 
+    // Retorna lista de inativos
+    if (!empty($_GET['inativos'])) {
+        $stmt = $pdo->query(
+            "SELECT ui.usuario_id AS id, ui.nome, ui.email, ui.inativado_em
+             FROM usuarios_inativos ui
+             JOIN usuarios u ON u.id = ui.usuario_id
+             WHERE u.status = 'inativo'
+             ORDER BY ui.inativado_em DESC"
+        );
+        responder(200, $stmt->fetchAll());
+    }
+
     $busca = $_GET['busca'] ?? '';
     if ($busca) {
         $stmt = $pdo->prepare(
-            'SELECT u.id, u.nome, u.email, u.data_nasc, u.status, u.criado_em,
+            "SELECT u.id, u.nome, u.email, u.data_nasc, u.status, u.criado_em,
                     COUNT(CASE WHEN e.data_devolucao_real IS NULL THEN 1 END) AS emprestimos_ativos
              FROM usuarios u
              LEFT JOIN emprestimos e ON e.usuario_id = u.id
-             WHERE u.nome LIKE ? OR u.email LIKE ?
+             WHERE u.status != 'inativo' AND (u.nome LIKE ? OR u.email LIKE ?)
              GROUP BY u.id
-             ORDER BY u.nome'
+             ORDER BY u.nome"
         );
         $like = "%$busca%";
         $stmt->execute([$like, $like]);
     } else {
         $stmt = $pdo->query(
-            'SELECT u.id, u.nome, u.email, u.data_nasc, u.status, u.criado_em,
+            "SELECT u.id, u.nome, u.email, u.data_nasc, u.status, u.criado_em,
                     COUNT(CASE WHEN e.data_devolucao_real IS NULL THEN 1 END) AS emprestimos_ativos
              FROM usuarios u
              LEFT JOIN emprestimos e ON e.usuario_id = u.id
+             WHERE u.status != 'inativo'
              GROUP BY u.id
-             ORDER BY u.nome'
+             ORDER BY u.nome"
         );
     }
     responder(200, $stmt->fetchAll());
@@ -136,9 +149,21 @@ if ($metodo === 'PUT') {
 
     if (empty($campos)) responder(400, ['erro' => 'Nenhum campo para atualizar.']);
 
-    $params[] = $id;
-    $stmt = $pdo->prepare('UPDATE usuarios SET ' . implode(', ', $campos) . ' WHERE id = ?');
-    $stmt->execute($params);
+    $pdo->beginTransaction();
+    try {
+        $params[] = $id;
+        $pdo->prepare('UPDATE usuarios SET ' . implode(', ', $campos) . ' WHERE id = ?')->execute($params);
+
+        // Se estiver reativando a conta, limpa o registro de inativo
+        if (!empty($d['status']) && $d['status'] === 'ativo') {
+            $pdo->prepare('DELETE FROM usuarios_inativos WHERE usuario_id = ?')->execute([$id]);
+        }
+
+        $pdo->commit();
+    } catch (\Throwable $e) {
+        $pdo->rollBack();
+        responder(500, ['erro' => 'Erro ao atualizar usuário.']);
+    }
 
     responder(200, ['mensagem' => 'Usuário atualizado com sucesso.']);
 }
@@ -159,43 +184,65 @@ if ($metodo === 'DELETE') {
         responder(409, ['erro' => 'Esta conta já está inativa.']);
     }
 
-    // Bloqueia se tiver empréstimos ativos
+    // Bloqueia só se tiver empréstimos ativos ou atrasados SEM solicitação de devolução
     $emp = $pdo->prepare("SELECT COUNT(*) FROM emprestimos WHERE usuario_id = ? AND status IN ('ativo','atrasado') AND data_devolucao_real IS NULL");
     $emp->execute([$id]);
     if ($emp->fetchColumn() > 0) {
-        responder(409, ['erro' => 'Usuário possui livros em aberto. Solicite a devolução antes de inativar.']);
+        responder(409, ['erro' => 'Você possui livros em aberto. Solicite a devolução de todos os livros antes de desativar a conta.']);
     }
 
-    // Desativa o usuário
+    // Desativa o usuário e registra no histórico
     $pdo->beginTransaction();
     try {
         $upd = $pdo->prepare("UPDATE usuarios SET status = 'inativo' WHERE id = ?");
         $upd->execute([$id]);
 
-        // Registra na tabela de inativos (se existir)
-        try {
-            $ins = $pdo->prepare(
-                'INSERT INTO usuarios_inativos (usuario_id, nome, email, senha, data_nasc, criado_em, desativado_em)
-                 VALUES (:usuario_id, :nome, :email, :senha, :data_nasc, :criado_em, NOW())
-                 ON DUPLICATE KEY UPDATE desativado_em = NOW()'
-            );
-            $ins->execute([
-                ':usuario_id' => $usuario['id'],
-                ':nome'       => $usuario['nome'],
-                ':email'      => $usuario['email'],
-                ':senha'      => $usuario['senha'],
-                ':data_nasc'  => $usuario['data_nasc'],
-                ':criado_em'  => $usuario['criado_em'],
-            ]);
-        } catch (\Throwable $ignored) {
-            // tabela opcional — ignora se não existir
-        }
+        // Registra na tabela de histórico de inativações
+        $ins = $pdo->prepare(
+            'INSERT INTO usuarios_inativos
+               (usuario_id, nome, email, cpf, telefone, data_nasc, motivo, inativado_por, criado_em, inativado_em)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+             ON DUPLICATE KEY UPDATE inativado_em = NOW(), motivo = VALUES(motivo)'
+        );
+        $ins->execute([
+            $usuario['id'],
+            $usuario['nome'],
+            $usuario['email'],
+            $usuario['cpf']      ?? null,
+            $usuario['telefone'] ?? null,
+            $usuario['data_nasc'],
+            $d['motivo']         ?? null,
+            $d['inativado_por']  ?? null,
+            $usuario['criado_em'],
+        ]);
 
         $pdo->commit();
         responder(200, ['mensagem' => 'Usuário inativado com sucesso.']);
     } catch (\Throwable $e) {
         $pdo->rollBack();
         responder(500, ['erro' => 'Erro interno ao inativar o usuário. Tente novamente.']);
+    }
+}
+
+// ── PATCH (REATIVAR) ─────────────────────────────────────
+if ($metodo === 'PATCH') {
+    if (!$id) responder(400, ['erro' => 'ID obrigatório.']);
+
+    $chk = $pdo->prepare('SELECT id, status FROM usuarios WHERE id = ?');
+    $chk->execute([$id]);
+    $u = $chk->fetch();
+    if (!$u) responder(404, ['erro' => 'Usuário não encontrado.']);
+    if ($u['status'] !== 'inativo') responder(409, ['erro' => 'Usuário já está ativo.']);
+
+    $pdo->beginTransaction();
+    try {
+        $pdo->prepare("UPDATE usuarios SET status = 'ativo' WHERE id = ?")->execute([$id]);
+        $pdo->prepare("DELETE FROM usuarios_inativos WHERE usuario_id = ?")->execute([$id]);
+        $pdo->commit();
+        responder(200, ['mensagem' => 'Usuário reativado com sucesso.']);
+    } catch (\Throwable $e) {
+        $pdo->rollBack();
+        responder(500, ['erro' => 'Erro ao reativar usuário.']);
     }
 }
 
