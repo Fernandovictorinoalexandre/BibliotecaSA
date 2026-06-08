@@ -282,6 +282,15 @@
   }
 
   // ── Logout ──────────────────────────────────────────────
+<<<<<<< HEAD
+=======
+  async function logout() {
+    try { await fetch('http://localhost:9999/Estacao-refatorado/php/logout.php', { method: 'POST' }); } catch {}
+    ['func_logado','func_id','func_nome','func_email','func_cargo','func_matricula']
+      .forEach(k => localStorage.removeItem(k));
+    window.location.href = 'LoginFuncionario.html';
+  }
+>>>>>>> ad88522de953afc72096d265041dd2c97e48cd82
 
   carregarDash();
   carregarFuncionarios();
