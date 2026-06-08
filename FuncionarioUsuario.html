@@ -172,7 +172,11 @@
 <script src="func-utils.js"></script>
 <script>
   const API = 'http://localhost:9999/Estacao-refatorado/php/usuarios.php';
+<<<<<<< HEAD
 
+=======
+  const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+>>>>>>> ad88522de953afc72096d265041dd2c97e48cd82
   let idParaDeletar = null;
   let todosUsuarios = [];
 
@@ -339,6 +343,46 @@
       }).join('');
     } catch {
       tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Erro ao carregar.</td></tr>';
+<<<<<<< HEAD
+=======
+    }
+  }
+
+    async function reativarUsuario(id, nome) {
+    if (!confirm('Reativar "' + nome + '"?')) return;
+    try {
+      const r = await fetch(API + '?id=' + id, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const d = await r.json();
+      if (r.ok) {
+        toast(d.mensagem || 'Usuário reativado.', 'sucesso');
+        carregarUsuarios();
+        carregarInativos();
+      } else {
+        toast(d.erro || 'Erro ao reativar.', 'erro');
+      }
+    } catch {
+      toast('Erro de conexão.', 'erro');
+    }
+  }
+
+    // ── Avatar com iniciais ──────────────────────────────
+  (function() {
+    const nome = localStorage.getItem('func_nome') || '';
+    const el   = document.getElementById('func-nome-nav');
+    const av   = document.getElementById('user-avatar-nav');
+    if (el) el.textContent = nome;
+    if (av && nome) {
+      const partes  = nome.trim().split(' ').filter(Boolean);
+      const iniciais = (partes[0]?.[0] || '') + (partes[1]?.[0] || '');
+      av.innerHTML  = `<span style="font-size:.8rem;font-weight:700;color:#09122c;">${iniciais.toUpperCase()}</span>`;
+      av.style.background = '#73ffe3';
+      av.style.display    = 'flex';
+      av.style.alignItems = 'center';
+      av.style.justifyContent = 'center';
+>>>>>>> ad88522de953afc72096d265041dd2c97e48cd82
     }
   }
 
