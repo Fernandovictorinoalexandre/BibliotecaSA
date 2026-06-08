@@ -340,6 +340,10 @@
     const l = Math.max(1, daysLate(loan.dueDate));
     return l * FINE_PER_DAY;
   }
+<<<<<<< HEAD
+=======
+  function fmtMoney(v)     { return 'R$ '+v.toFixed(2).replace('.',','); }
+>>>>>>> ad88522de953afc72096d265041dd2c97e48cd82
   function today_iso()     { return TODAY.toISOString().split('T')[0]; }
   function deadlinePct(b,d){ if(!b||!d)return 0; const s=parseDate(b).getTime(),e=parseDate(d).getTime(),n=TODAY.getTime(); if(e-s<=0)return 100; return Math.min(100,Math.max(0,(n-s)/(e-s)*100)); }
 
