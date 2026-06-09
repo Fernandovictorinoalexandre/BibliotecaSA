@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Estação Literária</title>
+
+  <!-- Ícones -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+  <!-- Fonte -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="usuario.css">
+</head>
+
+<body class="page-internal">
+
+<!-- ── HEADER ── -->
+<header class="header">
+  <div class="logo">
+    <img src="Biblioteca2.png" alt="Logo"
+         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+    <div class="logo-icon-fallback" style="display:none">
+      <span class="material-symbols-outlined">auto_stories</span>
+    </div>
+    <h1>Biblioteca</h1>
+  </div>
+  <nav class="nav-links">
+    <a href="PainelUsuario.html" class="active">Início</a>
+    <a href="CatalogoLivros.html">Catálogo</a>
+    <a href="Suporte.html">Suporte</a>
+    <a href="Conta.html">Conta</a>
+  </nav>
+  <div class="right-area">
+    <div style="position:relative;display:inline-flex;align-items:center;">
+      <input class="search" type="text" placeholder="Pesquisar..." id="campoBuscaHeader">
+    </div>
+    <div style="display:flex;align-items:center;gap:.5rem;">
+      <span id="nav-nome-usuario" style="font-size:.82rem;color:var(--on-surface-variant);white-space:nowrap;"></span>
+      <div class="user-avatar" id="nav-avatar-usuario" style="width:36px;height:36px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(0,245,212,.15);border:2px solid rgba(0,245,212,.3);flex-shrink:0;position:relative;">
+        <span class="material-symbols-outlined" style="font-size:1.2rem;color:var(--primary);">person</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+
+  <h2 class="sidebar-title">Portal do Leitor</h2>
+  <p class="sidebar-subtitle">Estação Central</p>
+
+  <nav class="sidebar-links">
+
+    <a href="Emprestimo.html">
+      <span class="material-symbols-outlined">book</span>
+      <span>Empréstimo</span>
+    </a>
+
+    <a href="DevolucaoMuta.html">
+      <span class="material-symbols-outlined">assignment_return</span>
+      <span>Devolução</span>
+    </a>
+
+  </nav>
+
+</aside>
+
+<!-- CONTEÚDO -->
+<main class="main">
+
+  <section class="hero">
+    <h2>Bem-vindo à Estação Literária</h2>
+    <p>Continue sua jornada entre livros e universos.</p>
+
+    <div class="actions">
+      <button class="btn btn-secondary" id="btnNoticias" onclick="mostrar('noticias')">
+        <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;margin-right:4px;">newspaper</span>
+        Últimas Notícias
+      </button>
+      <button class="btn btn-primary" id="btnEmprestados" onclick="mostrar('livros')">Mais Emprestados</button>
+    </div>
+  </section>
+
+  <!-- PAINEL DE NOTÍCIAS -->
+  <div class="news-panel" id="newsPanel">
+    <div class="news-panel-inner">
+      <div class="news-panel-header">
+        <span class="news-panel-title">
+          <span class="material-symbols-outlined">newspaper</span>
+          Últimas Notícias
+        </span>
+        <button class="news-panel-close" onclick="mostrar('livros')" title="Fechar">✕</button>
+      </div>
+      <div class="news-grid">
+        <div class="news-card">
+          <span class="news-tag tag-novidade">✦ Novidade</span>
+          <div class="news-card-body">
+            <div class="news-card-title">Novos títulos de ficção científica chegaram ao acervo!</div>
+            <div class="news-card-desc">A biblioteca recebeu 40 novos exemplares de autores nacionais e internacionais. Confira o catálogo e reserve o seu.</div>
+            <div class="news-card-date">15 de maio de 2026</div>
+          </div>
+        </div>
+        <div class="news-card">
+          <span class="news-tag tag-evento">★ Evento</span>
+          <div class="news-card-body">
+            <div class="news-card-title">Clube do Livro — encontro mensal dia 24</div>
+            <div class="news-card-desc">O tema deste mês é "Mundos distópicos". Traga sua análise e participe da discussão. Vagas limitadas, inscreva-se na recepção.</div>
+            <div class="news-card-date">10 de maio de 2026</div>
+          </div>
+        </div>
+        <div class="news-card">
+          <span class="news-tag tag-aviso">⚠ Aviso</span>
+          <div class="news-card-body">
+            <div class="news-card-title">Sistema de renovação online agora disponível</div>
+            <div class="news-card-desc">Você já pode renovar seus empréstimos diretamente pela plataforma, sem precisar comparecer à biblioteca. Válido para até 2 renovações.</div>
+            <div class="news-card-date">5 de maio de 2026</div>
+          </div>
+        </div>
+        <div class="news-card">
+          <span class="news-tag tag-dica">💡 Dica</span>
+          <div class="news-card-body">
+            <div class="news-card-title">Horário especial no feriado de junho</div>
+            <div class="news-card-desc">A biblioteca funcionará em horário reduzido nos dias 19 e 20 de junho — das 9h às 14h. Planeje suas devoluções com antecedência.</div>
+            <div class="news-card-date">2 de maio de 2026</div>
+          </div>
+        </div>
+      </div>
+      <hr class="news-divider">
+    </div>
+  </div>
+
+  <section class="book-grid" id="secLivros">
+    <div id="livros-loading" style="text-align:center;padding:2rem;color:var(--on-surface-variant);font-size:.9rem;">Carregando...</div>
+  </section>
+
+</main>
+
+
+<script src="utils.js"></script>
+<script>
+  const API_LIVROS = 'http://localhost:9999/Estacao-refatorado/php/livros.php';
+  const API_EMP    = 'http://localhost:9999/Estacao-refatorado/php/emprestimos.php';
+
+  if (!localStorage.getItem('logado')) window.location.href = 'LoginUsuario.html';
+
+  const nomeUsuario = localStorage.getItem('usuario_nome') || 'Leitor';
+  const heroTitle = document.querySelector('.hero h2');
+  if (heroTitle) heroTitle.textContent = `Bem-vindo, ${nomeUsuario.split(' ')[0]}!`;
+
+  let vistaAtual = 'livros';
+
+  function mostrar(vista) {
+    const panel     = document.getElementById('newsPanel');
+    const secLivros = document.getElementById('secLivros');
+    const btnNews   = document.getElementById('btnNoticias');
+    const btnEmp    = document.getElementById('btnEmprestados');
+
+    if (vista === 'noticias') {
+      panel.classList.add('open');
+      secLivros.style.display = 'none';
+      btnNews.classList.add('news-open');
+      btnEmp.classList.remove('news-open');
+    } else {
+      panel.classList.remove('open');
+      secLivros.style.display = '';
+      btnEmp.classList.add('news-open');
+      btnNews.classList.remove('news-open');
+    }
+    vistaAtual = vista;
+  }
+
+  async function carregarLivros() {
+    const sec = document.getElementById('secLivros');
+    try {
+      const resp  = await fetch(API_LIVROS);
+      const lista = await resp.json();
+
+      const disponiveis = lista
+        .filter(l => l.status === 'disponivel')
+        .slice(0, 8);
+
+      if (!disponiveis.length) {
+        sec.innerHTML = '<p style="text-align:center;color:var(--on-surface-variant);padding:2rem;">Nenhum livro disponível no momento.</p>';
+        return;
+      }
+
+      sec.innerHTML = disponiveis.map(l => `
+        <div class="book-card" onclick="verLivro(${l.id})" style="cursor:pointer;">
+          ${l.capa
+            ? `<img src="${l.capa}" class="book-img" alt="${l.titulo}"
+                onerror="this.parentElement.querySelector('.book-img-ph').style.display='flex';this.style.display='none'">
+               <div class="book-img-ph" style="display:none;align-items:center;justify-content:center;height:160px;font-size:2rem;">📖</div>`
+            : `<div class="book-img-ph" style="display:flex;align-items:center;justify-content:center;height:160px;font-size:2rem;">📖</div>`
+          }
+          <div class="book-body">
+            <h3>${l.titulo}</h3>
+            <p>${l.autor}</p>
+            ${l.categoria ? `<span style="font-size:.72rem;color:var(--primary);font-weight:600;">${l.categoria}</span>` : ''}
+          </div>
+        </div>`).join('');
+    } catch {
+      sec.innerHTML = '<p style="text-align:center;color:#ff716c;padding:2rem;">Erro ao carregar livros.</p>';
+    }
+  }
+
+  function verLivro(id) {
+    // Navega passando o ID na URL — LivroDetalhe buscará direto do banco
+    window.location.href = 'LivroDetalhe.html?livro=' + id;
+  }
+
+  mostrar('livros');
+  carregarLivros();
+</script>
+
+<script>
+// ── Avatar + nome do usuário na navbar ───────────────────
+(function() {
+  const nome = localStorage.getItem('usuario_nome') || '';
+  const foto  = localStorage.getItem('usuario_foto') || '';
+  const navNome   = document.getElementById('nav-nome-usuario');
+  const navAvatar = document.getElementById('nav-avatar-usuario');
+  if (navNome && nome) navNome.textContent = nome.split(' ')[0];
+  if (navAvatar) {
+    if (foto) {
+      navAvatar.innerHTML = '<img src="' + foto + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;display:block;">';
+      navAvatar.style.background = 'transparent';
+    } else if (nome) {
+      const inicial = nome.charAt(0).toUpperCase();
+      navAvatar.innerHTML = '<span style="font-size:.85rem;font-weight:700;color:#09122c;">' + inicial + '</span>';
+      navAvatar.style.background = '#73ffe3';
+    }
+  }
+})();
+</script>
+<script src="busca-global.js"></script>
+</body>
+</html>

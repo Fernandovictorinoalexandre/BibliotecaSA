@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estação Literária — Devolução</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="leitor.css">
+
+</head>
+<body class="page-flex">
+
+<header class="header">
+  <div class="logo">
+    <img src="Biblioteca2.png" alt="Logo"
+         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+    <div class="logo-icon-fallback">
+      <span class="material-symbols-outlined">auto_stories</span>
+    </div>
+    <h1>Biblioteca</h1>
+  </div>
+  <nav class="nav-links">
+    <a href="PainelUsuario.html">Início</a>
+    <a href="CatalogoLivros.html">Catálogo</a>
+    <a href="Suporte.html">Suporte</a>
+    <a href="Conta.html">Conta</a>
+  </nav>
+  <div class="right-area">
+    <div style="position:relative;display:inline-flex;align-items:center;">
+      <input class="search" type="text" placeholder="Pesquisar...">
+    </div>
+    <span id="nav-nome-usuario" style="font-size:.82rem;color:var(--on-surface-variant);white-space:nowrap;"></span>
+    <div class="user-avatar" id="nav-avatar-usuario" style="width:36px;height:36px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(0,245,212,.15);border:2px solid rgba(0,245,212,.3);cursor:pointer;" onclick="window.location.href='Conta.html'">
+      <span class="material-symbols-outlined" style="font-size:1.2rem;color:var(--primary);">person</span>
+    </div>
+  </div>
+</header>
+
+<div class="page-body">
+
+  <aside class="sidebar">
+    <h2 class="sidebar-title">Portal do Leitor</h2>
+    <p class="sidebar-subtitle">Estação Central</p>
+    <nav class="sidebar-links">
+      <a href="Emprestimo.html">
+        <span class="material-symbols-outlined">book</span>
+        <span>Empréstimo</span>
+      </a>
+      <a href="#" class="active">
+        <span class="material-symbols-outlined">assignment_return</span>
+        <span>Devolução</span>
+      </a>
+    </nav>
+  </aside>
+
+  <main class="main">
+
+    <section class="hero">
+      <div class="hero-top">
+        <div class="hero-icon">
+          <span class="material-symbols-outlined">assignment_return</span>
+        </div>
+        <div>
+          <h2>Central de Devoluções</h2>
+          <p>Devolva seus livros, acompanhe multas por atraso e regularize sua situação.</p>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <span class="hero-stat-value teal" id="stat-loans">0</span>
+          <span class="hero-stat-label">Livros em mãos</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-value red" id="stat-late">0</span>
+          <span class="hero-stat-label">Em atraso</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-value yellow" id="stat-fine">R$ 0,00</span>
+          <span class="hero-stat-label">Multa total</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-value teal" id="stat-today">0</span>
+          <span class="hero-stat-label">Vence hoje</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="total-panel" id="total-panel">
+      <div class="total-left">
+        <div class="total-label">Total de multas pendentes</div>
+        <div class="total-value" id="total-value">R$ 0,00</div>
+        <div class="total-sub" id="total-sub">Nenhuma multa pendente</div>
+      </div>
+      <button class="btn-pay" id="btn-pay-all" onclick="payAllFines()" disabled>
+        <span class="material-symbols-outlined sm">payments</span>
+        Pagar todas as multas
+      </button>
+    </div>
+
+    <div class="section-header">
+      <span class="section-title">Livros para Devolver</span>
+      <span class="section-tag" id="loan-count-label">—</span>
+    </div>
+
+    <div class="returns-grid" id="returns-grid"></div>
+
+    <div class="section-header" style="margin-top:1rem;">
+      <span class="section-title">Histórico de Devoluções</span>
+    </div>
+    <div class="history-card" id="history-card">
+      <div class="history-header">
+        <span style="font-size:.8125rem;color:var(--on-surface-variant);">Devoluções recentes desta sessão</span>
+      </div>
+      <div id="history-list">
+        <div class="empty-state">
+          <span class="material-symbols-outlined">history</span>
+          <h3>Nenhuma devolução ainda</h3>
+          <p>As devoluções feitas nesta sessão aparecerão aqui.</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ══════════════════════════════════
+     MODAL PRINCIPAL
+══════════════════════════════════ -->
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+
+    <!-- PASSO 0: multa pendente → escolhe pagamento -->
+    <div id="passo-multa">
+      <div class="modal-icon">
+        <span class="material-symbols-outlined">warning</span>
+      </div>
+      <h3>Multa pendente</h3>
+      <p id="modal-multa-desc"></p>
+      <div class="modal-fine-box">
+        <div class="modal-fine-label">
+          <div style="font-weight:700;color:var(--on-background);font-size:.9375rem;" id="modal-book-multa"></div>
+          <div style="margin-top:4px;" id="modal-days-multa"></div>
+        </div>
+        <div class="modal-fine-value" id="modal-fine-value-multa"></div>
+      </div>
+      <p style="font-size:.82rem;color:#8899bb;margin:0 0 .5rem;">Escolha como pagar a multa:</p>
+      <div class="pg-metodos-modal">
+        <button class="pg-metodo-modal" onclick="irParaPix()">
+          <span class="icone">⚡</span>
+          <div><strong>PIX</strong><small>Aprovação imediata</small></div>
+          <span class="arrow">›</span>
+        </button>
+        <button class="pg-metodo-modal" onclick="irParaCartao()">
+          <span class="icone">💳</span>
+          <div><strong>Cartão de Crédito</strong><small>Débito ou crédito</small></div>
+          <span class="arrow">›</span>
+        </button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- PASSO 1: PIX -->
+    <div id="passo-pix" style="display:none">
+      <button class="btn-voltar-modal" onclick="voltarParaMulta()">← Voltar</button>
+      <div class="modal-icon" style="background:rgba(0,245,212,.1);border-color:rgba(0,245,212,.25);color:#00f5d4;">
+        <span class="material-symbols-outlined">bolt</span>
+      </div>
+      <h3>Pagar com PIX</h3>
+      <p>Valor da multa: <strong id="pix-valor" style="color:#00f5d4;"></strong></p>
+      <div class="pix-wrap">
+        <div class="pix-qr">
+          <canvas id="pix-qr-canvas" width="150" height="150"></canvas>
+        </div>
+        <p style="font-size:.78rem;color:#8899bb;margin:.3rem 0 0;">Escaneie com o app do seu banco</p>
+      </div>
+      <div class="pix-chave-box">
+        <span class="pix-chave-label">Chave PIX (e-mail)</span>
+        <div class="pix-chave-row">
+          <span class="pix-chave-valor">estacaoliteraria@biblioteca.com.br</span>
+          <button class="pix-copiar" onclick="copiarPix(this)">Copiar</button>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+        <button class="btn-confirm" onclick="pagamentoConfirmado()">
+          <span class="material-symbols-outlined sm">check</span>
+          Já paguei
+        </button>
+      </div>
+    </div>
+
+    <!-- PASSO 2: Cartão -->
+    <div id="passo-cartao" style="display:none">
+      <button class="btn-voltar-modal" onclick="voltarParaMulta()">← Voltar</button>
+      <div class="modal-icon" style="background:rgba(0,245,212,.1);border-color:rgba(0,245,212,.25);color:#00f5d4;">
+        <span class="material-symbols-outlined">credit_card</span>
+      </div>
+      <h3>Dados do Cartão</h3>
+      <p>Valor da multa: <strong id="cartao-valor" style="color:#00f5d4;"></strong></p>
+      <div class="cartao-form">
+        <div class="cartao-campo">
+          <label>Número do Cartão</label>
+          <input type="text" id="c-numero" placeholder="0000 0000 0000 0000" maxlength="19" oninput="mascaraCartao(this)" inputmode="numeric">
+        </div>
+        <div class="cartao-campo">
+          <label>Nome no Cartão</label>
+          <input type="text" id="c-nome" placeholder="NOME COMO NO CARTÃO" oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div class="cartao-campo">
+          <label>CPF do Titular</label>
+          <input type="text" id="c-cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPFCartao(this)" inputmode="numeric">
+        </div>
+        <div class="cartao-row">
+          <div class="cartao-campo">
+            <label>Validade</label>
+            <input type="text" id="c-validade" placeholder="MM/AA" maxlength="5" oninput="mascaraVal(this)" inputmode="numeric">
+          </div>
+          <div class="cartao-campo">
+            <label>CVV</label>
+            <input type="text" id="c-cvv" placeholder="123" maxlength="4" inputmode="numeric">
+          </div>
+        </div>
+        <p class="cartao-erro" id="c-erro"></p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+        <button class="btn-confirm" onclick="validarCartao()">
+          <span class="material-symbols-outlined sm">check</span>
+          Pagar multa
+        </button>
+      </div>
+    </div>
+
+    <!-- PASSO 3: Processando -->
+    <div id="passo-processando" style="display:none;text-align:center;padding:1rem 0;">
+      <div style="font-size:2.5rem;margin-bottom:1rem;">⏳</div>
+      <h3>Processando pagamento...</h3>
+      <p style="color:#8899bb;">Aguarde um momento.</p>
+      <div style="margin-top:1.5rem;display:flex;justify-content:center;">
+        <div style="width:40px;height:40px;border:3px solid rgba(0,245,212,.2);border-top-color:#00f5d4;border-radius:50%;animation:spin .7s linear infinite;"></div>
+      </div>
+    </div>
+
+    <!-- PASSO 4: Confirmação de envio -->
+    <div id="passo-aviso" style="display:none">
+      <div class="modal-icon" style="background:rgba(0,245,212,.1);border-color:rgba(0,245,212,.25);color:#00f5d4;">
+        <span class="material-symbols-outlined">schedule_send</span>
+      </div>
+      <h3 id="aviso-titulo">Devolução solicitada!</h3>
+      <div class="aviso-devolucao">
+        <div class="aviso-box">
+          <span class="material-symbols-outlined">schedule</span>
+          <div class="aviso-box-text">
+            <strong>Aguardando confirmação do funcionário</strong>
+            <p>Leve o livro à biblioteca. O funcionário confirmará a entrega no sistema quando você entregar.</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions" style="margin-top:1.5rem;">
+        <button class="btn-confirm" id="btn-confirmar-dev" onclick="confirmarDevolucaoFinal()" style="flex:1;">
+          <span class="material-symbols-outlined sm">check</span>
+          Entendi, confirmar
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script src="utils.js"></script>
+<script>
+  if (!localStorage.getItem('logado')) window.location.href = 'LoginUsuario.html';
+
+  const FINE_PER_DAY = 0.50;
+  const TODAY        = new Date(); TODAY.setHours(0,0,0,0);
+  const API_EMP      = 'http://localhost:9999/Estacao-refatorado/php/emprestimos.php';
+  const usuarioId    = localStorage.getItem('usuario_id');
+
+  let loans     = [];
+  let history   = [];
+  let pendingId = null;
+  let payAllMode = false;
+
+  /* ── Carregar ── */
+  async function carregarDobanco() {
+    const grid = document.getElementById('returns-grid');
+    if (grid) grid.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--on-surface-variant);opacity:.7;">Carregando...</div>';
+    try {
+      const resp = await fetch(API_EMP + '?usuario_id=' + usuarioId);
+      if (!resp.ok) throw new Error();
+      const lista = await resp.json();
+      if (!Array.isArray(lista)) throw new Error();
+
+      loans = lista
+        .filter(e => !e.data_devolucao_real)
+        .map(e => ({
+          empId:      String(e.id),
+          title:      e.titulo,
+          author:     e.autor,
+          borrowedAt: (e.data_emprestimo || '').split('T')[0],
+          dueDate:    (e.data_devolucao_prevista || '').split('T')[0],
+          status:     e.status,
+          // late vem do status do banco — não da data local do PC
+          late:       e.status === 'atrasado',
+          multa:      parseFloat(e.multa) || 0,
+        }));
+
+      history = lista
+        .filter(e => e.data_devolucao_real)
+        .map(e => ({
+          title:      e.titulo,
+          author:     e.autor,
+          dueDate:    (e.data_devolucao_prevista || '').split('T')[0],
+          returnedAt: (e.data_devolucao_real || '').split('T')[0],
+          fine:       parseFloat(e.multa) || 0,
+        }))
+        .reverse();
+    } catch {
+      if (grid) grid.innerHTML = '<div style="text-align:center;padding:2rem;color:#ff716c;">Erro ao carregar devoluções. Verifique a conexão.</div>';
+      return;
+    }
+    render();
+  }
+
+  /* ── Utilitários ── */
+  function parseDate(iso) { const [y,m,d]=iso.split('-').map(Number); const dt=new Date(y,m-1,d); dt.setHours(0,0,0,0); return dt; }
+  function daysLate(due)   { if(!due) return 0; return Math.floor((TODAY - parseDate(due)) / 86400000); }
+  function calcFine(loan)  {
+    // Só aplica multa se o banco confirma status atrasado
+    if (!loan.late) return 0;
+    // Usa multa já gravada no banco (fonte verdadeira)
+    if (loan.multa > 0) return loan.multa;
+    // Fallback: calcula pelo número de dias (garante valor mínimo de 1 dia)
+    const l = Math.max(1, daysLate(loan.dueDate));
+    return l * FINE_PER_DAY;
+  }
+  function today_iso()     { return TODAY.toISOString().split('T')[0]; }
+  function deadlinePct(b,d){ if(!b||!d)return 0; const s=parseDate(b).getTime(),e=parseDate(d).getTime(),n=TODAY.getTime(); if(e-s<=0)return 100; return Math.min(100,Math.max(0,(n-s)/(e-s)*100)); }
+
+  /* ── Render ── */
+  function render() { renderStats(); renderTotal(); renderGrid(); renderHistory(); }
+
+  function renderStats() {
+    const totalFine  = loans.reduce((s,l) => s+calcFine(l), 0);
+    const lateCount  = loans.filter(l => daysLate(l.dueDate) > 0).length;
+    const todayCount = loans.filter(l => l.dueDate === today_iso()).length;
+    document.getElementById('stat-loans').textContent = loans.length;
+    document.getElementById('stat-late').textContent  = lateCount;
+    document.getElementById('stat-fine').textContent  = fmtMoney(totalFine);
+    document.getElementById('stat-today').textContent = todayCount;
+    document.getElementById('loan-count-label').textContent =
+      loans.length === 0 ? 'Nenhum livro pendente' : `${loans.length} livro${loans.length>1?'s':''}`;
+  }
+
+  function renderTotal() {
+    const total = loans.reduce((s,l) => s+calcFine(l), 0);
+    const lateC = loans.filter(l => daysLate(l.dueDate) > 0).length;
+    const el=document.getElementById('total-value'), sub=document.getElementById('total-sub'), btn=document.getElementById('btn-pay-all');
+    el.textContent = fmtMoney(total); el.className = 'total-value'+(total===0?' zero':'');
+    if (total === 0) { sub.textContent = 'Nenhuma multa pendente 🎉'; btn.disabled = true; }
+    else { sub.textContent = `${lateC} livro${lateC>1?'s':''} em atraso • ${fmtMoney(FINE_PER_DAY)}/dia`; btn.disabled = false; }
+  }
+
+  function renderGrid() {
+    const grid = document.getElementById('returns-grid');
+    if (loans.length === 0) {
+      grid.innerHTML = `<div class="empty-state" style="background:var(--surface-container);border:1px solid var(--border);border-radius:1rem;">
+        <span class="material-symbols-outlined">check_circle</span><h3>Tudo em ordem!</h3>
+        <p>Você não tem livros pendentes de devolução.</p></div>`;
+      return;
+    }
+    const sorted = [...loans].sort((a,b) => daysLate(b.dueDate)-daysLate(a.dueDate));
+    grid.innerHTML = sorted.map(loan => {
+      const late=daysLate(loan.dueDate), fine=calcFine(loan), pct=deadlinePct(loan.borrowedAt,loan.dueDate);
+      const isLate=loan.late, isToday=!loan.late && loan.dueDate===today_iso();
+      const isAguardando = loan.status === 'aguardando_devolucao';
+      let sc, st;
+      if (isAguardando) { sc='status-today'; st='Aguardando confirmação'; }
+      else if (isLate)  { sc='status-late';  st='Atrasado'; }
+      else if (isToday) { sc='status-today'; st='Vence hoje'; }
+      else              { const d=Math.abs(late); sc='status-ok'; st=`${d} dia${d!==1?'s':''} restante${d!==1?'s':''}`; }
+      const fillC  = isLate ? 'over' : pct>75 ? 'warn' : 'ok';
+      const daysOver = Math.max(1, late); // nunca exibe negativo
+      const dlText = isLate ? `${daysOver} dia${daysOver>1?'s':''} em atraso` : isToday ? 'Devolução hoje!' : `Vence em ${fmt(loan.dueDate)}`;
+      return `
+      <div class="return-card ${isLate?'is-late':''}" id="rc-${loan.empId}">
+        <div class="return-card-body">
+          <div class="rc-cover ${isLate?'late-cover':'ok-cover'}">
+            <span class="material-symbols-outlined" style="font-size:1.5rem;">menu_book</span>
+          </div>
+          <div class="rc-info">
+            <div class="rc-title">${loan.title}</div>
+            <div class="rc-author">${loan.author}</div>
+            <div class="rc-dates">
+              <div class="rc-date-item"><div class="rc-date-label">Retirada</div><div class="rc-date-value">${loan.borrowedAt?fmt(loan.borrowedAt):'—'}</div></div>
+              <div class="rc-date-item"><div class="rc-date-label">Devolução prevista</div><div class="rc-date-value ${isLate?'late-date':''}">${loan.dueDate?fmt(loan.dueDate):'—'}</div></div>
+              ${isLate?`<div class="rc-date-item"><div class="rc-date-label">Dias em atraso</div><div class="rc-date-value late-date">${daysOver} dia${daysOver>1?'s':''}</div></div>`:''}
+            </div>
+          </div>
+          <div class="rc-right">
+            <span class="status ${sc}">${st}</span>
+            <div class="fine-block">
+              <div class="fine-label">Multa</div>
+              <div class="fine-amount ${fine===0?'zero':''}">${fmtMoney(fine)}</div>
+              ${isLate?`<div class="fine-days">${fmtMoney(FINE_PER_DAY)}/dia</div>`:''}
+            </div>
+            ${isAguardando
+              ? `<button class="btn-return-main" disabled style="opacity:.5;cursor:not-allowed;">
+                   <span class="material-symbols-outlined sm">schedule</span> Aguardando...
+                 </button>
+                 <button class="btn-cancel-dev" onclick="cancelarDevolucao('${loan.empId}')">
+                   <span class="material-symbols-outlined sm">undo</span> Cancelar solicitação
+                 </button>`
+              : `<button class="btn-return-main" onclick="openModal('${loan.empId}')">
+                   <span class="material-symbols-outlined sm">assignment_return</span> Devolver
+                 </button>`
+            }
+          </div>
+        </div>
+        <div class="rc-footer">
+          <div class="deadline-track"><div class="deadline-fill ${fillC}" style="width:${Math.min(pct,100)}%"></div></div>
+          <span class="deadline-text ${isLate?'late-text':''}">${dlText}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderHistory() {
+    const list = document.getElementById('history-list');
+    if (history.length === 0) {
+      list.innerHTML = `<div class="empty-state"><span class="material-symbols-outlined">history</span><h3>Nenhuma devolução ainda</h3><p>As devoluções confirmadas pelos funcionários aparecerão aqui.</p></div>`;
+      return;
+    }
+    list.innerHTML = history.map(h => `
+      <div class="history-row">
+        <div class="history-icon ${h.fine>0?'fine':'ok'}">
+          <span class="material-symbols-outlined sm">${h.fine>0?'warning':'check_circle'}</span>
+        </div>
+        <div class="history-info">
+          <div class="history-title">${h.title}</div>
+          <div class="history-meta">${h.author} • Devolvido ${fmt(h.returnedAt)}</div>
+        </div>
+        <div class="history-fine ${h.fine>0?'paid':'zero'}" ${h.fine>0?'style="color:var(--error)"':''}>
+          ${h.fine>0?fmtMoney(h.fine)+' multa':'Sem multa'}
+        </div>
+      </div>`).join('');
+  }
+
+  /* ── Modal ── */
+  const passos = ['passo-multa','passo-pix','passo-cartao','passo-processando','passo-aviso'];
+  function mostrarPasso(id) { passos.forEach(p => document.getElementById(p).style.display = p===id?'':'none'); }
+
+  function openModal(empId) {
+    payAllMode = false;
+    const loan = loans.find(l => l.empId === String(empId));
+    if (!loan) return;
+    pendingId = loan.empId;
+    const fine = calcFine(loan), late = daysLate(loan.dueDate);
+    if (fine > 0) {
+      document.getElementById('modal-multa-desc').textContent =
+        `O livro "${loan.title}" está ${Math.max(1,late)} dia${Math.max(1,late)>1?'s':''} atrasado. Pague a multa para continuar.`;
+      document.getElementById('modal-book-multa').textContent  = loan.title;
+      const modalDays = Math.max(1, late);
+      document.getElementById('modal-days-multa').textContent  = `${modalDays} dia${modalDays>1?'s':''} em atraso • ${fmtMoney(FINE_PER_DAY)}/dia`;
+      document.getElementById('modal-fine-value-multa').textContent = fmtMoney(fine);
+      document.getElementById('pix-valor').textContent    = fmtMoney(fine);
+      document.getElementById('cartao-valor').textContent = fmtMoney(fine);
+      mostrarPasso('passo-multa');
+    } else {
+      document.getElementById('aviso-titulo').textContent = `"${loan.title}" — Solicitar devolução`;
+      mostrarPasso('passo-aviso');
+    }
+    document.getElementById('modal').classList.add('open');
+  }
+
+  function payAllFines() {
+    const atrasados = loans.filter(l => calcFine(l) > 0);
+    if (atrasados.length === 0) return;
+    payAllMode = true; pendingId = null;
+    const total = atrasados.reduce((s,l) => s+calcFine(l), 0);
+    const nomes = atrasados.map(l => `"${l.title}"`).join(', ');
+    document.getElementById('modal-multa-desc').textContent =
+      `Você tem ${atrasados.length} livro${atrasados.length>1?'s':''} em atraso: ${nomes}.`;
+    document.getElementById('modal-book-multa').textContent  = `${atrasados.length} livro${atrasados.length>1?'s':''} em atraso`;
+    document.getElementById('modal-days-multa').textContent  = 'Total de multas acumuladas';
+    document.getElementById('modal-fine-value-multa').textContent = fmtMoney(total);
+    document.getElementById('pix-valor').textContent    = fmtMoney(total);
+    document.getElementById('cartao-valor').textContent = fmtMoney(total);
+    mostrarPasso('passo-multa');
+    document.getElementById('modal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+    pendingId = null; payAllMode = false;
+    ['c-numero','c-nome','c-cpf','c-validade','c-cvv'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('c-erro').textContent = '';
+  }
+
+  document.getElementById('modal').addEventListener('click', e => { if(e.target===document.getElementById('modal')) closeModal(); });
+
+  function irParaPix()       { gerarQR(); mostrarPasso('passo-pix'); }
+  function irParaCartao()    { mostrarPasso('passo-cartao'); }
+  function voltarParaMulta() { mostrarPasso('passo-multa'); }
+
+  /* ── PIX ── */
+  function gerarQR() {
+    const canvas=document.getElementById('pix-qr-canvas'), ctx=canvas.getContext('2d');
+    const size=150, cell=5, cols=Math.floor(size/cell);
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,size,size); ctx.fillStyle='#000';
+    function marcador(x,y){ ctx.fillRect(x,y,7*cell,7*cell); ctx.fillStyle='#fff'; ctx.fillRect(x+cell,y+cell,5*cell,5*cell); ctx.fillStyle='#000'; ctx.fillRect(x+2*cell,y+2*cell,3*cell,3*cell); }
+    marcador(0,0); marcador((cols-7)*cell,0); marcador(0,(cols-7)*cell);
+    let idx=0;
+    for(let r=0;r<cols;r++) for(let c=0;c<cols;c++){
+      const em=(r<8&&c<8)||(r<8&&c>=cols-8)||(r>=cols-8&&c<8);
+      if(!em&&((idx*1664525+42)%65536)/65536>0.5) ctx.fillRect(c*cell,r*cell,cell,cell);
+      idx++;
+    }
+  }
+  function copiarPix(btn) { navigator.clipboard.writeText('estacaoliteraria@biblioteca.com.br').then(()=>{ btn.textContent='✓ Copiado!'; setTimeout(()=>btn.textContent='Copiar',2000); }); }
+
+  /* ── Cartão ── */
+  function mascaraCartao(el) { let v=el.value.replace(/\D/g,'').substring(0,16); el.value=v.replace(/(.{4})/g,'$1 ').trim(); }
+  function mascaraCPFCartao(el) { let v=el.value.replace(/\D/g,'').slice(0,11); if(v.length>9)v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4'); else if(v.length>6)v=v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3'); else if(v.length>3)v=v.replace(/(\d{3})(\d{1,3})/,'$1.$2'); el.value=v; }
+  function mascaraVal(el)    { let v=el.value.replace(/\D/g,'').substring(0,4); if(v.length>=2)v=v.slice(0,2)+'/'+v.slice(2); el.value=v; }
+  function validarCartao() {
+    const num=document.getElementById('c-numero').value.replace(/\s/g,''), nom=document.getElementById('c-nome').value.trim();
+    const cpf=document.getElementById('c-cpf').value.replace(/\D/g,'');
+    const val=document.getElementById('c-validade').value, cvv=document.getElementById('c-cvv').value;
+    const err=document.getElementById('c-erro');
+    if(num.length<16){ err.textContent='Número do cartão inválido.'; return; }
+    if(nom.length<3) { err.textContent='Informe o nome como no cartão.'; return; }
+    if(cpf.length<11){ err.textContent='CPF do titular inválido.'; return; }
+    if(val.length<5) { err.textContent='Data de validade inválida.'; return; }
+    if(cvv.length<3) { err.textContent='CVV inválido.'; return; }
+    err.textContent=''; pagamentoConfirmado();
+  }
+
+  /* ── Após pagamento ── */
+  function pagamentoConfirmado() {
+    mostrarPasso('passo-processando');
+    setTimeout(() => {
+      if (payAllMode) {
+        document.getElementById('aviso-titulo').textContent = 'Multas pagas — confirmar devoluções';
+      } else {
+        const loan = loans.find(l => l.empId === pendingId);
+        if (loan) document.getElementById('aviso-titulo').textContent = `"${loan.title}" — Multa paga!`;
+      }
+      mostrarPasso('passo-aviso');
+    }, 2000);
+  }
+
+  /* ── Confirmar devolução final → envia para API e fica aguardando funcionário ── */
+  async function confirmarDevolucaoFinal() {
+    const btn = document.getElementById('btn-confirmar-dev');
+    btn.disabled = true; btn.textContent = 'Enviando...';
+
+    const idsParaSolicitar = payAllMode
+      ? loans.filter(l => calcFine(l) > 0).map(l => l.empId)
+      : [pendingId];
+
+    let ok = 0;
+    for (const empId of idsParaSolicitar) {
+      try {
+        const resp = await fetch(`${API_EMP}?id=${empId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ solicitar_devolucao: true, multa_paga: 1 }),
+        });
+        if (resp.ok) {
+          // Marca o empréstimo como aguardando na lista local
+          const loan = loans.find(l => l.empId === String(empId));
+          if (loan) loan.status = 'aguardando_devolucao';
+          ok++;
+        }
+      } catch {}
+    }
+
+    closeModal();
+    render();
+    if (ok > 0) {
+      showToast(
+        ok === 1
+          ? 'Devolução solicitada! Leve o livro à biblioteca — o funcionário confirmará a entrega.'
+          : `${ok} devoluções solicitadas! Leve os livros à biblioteca.`,
+        'ok'
+      );
+    } else {
+      showToast('Erro ao solicitar devolução. Tente novamente.', 'err');
+    }
+    btn.disabled = false; btn.innerHTML = '<span class="material-symbols-outlined sm">check</span> Entendi, confirmar';
+  }
+
+  /* ── Cancelar solicitação de devolução ── */
+  async function cancelarDevolucao(empId) {
+    try {
+      const resp = await fetch(`${API_EMP}?id=${empId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cancelar_devolucao: true }),
+      });
+      if (resp.ok) {
+        const loan = loans.find(l => l.empId === String(empId));
+        if (loan) loan.status = 'ativo';
+        render();
+        showToast('Solicitação de devolução cancelada.', 'ok');
+      } else {
+        const dados = await resp.json();
+        showToast(dados.erro || 'Erro ao cancelar.', 'err');
+      }
+    } catch {
+      showToast('Erro de conexão ao cancelar.', 'err');
+    }
+  }
+
+  /* ── Toast ── */
+  function showToast(msg, type='ok') {
+    const wrap=document.getElementById('toast-wrap');
+    const t=document.createElement('div'); t.className=`toast ${type}`; t.textContent=msg;
+    wrap.appendChild(t);
+    setTimeout(()=>{ t.classList.add('out'); setTimeout(()=>t.remove(),350); },4000);
+  }
+
+  document.querySelectorAll('.sidebar-links a').forEach(a =>
+    a.addEventListener('click', e => {
+      if(a.getAttribute('href')==='#') e.preventDefault();
+      document.querySelectorAll('.sidebar-links a').forEach(x=>x.classList.remove('active'));
+      a.classList.add('active');
+    })
+  );
+
+  carregarDobanco();
+</script>
+
+<script>
+(function() {
+  const nome = localStorage.getItem('usuario_nome') || '';
+  const foto  = localStorage.getItem('usuario_foto') || '';
+  const navNome   = document.getElementById('nav-nome-usuario');
+  const navAvatar = document.getElementById('nav-avatar-usuario');
+  if (navNome && nome)   navNome.textContent = nome.split(' ')[0];
+  if (navAvatar) {
+    if (foto) {
+      navAvatar.innerHTML = '<img src="' + foto + '" style="width:100%;height:100%;object-fit:cover;">';
+    } else if (nome) {
+      navAvatar.innerHTML = '<span style="font-size:.85rem;font-weight:700;color:#09122c;">' + nome.charAt(0).toUpperCase() + '</span>';
+      navAvatar.style.background = '#73ffe3';
+    }
+  }
+})();
+</script>
+<script src="busca-global.js"></script>
+</body>
+</html>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estação Literária - Usuários</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="funcionario.css">
+</head>
+<body class="page-func">
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <div class="logo-area">
+    <img src="Biblioteca2.png" width="60">
+    <h1>BIBLIOTECA</h1>
+  </div>
+  <nav class="menu">
+    <a href="PainelFuncionario.html">Dashboard</a>
+  </nav>
+  <div class="right-area">
+    <input type="text" id="campoBusca" placeholder="Pesquisar usuário..." class="search">
+    <div style="display:flex;align-items:center;gap:.5rem;">
+      <span id="func-nome-nav" style="font-size:.82rem;color:var(--on-surface-variant);white-space:nowrap;font-weight:500;"></span>
+      <div class="user-avatar" id="user-avatar-nav" style="flex-shrink:0;">
+        <span class="material-symbols-outlined">person</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <h1 class="logo">Estação Literária</h1>
+  <nav>
+    <a href="EmprestimoFuncionario.html" class="nav-item">
+      <span class="material-symbols-outlined">grid_view</span>Empréstimos
+    </a>
+    <a href="FuncionarioLivro.html" class="nav-item">
+      <span class="material-symbols-outlined">auto_stories</span>Livros
+    </a>
+    <a href="FuncionarioUsuario.html" class="nav-item active">
+      <span class="material-symbols-outlined">swap_horiz</span>Usuários
+    </a>
+    <a href="GestaoFuncionario.html" class="nav-item">
+      <span class="material-symbols-outlined">badge</span>Funcionários
+    </a>
+  </nav>
+  <div style="margin-top:auto;padding:20px 12px;">
+    <button onclick="logout()" style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,113,108,.25);background:rgba(255,113,108,.08);color:#ff716c;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background .2s;" onmouseover="this.style.background='rgba(255,113,108,.18)'" onmouseout="this.style.background='rgba(255,113,108,.08)'">
+      <span class="material-symbols-outlined" style="font-size:18px;">logout</span>Sair
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <header class="header">
+    <h2>Gerenciamento de Usuários</h2>
+  </header>
+
+  <!-- STATS -->
+  <section class="grid" id="statsArea">
+    <div class="card"><p>Total</p><h3 id="statTotal">—</h3></div>
+    <div class="card"><p>Ativos</p><h3 id="statAtivos">—</h3></div>
+    <div class="card"><p>Inativos</p><h3 id="statInativos">—</h3></div>
+    <div class="card"><p>Suspensos</p><h3 id="statSuspensos">—</h3></div>
+  </section>
+
+  <!-- TABELA -->
+  <section class="table-section">
+    <div class="table-header">
+      <h3>Lista de Usuários</h3>
+      <a href="CadastroUsuario.html" class="btn-primary" style="text-decoration:none;padding:.5rem 1.2rem;border-radius:8px;font-size:.875rem;">+ Novo Usuário</a>
+    </div>
+
+    <div id="tabelaWrap">
+      <table class="table" id="tabelaUsuarios">
+        <thead>
+          <tr>
+            <th>ID</th><th>Nome</th><th>E-mail</th>
+            <th>Data Nasc.</th><th>Status</th><th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="corpoTabela">
+          <tr><td colspan="6" class="empty-state">
+            <span class="spinner"></span> Carregando...
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- TABELA DE USUÁRIOS INATIVOS -->
+  <section class="table-section" style="margin-top:2rem;">
+    <div class="table-header">
+      <h3 style="display:flex;align-items:center;gap:.5rem;">
+        <span class="material-symbols-outlined" style="color:#ff716c;font-size:1.2rem;">person_off</span>
+        Usuários Inativos
+      </h3>
+    </div>
+    <div class="table-scroll">
+      <table class="table" id="tabelaInativos">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th class="col-sm">E-mail</th>
+            <th class="col-md">Inativado em</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="corpoInativos">
+          <tr><td colspan="4" class="empty-state"><span class="spinner"></span> Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<!-- MODAL EDIÇÃO -->
+<div class="modal-overlay" id="modalEdicao">
+  <div class="modal">
+    <h3>Editar Usuário</h3>
+    <input type="hidden" id="editId">
+    <div class="input-group">
+      <label>Nome completo</label>
+      <input type="text" id="editNome">
+    </div>
+    <div class="input-group">
+      <label>E-mail</label>
+      <input type="email" id="editEmail">
+    </div>
+    <div class="input-group">
+      <label>Data de Nascimento</label>
+      <input type="date" id="editDataNasc">
+    </div>
+    <div class="input-group">
+      <label>Nova Senha (deixe em branco para manter)</label>
+      <input type="password" id="editSenha" maxlength="50" placeholder="••••••">
+    </div>
+    <div class="input-group">
+      <label>Status</label>
+      <select id="editStatus">
+        <option value="ativo">Ativo</option>
+        <option value="suspenso">Suspenso</option>
+      </select>
+    </div>
+    <div class="modal-acoes">
+      <button class="btn-modal-cancel" onclick="fecharModal('modalEdicao')">Cancelar</button>
+      <button class="btn-modal-save" id="btnSalvar" onclick="salvarEdicao()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAÇÃO INATIVAÇÃO -->
+<div class="modal-overlay" id="modalExclusao">
+  <div class="modal modal-confirm">
+    <h3>Confirmar Inativação</h3>
+    <p id="msgExclusao">Tem certeza que deseja inativar este usuário?</p>
+    <div class="modal-acoes">
+      <button class="btn-modal-cancel" onclick="fecharModal('modalExclusao')">Cancelar</button>
+      <button class="btn-modal-del" id="btnConfirmarDel" onclick="confirmarExclusao()">Inativar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="utils.js"></script>
+<script src="func-utils.js"></script>
+<script>
+  const API = 'http://localhost:9999/Estacao-refatorado/php/usuarios.php';
+
+  let idParaDeletar = null;
+  let todosUsuarios = [];
+
+  document.addEventListener('DOMContentLoaded', () => { inicializarModais(); });
+
+  // ── Renderiza tabela ─────────────────────────────────
+  function renderizarTabela(usuarios) {
+    const tbody = document.getElementById('corpoTabela');
+
+    if (!usuarios.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Nenhum usuário encontrado.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = usuarios.map(u => `
+      <tr>
+        <td>${u.id}</td>
+        <td>${esc(u.nome)}</td>
+        <td>${esc(u.email)}</td>
+        <td>${u.data_nasc ? u.data_nasc : '—'}</td>
+        <td><span class="badge ${u.status}">${u.status}</span></td>
+        <td>
+          <button class="btn-acao btn-editar"  onclick="abrirEdicao(${u.id})">Editar</button>
+          <button class="btn-acao btn-excluir" onclick="abrirExclusao(${u.id}, '${u.nome}')">Inativar</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // ── Carregar usuários ────────────────────────────────
+  async function carregarUsuarios(busca = '') {
+    try {
+      const url = busca ? `${API}?busca=${encodeURIComponent(busca)}` : API;
+      const resp = await fetch(url);
+      const dados = await resp.json();
+      todosUsuarios = dados;
+
+      renderizarTabela(dados);
+
+      // Stats
+      document.getElementById('statTotal').textContent    = dados.length;
+      document.getElementById('statAtivos').textContent   = dados.filter(u => u.status === 'ativo').length;
+      document.getElementById('statInativos').textContent = dados.filter(u => u.status === 'inativo').length;
+      document.getElementById('statSuspensos').textContent = dados.filter(u => u.status === 'suspenso').length;
+
+    } catch {
+      document.getElementById('corpoTabela').innerHTML =
+        '<tr><td colspan="6" class="empty-state">Erro ao carregar dados.</td></tr>';
+    }
+  }
+
+  // ── Abrir edição ─────────────────────────────────────
+  async function abrirEdicao(id) {
+    try {
+      const resp = await fetch(`${API}?id=${id}`);
+      const u = await resp.json();
+      document.getElementById('editId').value       = u.id;
+      document.getElementById('editNome').value     = u.nome;
+      document.getElementById('editEmail').value    = u.email;
+      document.getElementById('editDataNasc').value = u.data_nasc ?? '';
+      document.getElementById('editSenha').value    = '';
+      document.getElementById('editStatus').value   = u.status;
+      abrirModal('modalEdicao');
+    } catch {
+      toast('Erro ao buscar dados do usuário.', 'erro');
+    }
+  }
+
+  // ── Salvar edição ────────────────────────────────────
+  async function salvarEdicao() {
+    const id    = document.getElementById('editId').value;
+    const nome  = document.getElementById('editNome').value.trim();
+    const email = document.getElementById('editEmail').value.trim();
+    const senha = document.getElementById('editSenha').value;
+    const data_nasc = document.getElementById('editDataNasc').value;
+    const status    = document.getElementById('editStatus').value;
+
+    const payload = { nome, email, data_nasc: data_nasc || null, status };
+    if (senha) payload.senha = senha;
+
+    const btn = document.getElementById('btnSalvar');
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+
+    try {
+      const resp = await fetch(`${API}?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const dados = await resp.json();
+      if (resp.ok) {
+        toast('Usuário atualizado!', 'sucesso');
+        fecharModal('modalEdicao');
+        carregarUsuarios();
+      } else {
+        toast(dados.erro || 'Erro ao atualizar.', 'erro');
+      }
+    } catch {
+      toast('Erro de conexão.', 'erro');
+    } finally {
+      btn.disabled = false; btn.innerHTML = 'Salvar';
+    }
+  }
+
+  // ── Exclusão ─────────────────────────────────────────
+  function abrirExclusao(id, nome) {
+    idParaDeletar = id;
+    document.getElementById('msgExclusao').textContent =
+      `Tem certeza que deseja inativar "${nome}"?`;
+    abrirModal('modalExclusao');
+  }
+
+  async function confirmarExclusao() {
+    const btn = document.getElementById('btnConfirmarDel');
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+
+    try {
+      const resp = await fetch(`${API}?id=${idParaDeletar}`, { method: 'DELETE' });
+      const dados = await resp.json();
+      if (resp.ok) {
+        toast('Usuário inativado.', 'sucesso');
+        fecharModal('modalExclusao');
+        carregarUsuarios();
+      } else {
+        toast(dados.erro || 'Erro ao remover.', 'erro');
+      }
+    } catch {
+      toast('Erro de conexão.', 'erro');
+    } finally {
+      btn.disabled = false; btn.innerHTML = 'Inativar';
+    }
+  }
+
+  // ── Busca com debounce ───────────────────────────────
+  let debounceTimer;
+  document.getElementById('campoBusca').addEventListener('input', e => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => carregarUsuarios(e.target.value), 400);
+  });
+
+  // ── Inicialização ────────────────────────────────────
+  carregarUsuarios();
+  carregarInativos();
+
+  // ── Usuários Inativos ─────────────────────────────────
+  async function carregarInativos() {
+    const tbody = document.getElementById('corpoInativos');
+    try {
+      const r = await fetch(API + '?inativos=1');
+      const dados = await r.json();
+      if (!dados.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Nenhum usuário inativo.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = dados.map(u => {
+        const dataInat = u.inativado_em ? new Date(u.inativado_em).toLocaleDateString('pt-BR') : '—';
+        return '<tr>' +
+          '<td style="font-weight:600;">' + esc(u.nome) + '</td>' +
+          '<td class="col-sm" style="font-size:.85rem;color:var(--on-surface-variant);">' + esc(u.email) + '</td>' +
+          '<td class="col-md" style="font-size:.8rem;color:var(--on-surface-variant);">' + dataInat + '</td>' +
+          '<td><div style="display:flex;gap:4px;justify-content:flex-end;flex-wrap:nowrap;">' +
+          '<button class="btn-acao btn-editar" onclick="reativarUsuario(' + u.id + ', this.dataset.nome)" data-nome="' + esc(u.nome) + '">Reativar</button>' +
+          '</div></td></tr>';
+      }).join('');
+    } catch {
+      tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Erro ao carregar.</td></tr>';
+    }
+  }
+
+    async function reativarUsuario(id, nome) {
+    if (!confirm('Reativar "' + nome + '"?')) return;
+    try {
+      const r = await fetch(API + '?id=' + id, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const d = await r.json();
+      if (r.ok) {
+        toast(d.mensagem || 'Usuário reativado.', 'sucesso');
+        carregarUsuarios();
+        carregarInativos();
+      } else {
+        toast(d.erro || 'Erro ao reativar.', 'erro');
+      }
+    } catch {
+      toast('Erro de conexão.', 'erro');
+    }
+  }
+</script>
+</body>
+</html>

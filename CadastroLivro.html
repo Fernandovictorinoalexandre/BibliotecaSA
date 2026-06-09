@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estação Literária - Cadastro de Livro</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="auth.css">
+</head>
+<body class="page-auth">
+  <div class="nebula-bg"></div>
+  <div class="overlay"></div>
+
+  <main>
+    <div>
+      <div class="logo-circle">
+        <img src="Biblioteca2.png" width="150px" height="100px">
+      </div>
+
+      <div class="card">
+        <h1 class="title-auth">Estação Literária</h1>
+        <h2>Cadastrar Livro</h2>
+
+        <form id="formLivro" novalidate>
+
+          <div class="input-group">
+            <label>Título
+              <input type="text" id="titulo" name="titulo">
+            </label>
+            <span class="msg-campo" id="err-titulo">Título obrigatório.</span>
+          </div>
+
+          <div class="input-group">
+            <label>Autor
+              <input type="text" id="autor" name="autor">
+            </label>
+            <span class="msg-campo" id="err-autor">Autor obrigatório.</span>
+          </div>
+
+          <div class="input-group">
+            <label>ISBN (10 ou 13 dígitos)
+              <input type="text" id="isbn" name="isbn" maxlength="17"
+                     inputmode="numeric" placeholder="Ex: 978-3-16-148410-0">
+            </label>
+            <span class="msg-campo" id="err-isbn">ISBN deve ter 10 ou 13 dígitos.</span>
+          </div>
+
+          <div class="input-group">
+            <label>Editora
+              <input type="text" id="editora" name="editora">
+            </label>
+          </div>
+
+          <div class="input-group">
+            <label>Data de Publicação
+              <input type="date" id="data_publicacao" name="data_publicacao"
+                min="1000-01-01" max="2099-12-31"
+                onkeydown="limitarAno(event, this)"
+                oninput="limitarAno(event, this)">
+            </label>
+          </div>
+
+          <div class="input-group">
+            <label>Quantidade
+              <input type="number" id="quantidade" name="quantidade"
+                     min="0" value="1">
+            </label>
+          </div>
+
+          <div class="input-group">
+            <label>Número de Páginas
+              <input type="number" id="paginas" name="paginas" min="1" max="99999" placeholder="ex: 320">
+            </label>
+          </div>
+
+          <div class="input-group">
+            <label>
+              <select id="categoria" name="categoria">
+                <option value="Geral">Geral</option>
+                <option value="Fantasia">Fantasia</option>
+                <option value="Ficção Científica">Ficção Científica</option>
+                <option value="Romance">Romance</option>
+                <option value="Terror">Terror</option>
+                <option value="Aventura">Aventura</option>
+                <option value="Mistério">Mistério</option>
+                <option value="História">História</option>
+                <option value="Biografia">Biografia</option>
+                <option value="Autoajuda">Autoajuda</option>
+                <option value="Infantil">Infantil</option>
+                <option value="Clássico">Clássico</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="input-group">
+            <label>Capa do Livro</label>
+            <div id="capa-upload-area" onclick="document.getElementById('capa-file').click()" style="
+              border: 2px dashed rgba(0,245,212,.35);
+              border-radius: 12px;
+              padding: 1.2rem;
+              text-align: center;
+              cursor: pointer;
+              transition: border-color .2s, background .2s;
+              background: rgba(0,245,212,.04);
+              margin-top: .35rem;
+            "
+            onmouseenter="this.style.borderColor='rgba(0,245,212,.7)'; this.style.background='rgba(0,245,212,.08)'"
+            onmouseleave="this.style.borderColor='rgba(0,245,212,.35)'; this.style.background='rgba(0,245,212,.04)'">
+              <div id="capa-preview-wrap" style="display:none; margin-bottom:.75rem;">
+                <img id="capa-preview-img" src="" alt="Preview da capa" style="
+                  max-height: 180px;
+                  max-width: 100%;
+                  border-radius: 8px;
+                  box-shadow: 0 4px 16px rgba(0,0,0,.4);
+                  object-fit: cover;
+                ">
+              </div>
+              <div id="capa-placeholder">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(0,245,212,.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:.5rem;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <p style="margin:0; font-size:.85rem; color:rgba(0,245,212,.7); font-weight:600;">Clique para selecionar imagem</p>
+                <p style="margin:.25rem 0 0; font-size:.75rem; color:var(--on-surface-variant);">JPG, PNG, WEBP — máx. 2MB</p>
+              </div>
+              <div id="capa-nome-arquivo" style="display:none; font-size:.78rem; color:var(--on-surface-variant); margin-top:.5rem;"></div>
+            </div>
+            <input type="file" id="capa-file" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none;" onchange="handleCapaChange(event)">
+            <button type="button" id="capa-remover" onclick="removerCapa(event)" style="
+              display:none; margin-top:.5rem; padding:.3rem .8rem; border-radius:8px;
+              border:1px solid rgba(255,113,108,.4); background:transparent;
+              color:#ff716c; font-size:.78rem; cursor:pointer;
+            ">✕ Remover imagem</button>
+          </div>
+
+          <div class="input-group">
+            <label>Descrição
+              <textarea id="descricao" name="descricao" rows="4"
+                        placeholder="Sinopse ou descrição do livro..."></textarea>
+            </label>
+          </div>
+
+          <button type="submit" class="btn-primary" id="btnCadastrar">Cadastrar Livro</button>
+
+        </form>
+
+        <div class="footer">
+          <a href="FuncionarioLivro.html">← Voltar ao acervo</a>
+        </div>
+      </div><!-- /card -->
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="utils.js"></script>
+<script>
+    if (localStorage.getItem('func_logado') !== 'true') window.location.href = 'LoginFuncionario.html';
+
+    const API = 'http://localhost:9999/Estacao-refatorado/php/livros.php';
+
+    // ── Limite 4 dígitos no ano ──────────────────────────
+    function limitarAno(event, el) {
+      const val = el.value;
+      if (val) {
+        const partes = val.split('-');
+        if (partes[0] && partes[0].length > 4) {
+          partes[0] = partes[0].slice(0, 4);
+          el.value = partes.join('-');
+        }
+      }
+    }
+
+    // ── Capa base64 ──────────────────────────────────────
+    let capaBase64 = null;
+
+    function handleCapaChange(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) {
+        toast('Imagem muito grande. Use até 2MB.', 'erro');
+        event.target.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        capaBase64 = e.target.result;
+        // Mostra preview
+        document.getElementById('capa-preview-img').src = capaBase64;
+        document.getElementById('capa-preview-wrap').style.display = 'block';
+        document.getElementById('capa-placeholder').style.display = 'none';
+        document.getElementById('capa-nome-arquivo').textContent = file.name;
+        document.getElementById('capa-nome-arquivo').style.display = 'block';
+        document.getElementById('capa-remover').style.display = 'inline-block';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removerCapa(event) {
+      event.stopPropagation();
+      capaBase64 = null;
+      document.getElementById('capa-file').value = '';
+      document.getElementById('capa-preview-img').src = '';
+      document.getElementById('capa-preview-wrap').style.display = 'none';
+      document.getElementById('capa-placeholder').style.display = 'block';
+      document.getElementById('capa-nome-arquivo').style.display = 'none';
+      document.getElementById('capa-remover').style.display = 'none';
+    }
+
+    // ── Toast ────────────────────────────────────────────
+    function toast(msg, tipo = 'sucesso') {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = `toast ${tipo} show`;
+      setTimeout(() => el.classList.remove('show'), 3500);
+    }
+
+    // ── Validação inline ─────────────────────────────────
+    function mostrarErro(id, visivel) {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('visivel', visivel);
+    }
+    function marcarCampo(inputId, invalido) {
+      const el = document.getElementById(inputId);
+      if (el) el.classList.toggle('campo-erro', invalido);
+    }
+    function limparIsbn(v) {
+      return v.replace(/\D/g, '');
+    }
+
+    // ── Submit ───────────────────────────────────────────
+    document.getElementById('formLivro').addEventListener('submit', async e => {
+      e.preventDefault();
+
+      const titulo          = document.getElementById('titulo').value.trim();
+      const autor           = document.getElementById('autor').value.trim();
+      const isbnRaw         = document.getElementById('isbn').value;
+      const editora         = document.getElementById('editora').value.trim();
+      const data_publicacao = document.getElementById('data_publicacao').value;
+      const quantidade      = parseInt(document.getElementById('quantidade').value) || 1;
+      const paginas         = parseInt(document.getElementById('paginas').value)    || null;
+      const capa            = capaBase64 || null;
+      const descricao       = document.getElementById('descricao').value.trim();
+      const categoria       = document.getElementById('categoria').value;
+      const isbn            = limparIsbn(isbnRaw);
+
+      // Validação local
+      let valido = true;
+
+      const tituloOk = titulo.length >= 1;
+      marcarCampo('titulo', !tituloOk); mostrarErro('err-titulo', !tituloOk);
+      if (!tituloOk) valido = false;
+
+      const autorOk = autor.length >= 2;
+      marcarCampo('autor', !autorOk); mostrarErro('err-autor', !autorOk);
+      if (!autorOk) valido = false;
+
+      const isbnOk = isbn.length === 10 || isbn.length === 13;
+      marcarCampo('isbn', !isbnOk); mostrarErro('err-isbn', !isbnOk);
+      if (!isbnOk) valido = false;
+
+      if (!valido) return;
+
+      // Envio para API
+      const btn = document.getElementById('btnCadastrar');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Cadastrando...';
+
+      try {
+        const resp = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            titulo, autor, isbn,
+            editora:         editora         || null,
+            data_publicacao: data_publicacao || null,
+            quantidade,
+            paginas,
+            capa:            capa            || null,
+            descricao:       descricao       || null,
+            categoria:       categoria       || 'Geral',
+          }),
+        });
+        const dados = await resp.json();
+
+        if (resp.ok) {
+          toast('Livro cadastrado com sucesso!', 'sucesso');
+          setTimeout(() => {
+            window.location.href = 'FuncionarioLivro.html';
+          }, 1500);
+        } else {
+          toast(dados.erro || 'Erro ao cadastrar livro.', 'erro');
+        }
+      } catch {
+        toast('Erro de conexão com o servidor.', 'erro');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Cadastrar Livro';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Suporte - Estação Literária</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="usuario.css">
+  <link rel="stylesheet" href="suporte.css">
+</head>
+<body class="page-internal">
+
+<!-- ── HEADER ── -->
+<header class="header">
+  <div class="logo">
+    <img src="Biblioteca2.png" alt="Logo"
+         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+    <div class="logo-icon-fallback" style="display:none">
+      <span class="material-symbols-outlined">auto_stories</span>
+    </div>
+    <h1>Biblioteca</h1>
+  </div>
+  <nav class="nav-links">
+    <a href="PainelUsuario.html">Início</a>
+    <a href="CatalogoLivros.html">Catálogo</a>
+    <a href="Suporte.html">Suporte</a>
+    <a href="Conta.html">Conta</a>
+  </nav>
+  <div class="right-area">
+    <div style="position:relative;display:inline-flex;align-items:center;">
+      <input class="search" type="text" placeholder="Pesquisar..." id="campoBuscaHeader">
+    </div>
+    <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0;">
+      <span id="nav-nome-usuario" style="font-size:.82rem;color:var(--on-surface-variant);white-space:nowrap;"></span>
+      <div class="user-avatar" id="nav-avatar-usuario" style="width:36px;height:36px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(0,245,212,.15);border:2px solid rgba(0,245,212,.3);flex-shrink:0;position:relative;z-index:1;">
+        <span class="material-symbols-outlined" style="font-size:1.2rem;color:var(--primary);">person</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- CHAT IA PRINCIPAL -->
+  <section class="chat-page">
+
+    <!-- Cabeçalho do chat -->
+    <div class="chat-page-header">
+      <div class="chat-page-avatar">
+        <span class="material-symbols-outlined">support_agent</span>
+      </div>
+      <div>
+        <h1 class="chat-page-title">Arquivista IA</h1>
+        <span class="chat-page-status">
+          <span class="chat-online-dot"></span>
+          Online · Estação Literária
+        </span>
+      </div>
+      <button class="chat-page-clear" onclick="limparChat()" title="Limpar conversa">
+        <span class="material-symbols-outlined">delete_sweep</span>
+      </button>
+    </div>
+
+    <!-- Mensagens -->
+    <div class="chat-page-msgs" id="chat-msgs"></div>
+
+    <!-- Chips de sugestão -->
+    <div class="chat-page-chips" id="sugestoes">
+      <button class="chip" onclick="enviarChip(this)">📖 Como Emprestar Livro</button>
+      <button class="chip" onclick="enviarChip(this)">🔄 Como Renovar o Prazo</button>
+      <button class="chip" onclick="enviarChip(this)">💳 Como Funciona a Multa</button>
+      <button class="chip" onclick="enviarChip(this)">📦 Como Devolver um Livro</button>
+      <button class="chip" onclick="enviarChip(this)">🔑 Como Recuperar Senha</button>
+      <button class="chip" onclick="enviarChip(this)">🕐 Horário de Funcionamento</button>
+    </div>
+
+    <!-- Input -->
+    <form class="chat-page-form" id="chat-form" onsubmit="enviarMensagem(event)">
+      <textarea
+        id="chat-input"
+        class="chat-page-input"
+        placeholder="Digite sua dúvida sobre a biblioteca..."
+        rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarMensagem(event)}"
+        oninput="autoResize(this)"
+      ></textarea>
+      <button type="submit" id="btn-enviar" class="chat-page-send">
+        <span class="material-symbols-outlined">send</span>
+      </button>
+    </form>
+
+  </section>
+<br>
+  <section class="glass-card support-section">
+    <span class="material-symbols-outlined support-bg-icon">support_agent</span>
+    <h2 class="support-title">Ainda precisa de auxílio?</h2>
+    <p class="support-desc">Nossos arquivistas estão a postos para guiar sua jornada literária através dos confins da estação.</p>
+    <div class="support-actions">
+      <button class="btn-ticket">Abrir Ticket</button>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <span>© 2025 Estação Literária · Todos os direitos reservados</span>
+  <div class="footer-links">
+    <a href="Suporte.html">Suporte</a>
+    <a href="Conta.html">Conta</a>
+    <a href="PainelUsuario.html">Início</a>
+  </div>
+</footer>
+<div class="bg-texture"><div class="bg-blob-1"></div><div class="bg-blob-2"></div></div>
+
+
+<!-- CHAT FLUTUANTE -->
+<button id="chat-fab" onclick="" title="Chat" style="display:none">
+  <span id="chat-badge"></span>
+  <span class="fab-icon material-symbols-outlined">support_agent</span>
+</button>
+<div id="chat-window" style="display:none!important">
+  <div id="chat-header">
+    <div class="chat-avatar">📚</div>
+    <div class="chat-header-info">
+      <strong>Arquivista IA</strong>
+      <span class="chat-status">Online · Estação Literária</span>
+    </div>
+    <button class="btn-limpar" onclick="limparChat()">🗑 Limpar</button>
+  </div>
+  <div id="chat-msgs"></div>
+  <div id="sugestoes">
+    <button class="chip" onclick="enviarChip(this)">Emprestar livro</button>
+    <button class="chip" onclick="enviarChip(this)">Pagar multa</button>
+    <button class="chip" onclick="enviarChip(this)">Renovar prazo</button>
+    <button class="chip" onclick="enviarChip(this)">Recuperar senha</button>
+  </div>
+  <form id="chat-form" onsubmit="enviarMensagem(event)">
+    <textarea id="chat-input" placeholder="Digite sua dúvida..." rows="1"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarMensagem(event)}"
+      oninput="autoResize(this)"></textarea>
+    <button type="submit" id="btn-enviar">
+      <span class="material-symbols-outlined" style="font-size:18px">send</span>
+    </button>
+  </form>
+</div>
+
+<script>
+// BASE DE CONHECIMENTO LOCAL — sem API, sem internet
+const BASE = [
+  {
+    tags: ['emprestar','emprestimo','pegar','retirar','como pego','quero um livro','valor','custa','quanto','preco'],
+    r: 'Para realizar um empréstimo, acesse o **Catálogo** no menu superior, escolha o livro e clique em **Emprestar**. 📖\n\nO empréstimo custa **R$ 15,00** (pago via **PIX ou cartão**) e o prazo é de **30 dias**.\n\nVocê pode ter até **5 livros** ao mesmo tempo.\n\nSe o livro estiver indisponível, aguarde a devolução de outro leitor.'
+  },
+  {
+    tags: ['renovar','renovacao','estender','mais tempo','prorrogar','renovacao prazo'],
+    r: 'Renovar é fácil! Vá em **Empréstimos** e clique em **Renovar** no livro desejado. 🔄\n\n- Custo: **R$ 15,00** (PIX ou cartão)\n- Cada renovação adiciona **+30 dias** ao prazo atual\n- Limite: **2 renovações** por empréstimo\n\n⚠️ Não é possível renovar se o empréstimo estiver em **atraso** ou se a **devolução já foi solicitada**.'
+  },
+  {
+    tags: ['devolver','devolucao','entregar','retornar','como devolver','prazo devolucao','solicitar devolucao'],
+    r: 'Para devolver, clique em **Devolver** na tela de **Devolução**. 📦\n\nApós clicar, um funcionário confirmará a entrega física na biblioteca.\n\nVocê pode **cancelar a solicitação** antes da confirmação do funcionário caso mude de ideia.\n\nLivros em atraso aparecem com alerta vermelho e mostram a multa acumulada.'
+  },
+  {
+    tags: ['multa','atraso','debito','pagar','pagamento','atrasado','credito','taxa','cobrado'],
+    r: 'Multas são geradas automaticamente por **atraso**. 💳\n\n- Valor: **R$ 0,50 por dia** de atraso\n- Pagamento via **PIX ou cartão** na tela de Devolução\n- O valor acumulado aparece na sua página **Conta**\n\nEx: 4 dias de atraso = R$ 2,00 de multa.'
+  },
+  {
+    tags: ['senha','recuperar senha','esqueci','acesso','login','entrar','bloqueado','chave','redefinir'],
+    r: 'Para recuperar sua senha, clique em **Esqueci minha senha** na tela de login. 🔑\n\nUm link de redefinição será enviado para o e-mail cadastrado — verifique o spam também.\n\nSem acesso ao e-mail? Vá presencialmente à biblioteca com um documento de identidade.'
+  },
+  {
+    tags: ['conta inativa','desativar','reativar','inativa','desativada','suspensa','bloqueada'],
+    r: 'Se sua conta estiver **inativa**, você ainda pode fazer login — será redirecionado para a página **Conta** onde pode reativá-la. ✅\n\nSe estiver **suspensa**, entre em contato com a biblioteca presencialmente ou abra um ticket.\n\nConta inativa **não consegue fazer empréstimos** até ser reativada.'
+  },
+  {
+    tags: ['horario','funcionamento','aberto','fecha','quando','atendimento','expediente'],
+    r: '🕐 **Horário de funcionamento:**\n\n- Segunda a sexta: **9h às 18h**\n- Sábado: **9h às 13h**\n- Domingos e feriados: **fechado**\n\nO Arquivista IA está disponível **24 horas** para dúvidas!'
+  },
+  {
+    tags: ['cadastro','criar conta','registrar','novo usuario','me cadastrar','como me cadastro'],
+    r: 'Para criar sua conta:\n\n1. Clique em **Criar Conta** na tela inicial\n2. Preencha nome, e-mail, data de nascimento e senha\n3. Pronto! 🎉\n\nO cadastro é **gratuito** e aberto a todos.'
+  },
+  {
+    tags: ['limite','quantos livros','maximo','quantidade','quantos posso','simultaneo'],
+    r: 'Cada usuário pode ter:\n\n📚 Até **5 livros** emprestados simultaneamente\n🕒 Prazo de **30 dias** por livro\n🔄 Até **2 renovações** por empréstimo (+30 dias cada, R$ 15,00)\n\nConta inativa ou suspensa não pode fazer empréstimos.'
+  },
+  {
+    tags: ['ticket','chamado','contato','falar','humano','atendente','reclamar','problema','ajuda','suporte'],
+    r: 'Para falar com nossa equipe, clique em **Abrir Ticket** nesta página. 🎫\n\nResponderemos em até **1 dia útil** por e-mail.\n\nAtendimento humano: segunda a sexta, **9h às 18h**.'
+  },
+  {
+    tags: ['catalogo','buscar livro','pesquisar','encontrar','isbn','autor','titulo','acervo','procurar'],
+    r: 'O Catálogo fica no menu superior. 🔍\n\nVocê pode buscar por:\n- **Título** do livro\n- **Nome do autor**\n- **ISBN**\n- **Gênero ou categoria**\n\nLivros disponíveis mostram o botão **Emprestar** em verde. Indisponíveis mostram **Indisponível**.'
+  },
+  {
+    tags: ['offline','sem internet','desconectado','modo offline'],
+    r: 'A Estação Literária opera **exclusivamente online**. 🌐\n\nTodas as funções requerem conexão com a internet.'
+  },
+  {
+    tags: ['obrigado','obrigada','valeu','otimo','perfeito','ajudou','consegui','legal','grato'],
+    r: 'Fico feliz em ter ajudado! 🌟\n\nSe surgir mais alguma dúvida, estarei aqui. Boas leituras! 📚✨'
+  },
+  {
+    tags: ['oi','ola','hey','bom dia','boa tarde','boa noite','tudo bem','como vai','ola','oi tudo'],
+    r: 'Saudações, viajante literário! 🌌 Sou o **Arquivista** da Estação Literária.\n\nPosso ajudar com **empréstimos, renovações, devoluções, multas** e muito mais.\n\nO que posso fazer por você hoje?'
+  }
+];
+
+const PADRAO = [
+  'Hmm, não encontrei essa informação nos meus arquivos. 🤔\n\nPosso ajudar com:\n- **Empréstimos e devoluções**\n- **Renovações de prazo**\n- **Multas e pagamentos**\n- **Recuperação de senha**\n- **Reservas de livros**\n\nTente reformular ou clique em "Abrir Ticket" para falar com nossa equipe!',
+  'Essa consulta está além dos meus registros atuais. 📜\n\nSugestão: abra um **ticket de suporte** — nossa equipe responde em até 1 dia útil.\n\nPosso ajudar com empréstimos, devoluções, multas ou sua conta!',
+  'Não encontrei uma resposta precisa para isso. 🛸\n\nTente perguntar sobre: **empréstimos, renovações, devoluções, multas, senha ou reservas**.\n\nOu clique em "Abrir Ticket" para falar com nosso time!'
+];
+
+let padraoCiclo = 0, digitando = false;
+
+function normalizar(t) {
+  return t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+
+function buscar(texto) {
+  const t = normalizar(texto);
+  let melhor = null, maior = 0;
+  for (const e of BASE) {
+    let pts = 0;
+    for (const tag of e.tags) {
+      if (t.includes(normalizar(tag))) pts += normalizar(tag).split(' ').length * 2;
+    }
+    if (pts > maior) { maior = pts; melhor = e; }
+  }
+  if (melhor && maior >= 2) return melhor.r;
+  return PADRAO[padraoCiclo++ % PADRAO.length];
+}
+
+function perguntarFAQ(el) { enviarTexto(el.querySelector('.faq-question').textContent); }
+function enviarChip(btn) {
+  enviarTexto(btn.textContent.trim());
+  document.getElementById('sugestoes').style.display='none';
+}
+
+function enviarMensagem(e) {
+  e.preventDefault();
+  const inp = document.getElementById('chat-input');
+  const txt = inp.value.trim();
+  if (!txt || digitando) return;
+  inp.value = ''; inp.style.height = 'auto';
+  enviarTexto(txt);
+}
+
+function enviarTexto(texto) {
+  document.getElementById('sugestoes').style.display = 'none';
+  renderMsg(texto, 'usuario');
+  digitando = true;
+  document.getElementById('btn-enviar').disabled = true;
+  const typing = criarTyping();
+  document.getElementById('chat-msgs').appendChild(typing);
+  scrollMsgs();
+  setTimeout(() => {
+  typing.remove();
+
+  buscarIA(texto);
+
+  }, 650 + Math.random() * 550);
+}
+
+async function buscarIA(texto) {
+
+// tenta responder pela base local
+const respostaLocal = buscar(texto);
+
+// se encontrou resposta boa
+if (!PADRAO.includes(respostaLocal)) {
+
+  renderMsg(respostaLocal, 'ia');
+
+  digitando = false;
+
+  document.getElementById('btn-enviar').disabled = false;
+
+  document.getElementById('chat-input').focus();
+
+  return;
+}
+
+// se não encontrou -> Gemini
+try {
+
+  const resposta = await fetch('php/gemini.php', {
+
+    method: 'POST',
+
+    headers: {
+      'Content-Type': 'application/json'
+    },
+
+    body: JSON.stringify({
+      pergunta: texto
+    })
+
+  });
+
+  const data = await resposta.json();
+
+  renderMsg(data.resposta, 'ia');
+
+} catch (erro) {
+
+  renderMsg(
+    'Os arquivos da estação estão temporariamente inacessíveis. 🌌',
+    'ia'
+  );
+
+}
+
+digitando = false;
+
+document.getElementById('btn-enviar').disabled = false;
+
+document.getElementById('chat-input').focus();
+}
+
+function renderMsg(texto, tipo) {
+  const hora = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const div = document.createElement('div');
+  div.className = 'msg msg-' + tipo;
+  div.innerHTML = '<div class="msg-bubble">' + fmt(texto) + '</div><div class="msg-hora">' + hora + '</div>';
+  document.getElementById('chat-msgs').appendChild(div);
+  scrollMsgs();
+}
+
+function fmt(t) {
+  return t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/\n/g,'<br>');
+}
+
+function criarTyping() {
+  const d = document.createElement('div');
+  d.className = 'msg msg-ia';
+  d.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+  return d;
+}
+
+function scrollMsgs() {
+  const m = document.getElementById('chat-msgs');
+  requestAnimationFrame(() => { m.scrollTop = m.scrollHeight; });
+}
+
+function limparChat() {
+  document.getElementById('chat-msgs').innerHTML = '';
+  document.getElementById('sugestoes').style.display = 'flex';
+  boasVindas();
+}
+
+function autoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,80)+'px'; }
+
+function boasVindas() {
+  setTimeout(() => renderMsg('Saudações, viajante literário! 🌌 Sou o **Arquivista**, assistente da Estação Literária.\n\nPosso ajudar com **empréstimos, renovações, devoluções, multas, recuperação de senha** e muito mais.\n\nUse os atalhos abaixo ou digite sua dúvida!', 'ia'), 300);
+}
+
+window.addEventListener('DOMContentLoaded', boasVindas);
+</script>
+<script src="busca-global.js"></script>
+<script>
+(function() {
+  const nome = localStorage.getItem('usuario_nome') || '';
+  const foto  = localStorage.getItem('usuario_foto') || '';
+  const navNome   = document.getElementById('nav-nome-usuario');
+  const navAvatar = document.getElementById('nav-avatar-usuario');
+  if (navNome && nome) navNome.textContent = nome.split(' ')[0];
+  if (navAvatar) {
+    if (foto) {
+      navAvatar.innerHTML = '<img src="' + foto + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;display:block;">';
+      navAvatar.style.background = 'transparent';
+    } else if (nome) {
+      const inicial = nome.charAt(0).toUpperCase();
+      navAvatar.innerHTML = '<span style="font-size:.85rem;font-weight:700;color:#09122c;">' + inicial + '</span>';
+      navAvatar.style.background = '#73ffe3';
+    }
+  }
+})();
+</script>
+</body>
+</html>

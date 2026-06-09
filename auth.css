@@ -1,0 +1,225 @@
+/* ═══════════════════════════════════════════════════════
+   auth.css — Login, Cadastro, Entrada, RecuperarSenha
+   Importe: tokens.css → components.css → auth.css
+   ═══════════════════════════════════════════════════════ */
+
+/* body centralizado com fundo nebulosa */
+body {
+  background: var(--background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: scroll;
+  position: relative;
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--text);
+}
+
+/* fundo de nebulosa */
+.nebula-bg {
+  position: fixed;
+  inset: 0;
+  background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAzggLAVeF6Ix1dgLyGSSNulIXzxCnMOgYD_8tzb8HnQE5-5fPeGKRxtx7PjazxqPIgiBeiFOnomdRwua4F1hDFLyNMqLc373dDcBgjU05gGiZbp2ReySP3WgPjZQUFxC5q9fQ2GifvUErXHmAdoojXwxplEoq5ucpVmb4eFsGV4cXlKme7Z9hCM6WrIDNIQsIIwHsGt1TnZrIiMMl6ZXCtecDisaQpX2sTZvOwPxR8kx5KZtel5YQylK8k8911akphf5m8VIgMjCY");
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+}
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(5,13,37,.5), rgba(5,13,37,.92));
+  z-index: 1;
+}
+
+/* conteúdo central */
+main {
+  position: relative;
+  z-index: 10;
+  width: 500px;
+  max-width: 100%;
+  text-align: center;
+}
+
+/* logo circular */
+.logo-circle {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(to bottom right, var(--primary), var(--primary-dim));
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto;
+  box-shadow: 0 0 40px rgba(0,245,212,.3);
+  overflow: hidden;
+}
+.logo-circle img { width: 100%; height: 100%; object-fit: cover; }
+
+/* título e subtítulo */
+.title-auth, .title {
+  font-size: 3.5rem; font-weight: 700;
+  background: linear-gradient(to right, var(--primary), var(--primary-dim));
+  -webkit-background-clip: text; color: transparent;
+  font-family: 'Space Grotesk', sans-serif;
+  margin-top: 1rem;
+}
+.subtitle-auth, .subtitle {
+  font-size: 0.75rem; letter-spacing: 3px;
+  color: var(--text-muted); text-transform: uppercase;
+}
+
+/* span e label de auth */
+span { color: var(--text-muted); font-size: 1rem; font-weight: bold; }
+label { color: var(--text-muted); font-size: 1rem; font-weight: bold; display: block; text-align: left; }
+
+/* card de login */
+.card-login, .cardLogin {
+  max-width: 400px; width: 100%;
+  margin: 2rem auto 0;
+  padding: 2.5rem;
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  background: rgba(9,18,44,.7);
+  border: 1px solid rgba(63,71,98,.3);
+  display: flex; flex-direction: column;
+  align-items: center; gap: 1rem;
+}
+.card-login h2, .cardLogin h2 { font-size: 1.5rem; color: var(--text); }
+.card-login p,  .cardLogin p  { color: var(--text-muted); font-size: .9rem; }
+.card-login form, .cardLogin form { width: 100%; display: flex; flex-direction: column; align-items: center; }
+
+/* card genérico (Cadastro, Entrada) */
+.card {
+  margin-top: 1.5rem;
+  padding: 2.5rem;
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  background: rgba(9,18,44,.7);
+  border: 1px solid rgba(63,71,98,.3);
+  text-align: left;
+}
+.card h1.title-auth { text-align: center; font-size: 2rem; }
+.card h2 { font-size: 1.25rem; color: var(--text); margin-bottom: 1rem; text-align: center; }
+
+/* inputs */
+.input-group { width: 100%; margin-top: 1rem; }
+.input-group + .input-group { margin-top: 1.25rem; }
+.input-group input {
+  width: 100%; padding: 0.875rem 1.125rem;
+  border-radius: 30px;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(0,0,0,.3);
+  color: white; outline: none;
+  font-family: inherit; font-size: .9rem;
+  transition: border-color .2s, box-shadow .2s;
+}
+.input-group input:focus { border-color: var(--primary); box-shadow: 0 0 12px rgba(0,245,212,.3); }
+.input-group label { margin-bottom: .4rem; font-size: .85rem; }
+.input-group label input { margin-top: .4rem; }
+.input-group textarea{
+  width: 100% ;padding:  0.875rem 1.125rem;
+  border-radius: 30px;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(0,0,0,.3);
+  color: #ffffff; outline: none;
+}
+.input-group select{
+  width: 100%; padding: 0.875rem 1.125rem;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, .1);
+  background: rgba(0,0,0,.3);
+  color: #ffffff; outline: none;
+}
+ .input-group select option{
+ background-color: #222;
+  color: #ffffff; outline: none;
+
+}
+/* botão primário de auth (pequeno, centralizado) */
+.btn {
+  cursor: pointer; font-family: inherit; border: none;
+  transition: all .2s ease;
+}
+.btn-primary {
+  background: linear-gradient(to bottom right, var(--primary), var(--primary-dim));
+  color: #00332c; font-weight: 700;
+  margin-top: 1.75rem; padding: .75rem;
+  width: 160px; border-radius: 30px; font-size: .9rem;
+  display: block; margin-left: auto; margin-right: auto;
+}
+.btn-primary:hover { box-shadow: 0 0 30px rgba(0,245,212,.4); transform: translateY(-2px); }
+
+/* botões de seleção de portal (Entrada) */
+.buttons {
+  margin-top: 1.5rem;
+  display: grid; grid-template-columns: 1fr; gap: 1.25rem;
+}
+@media (min-width: 480px) { .buttons { grid-template-columns: 1fr 1fr; } }
+
+.btn-secondary {
+  padding: 1.75rem 1rem;
+  border-radius: 10px; cursor: pointer;
+  text-align: center;
+  background: var(--surface-container-high);
+  border: 1px solid var(--border);
+  color: var(--text);
+  transition: transform .2s, background .2s, box-shadow .2s;
+  font-size: .9rem; font-family: inherit;
+}
+.btn-secondary:hover {
+  transform: translateY(-3px);
+  background: var(--surface-container-highest);
+  box-shadow: 0 0 20px rgba(115,255,227,.1);
+}
+.btn-secondary small { color: var(--text-muted); display: block; font-size: .75rem; margin-top: .35rem; }
+
+/* footer do card de cadastro */
+.footer {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255,255,255,.08);
+  font-size: .8rem;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: center;
+  gap: .5rem;
+}
+.footer a { color: var(--primary); }
+
+/* status online (Entrada) */
+.status {
+  position: fixed; bottom: 20px; left: 20px;
+  font-size: .75rem; color: var(--text-muted);
+  display: flex; align-items: center; gap: .4rem;
+  z-index: 20;
+}
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--primary); display: inline-block;
+  box-shadow: 0 0 8px var(--primary);
+}
+
+
+/* ── Toast & Form validation (from inline) ── */
+.toast {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 9999;
+      padding: .85rem 1.4rem; border-radius: 10px;
+      font-size: .9rem; font-weight: 600;
+      opacity: 0; transform: translateY(12px);
+      transition: opacity .3s, transform .3s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.sucesso { background: #00f5d4; color: #00443a; }
+    .toast.erro    { background: #ff716c; color: #fff; }
+
+    .spinner {
+      display: inline-block; width: 16px; height: 16px;
+      border: 2px solid rgba(0,68,58,.4);
+      border-top-color: #00443a;
+      border-radius: 50%; animation: spin .7s linear infinite;
+      vertical-align: middle; margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .campo-erro { border-color: var(--error) !important; }
+    .msg-campo  { color: var(--error); font-size: .75rem; margin-top: 3px; display: none; }
+    .msg-campo.visivel { display: block; }
