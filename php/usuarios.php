@@ -184,19 +184,11 @@ if ($metodo === 'DELETE') {
         responder(409, ['erro' => 'Esta conta já está inativa.']);
     }
 
-<<<<<<< HEAD
     // Bloqueia se tiver QUALQUER empréstimo não devolvido (qualquer status ativo)
     $emp = $pdo->prepare("SELECT COUNT(*) FROM emprestimos WHERE usuario_id = ? AND status IN ('ativo','atrasado','renovado','aguardando_devolucao') AND data_devolucao_real IS NULL");
     $emp->execute([$id]);
     if ($emp->fetchColumn() > 0) {
         responder(409, ['erro' => 'Usuário possui livros não devolvidos. Devolva todos os livros antes de inativar a conta.']);
-=======
-    // Bloqueia só se tiver empréstimos ativos ou atrasados SEM solicitação de devolução
-    $emp = $pdo->prepare("SELECT COUNT(*) FROM emprestimos WHERE usuario_id = ? AND status IN ('ativo','atrasado') AND data_devolucao_real IS NULL");
-    $emp->execute([$id]);
-    if ($emp->fetchColumn() > 0) {
-        responder(409, ['erro' => 'Você possui livros em aberto. Solicite a devolução de todos os livros antes de desativar a conta.']);
->>>>>>> ad88522de953afc72096d265041dd2c97e48cd82
     }
 
     // Desativa o usuário e registra no histórico
