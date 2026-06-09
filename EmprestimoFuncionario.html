@@ -210,7 +210,6 @@
 <script src="func-utils.js"></script>
 <script>
   const API = 'http://localhost:9999/Estacao-refatorado/php/emprestimos.php';
-  const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
   let emprestimos  = [];
   let filtroAtual  = 'todos';
