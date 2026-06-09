@@ -242,11 +242,7 @@
 <script src="func-utils.js"></script>
 <script>
   const API = 'http://localhost:9999/Estacao-refatorado/php/livros.php';
-<<<<<<< HEAD
 
-=======
-  const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
->>>>>>> ad88522de953afc72096d265041dd2c97e48cd82
   let idParaDeletar = null;
   let todosLivros = [];
 
@@ -478,58 +474,6 @@
 
   carregarLivros();
   carregarLivrosInativos();
-<<<<<<< HEAD
-=======
-
-  // ── Livros Inativos ──────────────────────────────────
-  async function carregarLivrosInativos() {
-    const tbody = document.getElementById('corpoLivrosInativos');
-    try {
-      const r = await fetch(API + '?inativos=1');
-      const dados = await r.json();
-      if (!dados.length) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Nenhum exemplar inativo.</td></tr>';
-        return;
-      }
-      const fmt = d => d ? new Date(d).toLocaleDateString('pt-BR') : '—';
-      tbody.innerHTML = dados.map(li => `
-        <tr>
-          <td style="font-weight:600;">${li.titulo}</td>
-          <td class="col-sm" style="font-size:.85rem;color:var(--on-surface-variant);">${li.autor}</td>
-          <td class="col-lg" style="font-family:monospace;font-size:.82rem;">${li.isbn}</td>
-          <td style="font-weight:700;">${li.quantidade}</td>
-          <td class="col-md" style="font-size:.8rem;color:var(--on-surface-variant);">${fmt(li.inativado_em)}</td>
-          <td>
-            <div style="display:flex;gap:4px;justify-content:flex-end;flex-wrap:nowrap;">
-              <button class="btn-acao btn-editar" onclick="reativarLivro(${li.reg_id}, '${li.titulo.replace(/'/g,"\'")}', ${li.quantidade})">Reativar</button>
-            </div>
-          </td>
-        </tr>`).join('');
-    } catch {
-      tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Erro ao carregar.</td></tr>';
-    }
-  }
-
-  async function reativarLivro(regId, titulo, qtd) {
-    if (!confirm(`Reativar ${qtd} exemplar(es) de "${titulo}"?`)) return;
-    try {
-      const r = await fetch(`${API}?reativar=${regId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const d = await r.json();
-      if (r.ok) {
-        showToast(d.mensagem || 'Exemplares reativados.', 'ok');
-        carregarLivros();
-        carregarLivrosInativos();
-      } else {
-        showToast(d.erro || 'Erro ao reativar.', 'erro');
-      }
-    } catch {
-      showToast('Erro de conexão.', 'erro');
-    }
-  }
->>>>>>> ad88522de953afc72096d265041dd2c97e48cd82
 
   // ── Livros Inativos ──────────────────────────────────
   async function carregarLivrosInativos() {
