@@ -143,34 +143,6 @@
   document.getElementById('senha').addEventListener('input', limparErroServidor);
 
   // ── Countdown de bloqueio ──────────────────────────────
-<<<<<<< HEAD
-=======
-  let _countdownTimer = null;
-  function iniciarCountdown(minutos) {
-    const btn  = document.getElementById('btnEntrar');
-    const el   = document.getElementById('erro-servidor');
-    btn.dataset.bloqueado = 'true';
-    let segundos = minutos * 60;
-    if (_countdownTimer) clearInterval(_countdownTimer);
-
-    function atualizar() {
-      const m = Math.floor(segundos / 60);
-      const s = String(segundos % 60).padStart(2, '0');
-      btn.disabled    = true;
-      btn.textContent = `Bloqueado — aguarde ${m}:${s}`;
-      if (segundos <= 0) {
-        clearInterval(_countdownTimer);
-        btn.disabled    = false;
-        btn.textContent = 'Entrar';
-        delete btn.dataset.bloqueado;
-        el.style.display = 'none';
-      }
-      segundos--;
-    }
-    atualizar();
-    _countdownTimer = setInterval(atualizar, 1000);
-  }
->>>>>>> ad88522de953afc72096d265041dd2c97e48cd82
 </script>
 </body>
 </html>
